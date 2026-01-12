@@ -1,0 +1,27 @@
+@use "font-import";
+
+html {
+  font-family: "InterDisplay", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  //background-color:#F94BE4;;
+}
+
+a {
+  color: inherit;
+}
+
+h2 {
+  color:rgb(0, 0, 0);
+  font-size: 3rem;
+}
