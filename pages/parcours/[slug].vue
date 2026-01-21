@@ -1,6 +1,31 @@
 <template>
   <main class="v-parcours-slug">
-    <AppHeader />
+    <Menu />
+
+    <!-- Picto numéro du lieu (depuis le CMS) -->
+    <img 
+      v-if="picto?.url" 
+      :src="picto.url" 
+      loading="lazy" 
+      :alt="`Lieu n°${data?.result?.title}`" 
+      class="number"
+    >
+
+    <!-- Image de fond / cover (depuis le CMS) -->
+    <img 
+      v-if="data?.result?.cover?.url" 
+      :src="data.result.cover.url" 
+      loading="lazy" 
+      :alt="data.result.cover.alt || data.result.title" 
+      class="background"
+    >
+    
+    <ContentBlockText />
+
+    <AudioCard :title="data.result.title" :image="data.result.imagepodcast?.url" :alt="data.result.imagepodcast?.alt" :srcset="data.result.imagepodcast?.srcset" :sizes="data.result.imagepodcast?.sizes" :duration="data.result.imagepodcast?.duration" :description="data.result.imagepodcast?.description" :descriptionBlack="data.result.imagepodcast?.descriptionBlack" :isHome="data.result.imagepodcast?.isHome" :isCatalogue="data.result.imagepodcast?.isCatalogue" :isParcours="data.result.imagepodcast?.isParcours" :bgColor="data.result.imagepodcast?.bgColor"  />
+    <AudioPlayer :title="data.result.title" :audio="audio?.url" />
+    
+    <AppFooter />
 
     <section v-if="data?.status === 'ok' && data.result" class="v-parcours-slug__content">
       <h1>{{ data.result.title }}</h1>
@@ -48,6 +73,8 @@ type FetchData = CMS_API_Response & {
     texte?: string
     layout?: string | null
     cover?: CMS_API_File | null
+    picto?: CMS_API_File | null
+    pictoFile?: CMS_API_File | null
     imagepodcast?: CMS_API_File | null
     imagepodcastFile?: CMS_API_File | null
     audio?: CMS_API_File | null
@@ -68,6 +95,21 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
       layout: 'page.layout.toBlocks.toHtml',
       cover: {
         query: 'page.cover.toFile',
+        select: {
+          url: true,
+          alt: true,
+        },
+      },
+      // Picto numéro du lieu - essaie plusieurs noms de champs possibles
+      picto: {
+        query: 'page.picto.toFile',
+        select: {
+          url: true,
+          alt: true,
+        },
+      },
+      pictoFile: {
+        query: "page.files.template('picto').first",
         select: {
           url: true,
           alt: true,
@@ -104,6 +146,9 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
+
+// Computed pour récupérer le picto (essaie le champ 'picto' puis le fichier avec template 'picto')
+const picto = computed(() => data.value?.result?.picto || data.value?.result?.pictoFile)
 
 const imagepodcast = computed(() => data.value?.result?.imagepodcast || data.value?.result?.imagepodcastFile)
 const audio = computed(() => data.value?.result?.audio || data.value?.result?.audioFile)

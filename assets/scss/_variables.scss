@@ -1,0 +1,43 @@
+// Variables CSS et Fonts - Notre Historia
+
+@font-face {
+  font-family: Solfa;
+  src: url('../fonts/Solfa.woff2') format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Gt Sectra;
+  src: url('../fonts/GT-Sectra-Medium-Italic.woff2') format("woff2");
+  font-weight: 500;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Gt Sectra;
+  src: url('../fonts/GT-Sectra-Medium.woff2') format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --black: #000;
+  --red: #fe0002;
+  --100: 100%;
+  --15: 15px;
+  --white: white;
+  --100vh: 100vh;
+  --40: 40px;
+  --10: 10px;
+  --yellow: #ffff01;
+  --green: #017f3f;
+  --f-18: 18px;
+  --20: 20px;
+  --0: 0px;
+  --30: 30px;
+  --60: 60px;
+}

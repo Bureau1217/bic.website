@@ -1,6 +1,9 @@
 <template>
   <main class="v-parcours">
-    <AppHeader />
+    <Menu />
+    <ContentBlockText />
+    <MapBlock />
+    <AppFooter />
 
     <section v-if="data?.status === 'ok'" class="v-parcours__content">
       <div class="v-parcours__intro">

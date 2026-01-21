@@ -1,6 +1,20 @@
 <template>
   <main class="v-ressources">
-    <AppHeader />
+    <Menu />
+
+    <ListeAgenda 
+      v-if="data?.result?.ressources?.evenements" 
+      title="Agenda" 
+      :events="formattedEvents" 
+    />
+
+    <ListeRessource 
+      v-if="data?.result?.ressources?.ressources" 
+      title="Ressources" 
+      :categories="formattedRessources" 
+    />
+
+
 
     <section v-if="data?.status === 'ok'" class="v-ressources__content">
       <AppBlocks :blocks="data.result.ressources.titre" />
@@ -13,44 +27,6 @@
           loading="lazy"
         />
       </div>
-
-      <section class="v-ressources__section">
-        <h2>Ressources</h2>
-        <div v-if="!data.result.ressources.ressources.length">
-          Aucune ressource pour le moment.
-        </div>
-        <ul v-else>
-          <li v-for="item in data.result.ressources.ressources" :key="item.nom">
-            <strong>{{ item.nom }}</strong>
-            <span v-if="item.tag"> - {{ item.tag }}</span>
-            <span v-if="item.lien">
-              -
-              <a :href="item.lien" target="_blank" rel="noopener">Lien</a>
-            </span>
-            <span v-if="item.fichier?.url">
-              -
-              <a :href="item.fichier.url" target="_blank" rel="noopener">Fichier</a>
-            </span>
-          </li>
-        </ul>
-      </section>
-
-      <section class="v-ressources__section">
-        <h2>Agenda</h2>
-        <div v-if="!data.result.ressources.evenements.length">
-          Aucun evenement pour le moment.
-        </div>
-        <ul v-else>
-          <li v-for="item in data.result.ressources.evenements" :key="`${item.nom}-${item.date}`">
-            <strong>{{ item.nom }}</strong>
-            <div>
-              {{ item.date }} {{ item.heuredebut }} {{ item.heurefin }}
-            </div>
-            <div>{{ item.lieu }}</div>
-            <p v-if="item.description">{{ item.description }}</p>
-          </li>
-        </ul>
-      </section>
 
       <section class="v-ressources__section">
         <h2>{{ data.result.ressources.journal.titre || 'Notre journal' }}</h2>
@@ -72,6 +48,8 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
 type ReferenceRessource = {
   nom: string
   tag: string | string[] | null
@@ -164,6 +142,57 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
       },
     },
   },
+})
+
+// Transformer les ressources du CMS pour le composant ListeRessource (groupées par tag)
+const formattedRessources = computed(() => {
+  const ressources = data.value?.result?.ressources?.ressources
+  if (!ressources) return []
+  
+  // Grouper par tag
+  const grouped: Record<string, typeof ressources> = {}
+  
+  ressources.forEach((item) => {
+    const tag = (Array.isArray(item.tag) ? item.tag[0] : item.tag) || 'Autre'
+    if (!grouped[tag]) {
+      grouped[tag] = []
+    }
+    grouped[tag].push(item)
+  })
+  
+  // Convertir en format attendu par le composant
+  return Object.entries(grouped).map(([tagName, items]) => ({
+    name: tagName,
+    items: items.map((item) => ({
+      label: item.nom,
+      link: item.fichier?.url || item.lien || '#',
+      downloadText: item.fichier?.url ? 'Télécharger' : (item.lien ? 'Lien' : '')
+    }))
+  }))
+})
+
+// Transformer les événements du CMS pour le composant ListeAgenda
+const formattedEvents = computed(() => {
+  const events = data.value?.result?.ressources?.evenements
+  if (!events) return []
+  
+  return events.map((event) => {
+    // Formater la date avec les heures
+    let dateStr = event.date || ''
+    if (event.heuredebut) {
+      dateStr += ` - ${event.heuredebut}`
+    }
+    if (event.heurefin) {
+      dateStr += ` à ${event.heurefin}`
+    }
+    
+    return {
+      date: dateStr,
+      title: event.nom || '',
+      venue: event.lieu || '',
+      description: event.description || ''
+    }
+  })
 })
 
 const goToJournal = () => {

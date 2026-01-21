@@ -1,6 +1,16 @@
 <template>
   <main class="v-home">
-    <AppHeader />
+    <Menu />
+
+    <SitgMap />
+
+    <PortraitSlider />
+
+    <ListeAgenda />
+
+    <AppFooter />
+
+
 
     <section v-if="data?.status === 'ok'" class="v-home__content">
       <div class="v-home__intro">
@@ -31,6 +41,7 @@
     <section v-else class="v-home__error">
       Oups, la page n'existe pas :/
     </section>
+    <AppFooter />
   </main>
 </template>
 

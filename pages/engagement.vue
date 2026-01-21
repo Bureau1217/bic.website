@@ -1,6 +1,8 @@
 <template>
   <main class="v-legal">
-    <AppHeader />
+    <Menu />
+    
+    <Liste v-if="data?.result" :title="data.result.title" />
 
     <section v-if="data?.status === 'ok' && data.result" class="v-legal__content">
       <h1>{{ data.result.title }}</h1>

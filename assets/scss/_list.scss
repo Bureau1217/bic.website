@@ -1,0 +1,249 @@
+// Styles Liste - Notre Historia
+// Utilisé par: ListeAgenda, ListeRessource, ListePartenaires, ListeFaq, ListeMentions
+
+.list {
+  padding-top: var(--40);
+  background-color: var(--white);
+}
+
+.list_wrapper {
+  width: var(--100);
+  border-top: 1px solid var(--red);
+}
+
+.list_title {
+  padding-right: var(--40);
+  padding-left: var(--40);
+}
+
+.list_line {
+  padding: var(--10) var(--40);
+  grid-column-gap: var(--20);
+  grid-row-gap: var(--20);
+  border-bottom: 1px solid var(--red);
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  display: flex;
+  position: relative;
+}
+
+.list_label {
+  color: var(--red);
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 18px;
+}
+
+.list_label.is-3 {
+  padding-right: var(--40);
+}
+
+.list_case {
+  width: var(--100);
+}
+
+.list_case.is-last {
+  padding-right: var(--15);
+  grid-column-gap: var(--15);
+  grid-row-gap: var(--15);
+  justify-content: space-between;
+  align-items: flex-start;
+  display: flex;
+}
+
+.list_case.is-one {
+  padding-left: var(--40);
+}
+
+.list_case.is-3 {
+  padding-right: var(--40);
+}
+
+.list_case.is-2-5 {
+  padding-left: var(--40);
+  width: 40%;
+}
+
+.list_case.is-3-5 {
+  padding-right: var(--40);
+  width: 60%;
+}
+
+.list_plus {
+  left: auto;
+  top: var(--10);
+  right: var(--10);
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+  margin-left: auto;
+  display: flex;
+  position: absolute;
+  bottom: auto;
+}
+
+.list_plus.is-menu {
+  right: var(--20);
+}
+
+.list_plus.is-close {
+  transform: rotate(45deg);
+}
+
+.list_text {
+  padding-top: var(--40);
+}
+
+.list_plus_line {
+  background-color: var(--red);
+  width: 30px;
+  height: 2px;
+  position: absolute;
+}
+
+.list_plus_line.is-vertical {
+  transform: rotate(90deg);
+}
+
+.list_plus_line.is-white {
+  background-color: var(--white);
+}
+
+.list2 {
+  width: var(--100);
+  border-top: 1px solid var(--red);
+}
+
+.list2_item {
+  padding-top: var(--10);
+  padding-bottom: var(--10);
+  grid-column-gap: var(--15);
+  grid-row-gap: var(--15);
+  border-bottom: 1px solid var(--red);
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: center;
+  display: flex;
+}
+
+.list2_header,
+.list2_content {
+  width: var(--100);
+  justify-content: space-between;
+  align-items: flex-start;
+  display: flex;
+}
+
+.list_subtitle {
+  margin-top: 0;
+  margin-bottom: 0;
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.list_line_wrapper {
+  width: var(--100);
+  grid-column-gap: var(--10);
+  grid-row-gap: var(--10);
+  justify-content: space-between;
+  align-items: flex-start;
+  display: flex;
+}
+
+.list_desc {
+  width: 66.66%;
+}
+
+.list_dev_text {
+  color: var(--red);
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 18px;
+}
+
+.list_dev {
+  width: var(--100);
+}
+
+.list_dev_line {
+  grid-column-gap: var(--10);
+  grid-row-gap: var(--10);
+  justify-content: flex-start;
+  align-items: center;
+  display: flex;
+}
+
+.list_line--header {
+  padding: var(--10) var(--40);
+  grid-column-gap: var(--15);
+  grid-row-gap: var(--15);
+  border-top: 1px solid var(--red);
+  border-bottom: 1px none var(--red);
+  flex-flow: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  display: flex;
+  position: relative;
+}
+
+.list_image {
+  margin-bottom: var(--10);
+  width: 50%;
+}
+
+// Media queries
+@media screen and (max-width: 991px) {
+  .list_line {
+    flex-flow: column;
+  }
+
+  .list_label.is-bold {
+    font-weight: 700;
+  }
+
+  .list_case.is-one {
+    padding-left: 0;
+  }
+
+  .list_case.is-telecharger {
+    display: none;
+  }
+
+  .list_line_wrapper {
+    flex-flow: column;
+  }
+
+  .list_desc {
+    width: var(--100);
+  }
+
+  .list_dev {
+    grid-column-gap: var(--20);
+    grid-row-gap: var(--20);
+    flex-flow: column;
+    display: flex;
+  }
+
+  .list_dev_line {
+    flex-flow: column;
+  }
+
+  .list_line--header {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .list_title {
+    font-size: 89px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .list_title,
+  .list_line {
+    padding-right: var(--10);
+    padding-left: var(--10);
+  }
+}

@@ -1,0 +1,17 @@
+// Notre Historia - Main SCSS
+
+// @use doit être en premier (syntaxe moderne Sass)
+@use "variables" as *;
+@use "base" as *;
+@use "list" as *;
+@use "audio" as *;
+
+// Import des fichiers CSS purs (après les @use)
+@import "normalize.css";
+@import "webflow.css";
+
+// Note: Les styles des composants autonomes sont définis dans leurs fichiers .vue respectifs:
+// - Menu.vue -> .menu*, .global
+// - AppFooter.vue -> .footer*
+// - PortraitSlider.vue -> .portrait*
+// - MapBlock.vue -> .map
