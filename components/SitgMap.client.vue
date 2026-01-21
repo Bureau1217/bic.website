@@ -10,22 +10,29 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 
 /**
- * URLs des styles SITG - À remplacer par les URLs officielles SITG
- * Documentation: https://sitg.ge.ch → Services WEB API
+ * Style de carte - Par défaut utilise le style de démo MapLibre
  * 
- * Pour utiliser le style SITG sombre officiel, remplacez DEFAULT_STYLE
- * par l'URL correcte du style JSON de GEODE/SITG
+ * Pour utiliser le style SITG "tons sombres", tu as 2 options :
+ * 
+ * 1. Proxy côté serveur : Créer une route API Nuxt qui fetch le style SITG
+ *    et modifie les URLs relatives en absolues, puis le sert localement.
+ * 
+ * 2. Style local : Télécharger le style SITG depuis
+ *    https://vector.sitg.ge.ch/arcgis/rest/services/Hosted/PLAN_SITG_EPSG3857/VectorTileServer/resources/styles/root.json
+ *    Modifier les URLs relatives ("../sprites/sprite" → URL absolue)
+ *    Placer le fichier dans public/ et l'utiliser
  */
-const DEFAULT_STYLE = 'https://demotiles.maplibre.org/style.json'
+// Style SITG via proxy local (résout CORS + URLs relatives)
+const DEFAULT_STYLE = '/api/sitg-style'
 
 // Props
 interface Props {
-  center?: [number, number] // [lng, lat]
+  center?: [number, number]
   zoom?: number
   styleUrl?: string
 }
@@ -36,21 +43,17 @@ const props = withDefaults(defineProps<Props>(), {
   styleUrl: ''
 })
 
-// Refs
 const mapContainer = ref<HTMLElement | null>(null)
 let map: maplibregl.Map | null = null
 
-const computedStyleUrl = computed(() => props.styleUrl || DEFAULT_STYLE)
-
 onMounted(async () => {
   await nextTick()
-  
   if (!mapContainer.value) return
 
   try {
     map = new maplibregl.Map({
       container: mapContainer.value,
-      style: computedStyleUrl.value,
+      style: props.styleUrl || DEFAULT_STYLE,
       center: props.center,
       zoom: props.zoom,
       attributionControl: false
