@@ -3,7 +3,7 @@
     <Menu />
 
     <!-- Carte interactive SITG avec lieux Kirby -->
-    <div style="height: 500px; width: 100%;">
+    <div style="height: 100vh; width: 100%;">
       <MapView
         :center="[6.1432, 46.2044]"
         :zoom="12"
@@ -138,6 +138,19 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
+
+console.log("hello")
+console.log(data.value?.result?.lieux?.map(l => ({
+  slug: l.slug,
+  picto: l.picto?.url,
+  imagepodcast: l.imagepodcast?.url,
+})))
+
+
+
+
+
+
 
 /**
  * Parse les coordonnées GPS depuis le format texte "lat, lng"
