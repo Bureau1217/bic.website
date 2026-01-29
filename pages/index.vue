@@ -2,6 +2,18 @@
   <main class="v-home">
     <Menu />
 
+    <HomeHero
+  :titre="data.result.home.titre"
+  :soustitre="data.result.home.soustitre"
+  :cover="data.result.home.cover"
+  :audio-card="{
+    title: 'Episode 1',
+    description: 'Lorem ipsum dolor sit amet.',
+    duration: '12min',
+    image: data.result.home.podcastImage
+  }"
+/>
+
     <!-- Carte interactive SITG avec lieux Kirby -->
     <div style="height: 100vh; width: 100%;">
       <MapView

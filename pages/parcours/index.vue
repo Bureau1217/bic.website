@@ -1,42 +1,17 @@
 <template>
   <main class="v-parcours">
     <Menu />
-    <ContentBlockText />
+
+    
+    <section class="page_header">
+      <h1>{{ data?.result?.parcours?.title }}</h1>
+      <AppBlocks :blocks="data?.result?.parcours?.soustitre" />
+    </section>
+
     <MapBlock />
+
     <AppFooter />
 
-    <section v-if="data?.status === 'ok'" class="v-parcours__content">
-      <div class="v-parcours__intro">
-        <AppBlocks :blocks="data.result.parcours.titre" />
-        <AppBlocks :blocks="data.result.parcours.soustitre" />
-      </div>
-
-      <div v-if="data.result.parcours.cover?.url" class="v-parcours__cover">
-        <img
-          :src="data.result.parcours.cover.url"
-          :alt="data.result.parcours.cover.alt || data.result.parcours.title"
-          loading="lazy"
-        />
-      </div>
-
-      <h1>{{ data.result.parcours.title }}</h1>
-
-      <div class="v-parcours__children">
-        <NuxtLink
-          v-for="item in data.result.parcours.children"
-          :key="item.slug"
-          :to="`/parcours/${item.slug}`"
-          class="v-parcours__children__item"
-        >
-          <div>{{ item.title }}</div>
-          <small class="v-parcours__meta">{{ item.template }}</small>
-        </NuxtLink>
-      </div>
-    </section>
-
-    <section v-else class="v-parcours__error">
-      Oups, la page n'existe pas :/
-    </section>
   </main>
 </template>
 

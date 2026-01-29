@@ -49,6 +49,16 @@ img {
   margin-right: auto;
 }
 
+.page_header {
+  width: 100%;
+  max-width: 1000px;
+  padding: 80px 40px 0;
+  display: flex;
+  flex-flow: column;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .background {
   z-index: -1;
   width: var(--100);

@@ -1,6 +1,11 @@
 <template>
   <main class="v-ressources">
     <Menu />
+    <section class="page_header">
+      <AppBlocks :blocks="data?.result?.ressources?.titre" />
+      <AppBlocks :blocks="data?.result?.ressources?.soustitre" />
+    </section>
+
 
     <ListeAgenda 
       v-if="data?.result?.ressources?.evenements" 
@@ -10,40 +15,14 @@
 
     <ListeRessource 
       v-if="data?.result?.ressources?.ressources" 
-      title="Ressources" 
+      title="Références" 
       :categories="formattedRessources" 
     />
 
+    <AppFooter />
 
 
-    <section v-if="data?.status === 'ok'" class="v-ressources__content">
-      <AppBlocks :blocks="data.result.ressources.titre" />
-      <AppBlocks :blocks="data.result.ressources.soustitre" />
 
-      <div v-if="data.result.ressources.cover?.url" class="v-ressources__cover">
-        <img
-          :src="data.result.ressources.cover.url"
-          :alt="data.result.ressources.cover.alt || data.result.ressources.title"
-          loading="lazy"
-        />
-      </div>
-
-      <section class="v-ressources__section">
-        <h2>{{ data.result.ressources.journal.titre || 'Notre journal' }}</h2>
-        <p v-if="data.result.ressources.journal.texte">
-          {{ data.result.ressources.journal.texte }}
-        </p>
-        <AppButton
-          v-if="data.result.ressources.journal.bouton_url"
-          :label="data.result.ressources.journal.bouton_texte || 'Lire'"
-          @click="goToJournal"
-        />
-      </section>
-    </section>
-
-    <section v-else class="v-ressources__error">
-      Oups, la page n'existe pas :/
-    </section>
   </main>
 </template>
 

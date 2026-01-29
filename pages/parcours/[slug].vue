@@ -22,8 +22,8 @@
     
     <ContentBlockText />
 
-    <AudioCard :title="data.result.title" :image="data.result.imagepodcast?.url" :alt="data.result.imagepodcast?.alt" :srcset="data.result.imagepodcast?.srcset" :sizes="data.result.imagepodcast?.sizes" :duration="data.result.imagepodcast?.duration" :description="data.result.imagepodcast?.description" :descriptionBlack="data.result.imagepodcast?.descriptionBlack" :isHome="data.result.imagepodcast?.isHome" :isCatalogue="data.result.imagepodcast?.isCatalogue" :isParcours="data.result.imagepodcast?.isParcours" :bgColor="data.result.imagepodcast?.bgColor"  />
-    <AudioPlayer :title="data.result.title" :audio="audio?.url" />
+    <AudioCard :title="data?.result?.title" :image="data?.result?.imagepodcast?.url" :alt="data?.result?.imagepodcast?.alt" :srcset="data?.result?.imagepodcast?.srcset" :sizes="data?.result?.imagepodcast?.sizes" :duration="data?.result?.imagepodcast?.duration" :description="data?.result?.imagepodcast?.description" :descriptionBlack="data?.result?.imagepodcast?.descriptionBlack" :isHome="data?.result?.imagepodcast?.isHome" :isCatalogue="data?.result?.imagepodcast?.isCatalogue" :isParcours="data?.result?.imagepodcast?.isParcours" :bgColor="data?.result?.imagepodcast?.bgColor"  />
+    <AudioPlayer :title="data?.result?.title" :audio="audio?.url" />
     
     <AppFooter />
 
