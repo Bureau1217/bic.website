@@ -92,7 +92,7 @@ const subtitleText = computed(() => {
 .hero_image {
   object-fit: cover;
   width: 100%;
-  height: 40vw;
+  height: 100%;
 }
 
 .hero_side {

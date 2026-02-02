@@ -2,26 +2,28 @@
   <main class="v-home">
     <Menu />
 
-    <HomeHero
-  :titre="data.result.home.titre"
-  :soustitre="data.result.home.soustitre"
-  :cover="data.result.home.cover"
-  :audio-card="{
-    title: 'Episode 1',
-    description: 'Lorem ipsum dolor sit amet.',
-    duration: '12min',
-    image: data.result.home.podcastImage
-  }"
-/>
-
-    <!-- Carte interactive SITG avec lieux Kirby -->
-    <div style="height: 100vh; width: 100%;">
-      <MapView
-        :center="[6.1432, 46.2044]"
-        :zoom="12"
-        :markers="mapMarkers"
+    <template v-if="data?.result">
+      <HomeHero
+        :titre="data.result.home.titre"
+        :soustitre="data.result.home.soustitre"
+        :cover="data.result.home.cover"
+        :audio-card="{
+          title: 'Episode 1',
+          description: 'Lorem ipsum dolor sit amet.',
+          duration: '12min',
+          image: data.result.home.podcastImage
+        }"
       />
-    </div>
+
+      <!-- Carte interactive SITG avec lieux Kirby -->
+      <div style="height: 100vh; width: 100%;">
+        <MapView
+          :center="[6.1432, 46.2044]"
+          :zoom="5"
+          :markers="mapMarkers"
+        />
+      </div>
+    </template>
 
     <PortraitSlider />
 
@@ -30,40 +32,10 @@
 
     <AppFooter />
 
-
-
-    <section v-if="data?.status === 'ok'" class="v-home__content">
-      <div class="v-home__intro">
-        <AppBlocks :blocks="data.result.home.titre" />
-        <AppBlocks :blocks="data.result.home.soustitre" />
-      </div>
-
-      <div v-if="data.result.home.cover?.url" class="v-home__cover">
-        <img
-          :src="data.result.home.cover.url"
-          :alt="data.result.home.cover.alt || data.result.home.title"
-          loading="lazy"
-        />
-      </div>
-
-      <section class="v-home__nav">
-        <h2>Explorer</h2>
-        <ul>
-          <li v-for="item in data.result.nav" :key="item.slug">
-            <NuxtLink :to="`/${item.slug}`">
-              {{ item.title }}
-            </NuxtLink>
-          </li>
-        </ul>
-      </section>
-    </section>
-
-    <section v-else class="v-home__error">
-      Oups, la page n'existe pas :/
-    </section>
-    <AppFooter />
   </main>
 </template>
+
+
 
 <script setup lang="ts">
 // Types pour les lieux avec coordonnées GPS

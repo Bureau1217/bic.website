@@ -2,6 +2,24 @@
   <div class="map-view">
     <div ref="mapContainer" class="map-view__container"></div>
     
+    <!-- Conteneur des markers HTML -->
+    <div ref="markersContainer" class="map-view__markers"></div>
+    
+    <!-- Message d'erreur si le style ne charge pas -->
+    <div v-if="mapError" class="map-view__error">
+      {{ mapError }}
+    </div>
+    
+    <!-- Popup personnalisée -->
+    <div 
+      v-if="activePopup" 
+      class="map-view__popup"
+      :style="{ left: popupPosition.x + 'px', top: popupPosition.y + 'px' }"
+    >
+      <button class="map-view__popup-close" @click="closePopup">&times;</button>
+      <div v-html="activePopup.content"></div>
+    </div>
+    
     <!-- Attribution SITG -->
     <div class="map-view__attribution">
       Source : ICDG / SITG (État de Genève)
@@ -11,8 +29,17 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import maplibregl from 'maplibre-gl'
-import 'maplibre-gl/dist/maplibre-gl.css'
+
+// ArcGIS CSS (chargé côté client uniquement)
+import '@arcgis/core/assets/esri/themes/dark/main.css'
+
+// ArcGIS imports
+import esriConfig from '@arcgis/core/config'
+import EsriMap from '@arcgis/core/Map'
+import MapView from '@arcgis/core/views/MapView'
+import VectorTileLayer from '@arcgis/core/layers/VectorTileLayer'
+import Point from '@arcgis/core/geometry/Point'
+import Extent from '@arcgis/core/geometry/Extent'
 
 // ============================================================================
 // TYPES
@@ -47,102 +74,151 @@ export interface Props {
 const props = withDefaults(defineProps<Props>(), {
   markers: () => [],
   center: () => [6.1432, 46.2044], // Genève
-  zoom: 12,
+  zoom: 1,
   darkMode: true
 })
 
 const emit = defineEmits<{
   markerClick: [marker: MapMarker]
-  mapLoad: [map: maplibregl.Map]
+  mapLoad: [view: MapView]
 }>()
 
 // ============================================================================
-// CONFIGURATION SITG
+// CONFIGURATION ArcGIS SITG
 // ============================================================================
 
-const SITG_BASE_URL = 'https://vector.sitg.ge.ch/arcgis/rest/services/Hosted/PLAN_SITG_EPSG3857/VectorTileServer'
+// Portail ArcGIS Enterprise de Genève
+esriConfig.portalUrl = 'https://app2.ge.ch/tergeoportal'
 
-/**
- * Charge le style SITG via l'API proxy locale (évite CORS)
- * L'API corrige déjà les URLs relatives
- */
-async function loadSitgStyle(): Promise<maplibregl.StyleSpecification> {
-  const response = await fetch('/api/sitg-style')
-  
-  if (!response.ok) {
-    throw new Error(`Failed to load SITG style: ${response.status}`)
-  }
-  
-  const style = await response.json()
-  
-  // S'assurer que les URLs sont absolues
-  if (!style.sprite?.startsWith('http')) {
-    style.sprite = `${SITG_BASE_URL}/resources/sprites/sprite`
-  }
-  if (!style.glyphs?.startsWith('http')) {
-    style.glyphs = `${SITG_BASE_URL}/resources/fonts/{fontstack}/{range}.pbf`
-  }
-  
-  // Forcer les tuiles en format direct
-  if (style.sources?.esri) {
-    style.sources.esri = {
-      type: 'vector',
-      tiles: [`${SITG_BASE_URL}/tile/{z}/{y}/{x}.pbf`],
-      minzoom: 0,
-      maxzoom: 19
-    }
-  }
-  
-  return style
-}
+// URL du VectorTileServer SITG "Tons sombres"
+const SITG_VECTOR_TILE_URL = 'https://vector.sitg.ge.ch/arcgis/rest/services/Hosted/PLAN_SITG_EPSG3857/VectorTileServer'
+// PortalItem ID pour le style "Tons sombres"
+const SITG_PORTAL_ITEM_ID = '753d065ee1ba4d29be9a6de655abd94f'
 
 // ============================================================================
 // REFS & STATE
 // ============================================================================
 
-const mapContainer = ref<HTMLElement | null>(null)
-let map: maplibregl.Map | null = null
-const markersOnMap: maplibregl.Marker[] = []
+const mapContainer = ref<HTMLDivElement | null>(null)
+const markersContainer = ref<HTMLDivElement | null>(null)
+const mapError = ref<string | null>(null)
+
+// Popup state
+const activePopup = ref<{ content: string; marker: MapMarker } | null>(null)
+const popupPosition = ref({ x: 0, y: 0 })
+
+let view: MapView | null = null
+let esriMap: EsriMap | null = null
+
+// Stockage des éléments DOM des markers
+const markerElements = new Map<string | number, HTMLElement>()
+// Stockage des données markers
+const markerDataMap = new Map<string | number, MapMarker>()
+
+// Handle pour l'animation frame
+let updateMarkersRAF: number | null = null
 
 // ============================================================================
-// MARKERS MANAGEMENT
+// POPUP MANAGEMENT
+// ============================================================================
+
+function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }) {
+  // Positionner la popup au-dessus du marker
+  popupPosition.value = {
+    x: screenPoint.x,
+    y: screenPoint.y - 10 // Décalage vers le haut
+  }
+  activePopup.value = {
+    content: createPopupContent(marker),
+    marker
+  }
+}
+
+function closePopup() {
+  activePopup.value = null
+}
+
+// ============================================================================
+// HTML MARKERS MANAGEMENT
 // ============================================================================
 
 /**
- * Crée un élément DOM custom pour un marker
+ * Crée un élément DOM pour un marker
  */
 function createMarkerElement(marker: MapMarker): HTMLElement {
   const el = document.createElement('div')
   el.className = 'map-view__marker'
+  el.dataset.markerId = String(marker.id)
   
+  // Contenu du marker : picto (icon) si disponible, sinon numéro
   if (marker.icon) {
-    // Si c'est une URL d'image
-    if (marker.icon.startsWith('http') || marker.icon.startsWith('/')) {
-      el.innerHTML = `<img src="${marker.icon}" alt="${marker.title || ''}" />`
-    } else {
-      // Sinon c'est un emoji ou du texte
-      el.innerHTML = marker.icon
-    }
+    // Utiliser l'image picto du CMS
+    el.innerHTML = `<img src="${marker.icon}" alt="${marker.title || ''}" class="map-view__marker-icon" />`
   } else {
-    // Marker par défaut (point)
-    el.innerHTML = `
-      <svg width="32" height="40" viewBox="0 0 32 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 0C7.163 0 0 7.163 0 16c0 12 16 24 16 24s16-12 16-24c0-8.837-7.163-16-16-16z" fill="${marker.color || '#E63946'}"/>
-        <circle cx="16" cy="16" r="6" fill="white"/>
-      </svg>
-    `
+    // Fallback : afficher le numéro
+    const number = marker.number || ''
+    el.innerHTML = `<span class="map-view__marker-number">${number}</span>`
   }
   
-  // Style personnalisé si couleur définie
-  if (marker.color && !marker.icon) {
-    el.style.setProperty('--marker-color', marker.color)
-  }
+  // Gestionnaire de clic
+  el.addEventListener('click', (e) => {
+    e.stopPropagation()
+    const rect = el.getBoundingClientRect()
+    const containerRect = markersContainer.value?.getBoundingClientRect()
+    if (containerRect) {
+      openPopup(marker, { 
+        x: rect.left - containerRect.left + rect.width / 2, 
+        y: rect.top - containerRect.top 
+      })
+    }
+    emit('markerClick', marker)
+  })
   
   return el
 }
 
 /**
+ * Met à jour la position de tous les markers HTML sur l'écran
+ * Utilise requestAnimationFrame pour la performance
+ */
+function updateMarkersPosition() {
+  if (!view || !markersContainer.value) return
+  
+  markerElements.forEach((el, id) => {
+    const markerData = markerDataMap.get(id)
+    if (!markerData) return
+    
+    const point = new Point({
+      longitude: markerData.coordinates[0],
+      latitude: markerData.coordinates[1]
+    })
+    
+    const screenPoint = view!.toScreen(point)
+    
+    if (screenPoint) {
+      // Utiliser transform pour de meilleures performances
+      el.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px)`
+      el.style.display = 'flex'
+    } else {
+      // Point hors de l'écran
+      el.style.display = 'none'
+    }
+  })
+}
+
+/**
+ * Planifie une mise à jour des markers avec requestAnimationFrame
+ */
+function scheduleMarkersUpdate() {
+  if (updateMarkersRAF) {
+    cancelAnimationFrame(updateMarkersRAF)
+  }
+  updateMarkersRAF = requestAnimationFrame(updateMarkersPosition)
+}
+
+/**
  * Crée le contenu HTML d'une popup avec le style AudioCardMap
+ * IDENTIQUE à l'ancienne version
  */
 function createPopupContent(marker: MapMarker): string {
   const number = marker.number || ''
@@ -191,10 +267,10 @@ function createPopupContent(marker: MapMarker): string {
 }
 
 /**
- * Ajoute les markers sur la carte
+ * Ajoute les markers HTML sur la carte
  */
 function addMarkers() {
-  if (!map) return
+  if (!view || !markersContainer.value) return
   
   // Supprimer les markers existants
   clearMarkers()
@@ -203,36 +279,28 @@ function addMarkers() {
   props.markers.forEach((markerData) => {
     const el = createMarkerElement(markerData)
     
-    const marker = new maplibregl.Marker({ element: el })
-      .setLngLat(markerData.coordinates)
+    // Stocker les données et l'élément
+    markerDataMap.set(markerData.id, markerData)
+    markerElements.set(markerData.id, el)
     
-    // Ajouter une popup avec style AudioCardMap
-    const popup = new maplibregl.Popup({
-      offset: [0, -10],
-      closeButton: false,
-      closeOnClick: true,
-      className: 'map-card-popup',
-      maxWidth: 'none'
-    }).setHTML(createPopupContent(markerData))
-    
-    marker.setPopup(popup)
-    
-    // Event click
-    el.addEventListener('click', () => {
-      emit('markerClick', markerData)
-    })
-    
-    marker.addTo(map!)
-    markersOnMap.push(marker)
+    // Ajouter au DOM
+    markersContainer.value!.appendChild(el)
   })
+  
+  // Mettre à jour les positions
+  updateMarkersPosition()
 }
 
 /**
  * Supprime tous les markers de la carte
  */
 function clearMarkers() {
-  markersOnMap.forEach(marker => marker.remove())
-  markersOnMap.length = 0
+  // Supprimer les éléments DOM
+  markerElements.forEach((el) => {
+    el.remove()
+  })
+  markerElements.clear()
+  markerDataMap.clear()
 }
 
 // ============================================================================
@@ -243,34 +311,89 @@ async function initMap() {
   if (!mapContainer.value) return
   
   try {
-    // Charger le style SITG avec URLs corrigées
-    const style = await loadSitgStyle()
+    mapError.value = null
     
-    // Créer la carte
-    map = new maplibregl.Map({
+    // Créer le VectorTileLayer avec le style SITG "Tons sombres"
+    const sitgLayer = new VectorTileLayer({
+      portalItem: {
+        id: SITG_PORTAL_ITEM_ID,
+        portal: {
+          url: esriConfig.portalUrl
+        }
+      }
+    })
+    
+    // Créer la Map avec le VectorTileLayer comme basemap
+    esriMap = new EsriMap({
+      basemap: {
+        baseLayers: [sitgLayer]
+      }
+    })
+    
+    // Créer la vue
+    view = new MapView({
       container: mapContainer.value,
-      style: style,
+      map: esriMap,
       center: props.center,
       zoom: props.zoom,
-      attributionControl: false // On utilise notre propre attribution
+      ui: {
+        components: ['zoom'] // Garder uniquement le contrôle de zoom
+      },
+      constraints: {
+        rotationEnabled: false,
+        minZoom: 5,
+        maxZoom: 10,
+      }
     })
     
-    // Ajouter les contrôles de navigation
-    map.addControl(new maplibregl.NavigationControl(), 'top-right')
+    // Positionner le zoom en haut à droite
+    view.ui.move('zoom', 'bottom-left')
     
-    // Attendre que la carte soit chargée
-    map.on('load', () => {
-      addMarkers()
-      emit('mapLoad', map!)
+    // Attendre que la vue soit prête
+    await view.when()
+    
+    // Désactiver le zoom par scroll (molette/trackpad)
+    // pour que le scroll continue de faire défiler la page
+    // Le double-clic reste actif pour zoomer
+    view.on('mouse-wheel', (event) => {
+      event.stopPropagation()
     })
     
-    // Gérer les erreurs
-    map.on('error', (e) => {
-      console.error('[MapView] Map error:', e.error?.message || e)
+    // Ajouter les markers HTML initiaux
+    addMarkers()
+    
+    // Mettre à jour les positions des markers quand la carte bouge
+    view.watch('extent', () => {
+      scheduleMarkersUpdate()
     })
     
-  } catch (error) {
-    console.error('[MapView] Failed to initialize map:', error)
+    // Aussi lors des animations (zoom/pan)
+    view.watch('animation', () => {
+      scheduleMarkersUpdate()
+    })
+    
+    // Fermer la popup quand on clique sur la carte (pas sur un marker)
+    view.on('click', () => {
+      closePopup()
+    })
+    
+    // Émettre l'événement de chargement
+    emit('mapLoad', view)
+    
+    console.log('[MapView] ArcGIS map initialized with SITG style "Tons sombres" and HTML markers')
+    
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error)
+    console.error('[MapView] Failed to initialize map:', errorMessage)
+    
+    // Afficher une erreur claire si le style n'est pas accessible
+    if (errorMessage.includes('403') || errorMessage.includes('401') || errorMessage.includes('authentication')) {
+      mapError.value = 'Map style inaccessible (authentification requise)'
+    } else if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+      mapError.value = 'Map style introuvable'
+    } else {
+      mapError.value = `Map style inaccessible: ${errorMessage}`
+    }
   }
 }
 
@@ -285,26 +408,36 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  clearMarkers()
-  if (map) {
-    map.remove()
-    map = null
+  // Annuler l'animation frame en cours
+  if (updateMarkersRAF) {
+    cancelAnimationFrame(updateMarkersRAF)
+    updateMarkersRAF = null
   }
+  
+  clearMarkers()
+  
+  if (view) {
+    view.destroy()
+    view = null
+  }
+  
+  esriMap = null
 })
 
 // Réagir aux changements de markers
 watch(() => props.markers, () => {
-  if (map?.loaded()) {
+  if (view && !view.updating) {
     addMarkers()
   }
 }, { deep: true })
 
 // Réagir aux changements de center/zoom
 watch([() => props.center, () => props.zoom], ([newCenter, newZoom]) => {
-  if (map) {
-    map.flyTo({
+  if (view) {
+    view.goTo({
       center: newCenter,
-      zoom: newZoom,
+      zoom: newZoom
+    }, {
       duration: 1000
     })
   }
@@ -315,12 +448,51 @@ watch([() => props.center, () => props.zoom], ([newCenter, newZoom]) => {
 // ============================================================================
 
 defineExpose({
-  getMap: () => map,
+  /**
+   * Retourne la MapView ArcGIS (équivalent de getMap() avec MapLibre)
+   * Note: le type a changé de maplibregl.Map à MapView
+   */
+  getMap: () => view,
+  
+  /**
+   * Anime la vue vers un point
+   */
   flyTo: (center: [number, number], zoom?: number) => {
-    map?.flyTo({ center, zoom: zoom || props.zoom, duration: 1000 })
+    view?.goTo({
+      center: center,
+      zoom: zoom || props.zoom
+    }, {
+      duration: 1000
+    })
   },
+  
+  /**
+   * Ajuste la vue pour afficher des bounds
+   */
   fitBounds: (bounds: [[number, number], [number, number]], padding = 50) => {
-    map?.fitBounds(bounds, { padding })
+    if (!view) return
+    
+    const extent = new Extent({
+      xmin: bounds[0][0],
+      ymin: bounds[0][1],
+      xmax: bounds[1][0],
+      ymax: bounds[1][1],
+      spatialReference: { wkid: 4326 }
+    })
+    
+    view.goTo(extent.expand(1.2), {
+      duration: 1000
+    }).then(() => {
+      // Appliquer le padding en ajustant légèrement
+      if (view) {
+        view.padding = {
+          top: padding,
+          right: padding,
+          bottom: padding,
+          left: padding
+        }
+      }
+    })
   }
 })
 </script>
@@ -343,12 +515,120 @@ defineExpose({
 }
 
 /* ============================================================================
-   DARK MODE - Filtre CSS sur le canvas uniquement
-   Les markers et popups ne sont PAS affectés car ils sont en dehors du canvas
+   ERROR STATE
    ============================================================================ */
 
-.map-view__container .maplibregl-canvas {
-  filter: invert(1) grayscale(1) hue-rotate(180deg) brightness(0.9) contrast(1.1);
+.map-view__error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #ff6b6b;
+  padding: 20px 30px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-align: center;
+  z-index: 100;
+  max-width: 80%;
+}
+
+/* ============================================================================
+   HTML MARKERS
+   ============================================================================ */
+
+.map-view__markers {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.map-view__marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Centrer le marker sur son point */
+  margin-left: -20px;
+  margin-top: -40px;
+  /* Style du marker : jaune avec border-radius spécifique */
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: transform 0.15s ease-out;
+}
+
+.map-view__marker:hover {
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+.map-view__marker-number {
+  font-size: 16px;
+  font-weight: bold;
+  color: #000;
+  line-height: 1;
+}
+
+.map-view__marker-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 4px;
+}
+
+/* ============================================================================
+   CUSTOM POPUP
+   ============================================================================ */
+
+.map-view__popup {
+  position: absolute;
+  transform: translate(-50%, -100%);
+  z-index: 200;
+  pointer-events: auto;
+  animation: popup-fade-in 0.2s ease-out;
+}
+
+@keyframes popup-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+.map-view__popup-close {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  background: rgba(0, 0, 0, 0.6);
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.map-view__popup-close:hover {
+  background: rgba(0, 0, 0, 0.8);
 }
 
 /* ============================================================================
@@ -369,44 +649,108 @@ defineExpose({
 }
 
 /* ============================================================================
-   MARKERS
+   ARCGIS UI CUSTOMIZATION
    ============================================================================ */
 
-.map-view__marker {
+/* Masquer l'attribution ArcGIS par défaut (on utilise la nôtre) */
+.map-view .esri-attribution {
+  display: none;
+}
+
+/* Style des contrôles de zoom */
+.map-view .esri-ui-top-right {
+  top: 10px;
+  right: 10px;
+  color:white;
+}
+
+
+
+/* Conteneur des boutons zoom */
+.map-view .esri-zoom {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Override des variables Calcite pour les boutons */
+.map-view .esri-widget--button,
+.map-view .esri-widget--button:is(calcite-button) {
+  --calcite-icon-color: white !important;
+  --calcite-color-text-3: white !important;
+  --calcite-color-foreground-1: var(--red) !important;
+  --calcite-color-foreground-2: var(--red) !important;
+  --calcite-color-foreground-3: var(--red) !important;
+  width: 36px;
+  height: 36px;
+  color: white !important;
+  background: var(--red) !important;
+  border: none !important;
+}
+
+/* Enlever l'effet hover sur les boutons zoom */
+.map-view .esri-widget--button:hover,
+.map-view .esri-widget--button:focus,
+.map-view .esri-widget--button:active,
+.map-view .esri-widget--button:is(calcite-button):hover,
+.map-view .esri-widget--button:is(calcite-button):focus,
+.map-view .esri-widget--button:is(calcite-button):not(:hover) {
+  --calcite-icon-color: white !important;
+  --calcite-color-text-3: white !important;
+  --calcite-color-foreground-1: var(--red) !important;
+  --calcite-color-foreground-2: var(--red) !important;
+  --calcite-color-foreground-3: var(--red) !important;
+  background: var(--red) !important;
+  color: white !important;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
+  box-shadow: none !important;
 }
 
-.map-view__marker:hover {
-  transform: scale(1.1);
+/* Icônes + et - en blanc */
+.map-view .esri-icon-plus,
+.map-view .esri-icon-minus,
+.map-view calcite-icon {
+  color: white !important;
+  --calcite-icon-color: white !important;
 }
 
-.map-view__marker img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
+/* Enlever tout effet de fond gris sur le conteneur */
+.map-view .esri-ui-corner,
+.map-view .esri-component {
+  background: transparent !important;
 }
 
-.map-view__marker svg {
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+/* Force le style sur tous les états Calcite */
+.map-view calcite-button,
+.map-view calcite-button:hover,
+.map-view calcite-button:focus,
+.map-view calcite-button:active {
+  --calcite-color-brand: var(--red) !important;
+  --calcite-color-brand-hover: var(--red) !important;
+  --calcite-color-brand-press: var(--red) !important;
+  --calcite-icon-color: white !important;
+  background: var(--red) !important;
 }
+
+
 
 /* ============================================================================
    POPUPS - Style AudioCardMap
    ============================================================================ */
 
-.map-card-popup .maplibregl-popup-content {
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  border-radius: 0;
+/* Container popup ArcGIS */
+.map-view .esri-popup__main-container {
+  max-width: none !important;
+  width: auto !important;
 }
 
-.map-card-popup .maplibregl-popup-tip {
-  display: none;
+.map-view .esri-popup__content {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.map-view .esri-popup__header,
+.map-view .esri-popup__footer {
+  display: none !important;
 }
 
 /* Style map-card pour les popups */
@@ -419,6 +763,7 @@ defineExpose({
   text-decoration: none;
   color: inherit;
   overflow: hidden;
+  inset: auto auto auto auto;
 }
 
 .map-card--popup .map-card_image_wrapper {
@@ -512,20 +857,5 @@ defineExpose({
   font-size: 12px;
   opacity: 0.9;
   line-height: 1.4;
-}
-
-/* ============================================================================
-   NAVIGATION CONTROLS
-   ============================================================================ */
-
-.map-view .maplibregl-ctrl-group {
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.map-view .maplibregl-ctrl-group button {
-  width: 36px;
-  height: 36px;
 }
 </style>
