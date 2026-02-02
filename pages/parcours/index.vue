@@ -4,7 +4,7 @@
 
     
     <section class="page_header">
-      <h1>{{ data?.result?.parcours?.title }}</h1>
+      <AppBlocks :blocks="data?.result?.parcours?.titre" />
       <AppBlocks :blocks="data?.result?.parcours?.soustitre" />
     </section>
 
