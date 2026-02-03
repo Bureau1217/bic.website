@@ -7,12 +7,11 @@
         :titre="data.result.home.titre"
         :soustitre="data.result.home.soustitre"
         :cover="data.result.home.cover"
-        :audio-card="{
-          title: 'Episode 1',
-          description: 'Lorem ipsum dolor sit amet.',
-          duration: '12min',
-          image: data.result.home.podcastImage
-        }"
+        :audio-card="firstEpisode ? {
+          title: firstEpisode.title,
+          description: firstEpisode.texte || undefined,
+          image: firstEpisode.imagepodcast
+        } : undefined"
       />
 
       <!-- Carte interactive SITG avec lieux Kirby -->
@@ -38,7 +37,10 @@
 
 
 <script setup lang="ts">
-// Types pour les lieux avec coordonnées GPS
+
+/* TYPES POUR LES DONNEES DU CMS - Utile pour le débogage et le typage */
+
+// Types pour les lieux
 type LieuData = {
   title: string
   slug: string
@@ -48,6 +50,17 @@ type LieuData = {
   num: string | number | null        // Numéro du lieu (ordre de tri)
 }
 
+// Types pour les épisodes
+type EpisodeData = {
+  title: string
+  slug: string
+  num: string | number | null
+  texte: string | null  // Description de l'épisode
+  imagepodcast: CMS_API_File | null
+  audio: CMS_API_File | null
+}
+
+// Types pour les données du CMS
 type FetchData = CMS_API_Response & {
   result: {
     home: {
@@ -59,9 +72,11 @@ type FetchData = CMS_API_Response & {
     }
     nav: CMS_API_PageItem[]
     lieux: LieuData[]
+    episodes: EpisodeData[]
   }
 }
 
+/* FETCH DES DONNEES DU CMS */
 const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   lazy: true,
   method: 'POST',
@@ -119,24 +134,50 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           },
         },
       },
+      // Récupérer les épisodes du parcours
+      episodes: {
+        query: "site.find('parcours').children().template('episode').listed()",
+        select: {
+          title: true,
+          slug: true,
+          num: 'page.num',
+          texte: 'page.texte.value',
+          imagepodcast: {
+            query: 'page.images.template("poster").first',
+            select: {
+              url: true,
+              alt: true,
+              width: true,
+              height: true,
+            },
+          },
+          audio: {
+            query: 'page.files.template("audio").first',
+            select: {
+              url: true,
+            },
+          },
+        },
+      },
     },
   },
 })
 
-console.log("hello")
-console.log(data.value?.result?.lieux?.map(l => ({
-  slug: l.slug,
-  picto: l.picto?.url,
-  imagepodcast: l.imagepodcast?.url,
-})))
+
+watchEffect(() => {
+  if (data.value) {
+    console.log('[KQL response]', data.value)
+  }
+})
+
+/* PREMIER EPISODE POUR L'AUDIOCARD DU HOMEHERO */
+const firstEpisode = computed(() => {
+  return data.value?.result?.episodes?.[0] || null
+})
 
 
 
-
-
-
-
-/**
+/* PARSE DES COORDONNEES GPS - UTILE POUR LA CARTE INTERACTIVE 
  * Parse les coordonnées GPS depuis le format texte "lat, lng"
  * Exemple: "46.5191, 6.5668" → { lat: 46.5191, lng: 6.5668 }
  */
@@ -149,10 +190,9 @@ function parseGpsCoordinates(gps: string | null): { lat: number; lng: number } |
   return { lat: parts[0], lng: parts[1] }
 }
 
-// Transformer les lieux Kirby en markers pour MapView avec style AudioCardMap
+/* TRANSFORMER LES LIEUX KIRBY EN MARKERS POUR MAPVIEW AVEC STYLE AUDIOCARDMAP */
 const mapMarkers = computed(() => {
-  console.log('[Index] Lieux from Kirby:', data.value?.result?.lieux)
-  
+  //console.log('[Index] Lieux from Kirby:', data.value?.result?.lieux)
   if (!data.value?.result?.lieux) return []
   
   return data.value.result.lieux

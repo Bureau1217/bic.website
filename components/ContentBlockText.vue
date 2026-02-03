@@ -1,61 +1,119 @@
 <template>
   <div class="block-text" :class="{ 'is-auto': isAuto }">
-    <h1 v-if="title">{{ title }}</h1>
-    <p v-if="text" class="block_p">{{ text }}</p>
-    <slot></slot>
-    <div v-if="image" class="block-image">
-      <img 
-        :src="image.src" 
-        loading="lazy" 
-        :sizes="image.sizes || '(max-width: 1840px) 100vw, 1840px'" 
-        :srcset="image.srcset" 
-        :alt="image.alt || ''" 
-        class="block-image_image"
-      >
-      <p v-if="image.caption" class="block-image_legende">{{ image.caption }}</p>
-    </div>
-    <div v-if="slider && slider.length > 0" class="block-slider">
-      <div class="block-slider_list">
-        <div v-for="(item, index) in slider" :key="index" class="block-slider_item">
-          <img 
-            :src="item.src" 
-            loading="lazy" 
-            :sizes="item.sizes || '(max-width: 1840px) 100vw, 1840px'" 
-            :srcset="item.srcset" 
-            :alt="item.alt || ''" 
-            class="block-image_image"
-          >
-          <p v-if="item.caption" class="block-image_legende">{{ item.caption }}</p>
-        </div>
+    <template v-for="(block, index) in blocks" :key="block.id ?? index">
+      <!-- Heading -->
+      <component
+        v-if="block.type === 'heading'"
+        :is="getHeadingTag(block)"
+        v-html="block.content?.text"
+      />
+      
+      <!-- Text (paragraphe) -->
+      <div
+        v-else-if="block.type === 'text'"
+        class="block_p"
+        v-html="block.content?.text"
+      />
+      
+      <!-- Image simple -->
+      <div v-else-if="block.type === 'image' && block.content?.image?.url" class="block-image">
+        <img 
+          :src="block.content.image.url"
+          loading="lazy" 
+          :alt="block.content.image.alt || block.content.alt || ''" 
+          class="block-image_image"
+        >
+        <p v-if="block.content.caption" class="block-image_legende">{{ block.content.caption }}</p>
       </div>
-    </div>
+      
+      <!-- Galerie -->
+      <BlockGallery
+        v-else-if="block.type === 'gallery' && block.content?.images?.length"
+        :images="block.content.images"
+        :caption="block.content.caption"
+      />
+    </template>
   </div>
 </template>
 
-<script setup>
-defineProps({
-  title: {
-    type: String,
-    default: ''
-  },
-  text: {
-    type: String,
-    default: ''
-  },
-  isAuto: {
-    type: Boolean,
-    default: false
-  },
-  image: {
-    type: Object,
-    default: null
-  },
-  slider: {
-    type: Array,
-    default: () => []
+<script setup lang="ts">
+/** Bloc avec contenu résolu */
+type ResolvedBlock = {
+  id?: string
+  type: string
+  content?: {
+    text?: string
+    level?: string
+    image?: { url: string; alt?: string } | null
+    images?: { url: string; alt?: string }[]
+    caption?: string
+    alt?: string
+    [key: string]: unknown
   }
-})
+}
+
+defineProps<{
+  blocks?: ResolvedBlock[]
+  isAuto?: boolean
+}>()
+
+// Détermine la balise h1-h6 selon le niveau
+function getHeadingTag(block: ResolvedBlock): string {
+  const level = block.content?.level
+  if (typeof level === 'string' && /^h[1-6]$/.test(level)) {
+    return level
+  }
+  return 'h2'
+}
 </script>
 
 <style lang="scss">
+.block-text {
+  grid-column-gap: var(--40);
+  grid-row-gap: var(--40);
+  background-color: var(--white);
+  flex-flow: column;
+  width: 60%;
+  max-width: 800px;
+  padding: 80px 40px;
+  display: flex;
+
+  &.is-auto {
+    margin-left: auto;
+  }
+  
+  .block_p {
+    p {
+      margin-bottom: 0.5rem;
+    }
+  }
+}
+
+.block-image {
+  &_image {
+    width: var(--100);
+  }
+  
+  &_legende {
+    margin-top: var(--10);
+    color: var(--red);
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    font-size: 16px;
+  }
+}
+
+// Media queries
+@media screen and (max-width: 991px) {
+  .block-text {
+    width: 100%;
+    max-width: none;
+    margin-bottom: 60vh;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .block-text {
+    padding: var(--40) var(--10);
+  }
+}
 </style>

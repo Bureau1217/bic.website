@@ -78,15 +78,17 @@
           </div>
           <div class="menu_catalogue_list">
             <slot name="reportages">
-              <!-- Placeholder for reportages -->
+              <!-- Placeholder for Episodes-->
+
             </slot>
           </div>
           <div class="menu_catalogue_title_wrapper">
-            <p class="menu_catalogue_title">capsule 1 à 12</p>
+            <p class="menu_catalogue_title">Lieux 1 à 12</p>
           </div>
           <div class="menu_catalogue_list">
             <slot name="capsules">
-              <!-- Placeholder for capsules -->
+              <!-- Placeholder for Lieux -->
+
             </slot>
           </div>
         </div>

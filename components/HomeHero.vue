@@ -24,8 +24,7 @@
     <!-- Bloc texte principal -->
     <div class="block-text">
       <AppBlocks v-if="titre?.length" :blocks="titre" />
-      <p v-if="subtitleText" class="block_p">{{ subtitleText }}</p>
-      <slot></slot>
+      <AppBlocks v-if="soustitre?.length" :blocks="soustitre" class="block_p" />
     </div>
 
     <!-- Audio card optionnel -->

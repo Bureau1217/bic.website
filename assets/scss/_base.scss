@@ -68,31 +68,6 @@ img {
   inset: 0%;
 }
 
-.block-text {
-  grid-column-gap: var(--40);
-  grid-row-gap: var(--40);
-  background-color: var(--white);
-  flex-flow: column;
-  width: 60%;
-  padding: 80px 40px;
-  display: flex;
-}
-
-.block-text.is-auto {
-  margin-left: auto;
-}
-
-.block-image_legende {
-  margin-top: var(--10);
-  color: var(--red);
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
-}
-
-.block-image_image {
-  width: var(--100);
-}
-
 .image {
   width: 30px;
 }
@@ -140,20 +115,6 @@ img {
   height: 100%;
 }
 
-// Block slider
-.block-slider {
-  overflow: hidden;
-}
-
-.block-slider_list {
-  display: flex;
-}
-
-.block-slider_item {
-  width: var(--100);
-  flex: none;
-}
-
 .image-2 {
   width: 40px;
   height: 40px;
@@ -163,11 +124,6 @@ img {
 @media screen and (max-width: 991px) {
   .page.is-m-60 {
     padding-top: 60px;
-  }
-
-  .block-text {
-    width: 100%;
-    margin-bottom: 60vh;
   }
 
   .number {
@@ -204,10 +160,6 @@ img {
 @media screen and (max-width: 479px) {
   h1 {
     font-size: 70px;
-  }
-
-  .block-text {
-    padding: var(--40) var(--10);
   }
 
   .hero_side {
