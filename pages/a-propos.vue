@@ -1,6 +1,5 @@
 <template>
-  <main class="v-apropos">
-    <Menu />
+  <main class="page">
 
     
     <section class="page_header">
@@ -11,9 +10,11 @@
     <ListePartenaires :partners="formattedPartenaires" />
 
 
-    <AppFooter />
   </main>
 </template>
+
+
+
 
 <script setup lang="ts">
 type Partenaire = {

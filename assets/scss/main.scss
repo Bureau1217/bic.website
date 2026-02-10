@@ -5,6 +5,7 @@
 @use "base" as *;
 @use "list" as *;
 @use "audio" as *;
+@use "block" as *;
 
 // Import des fichiers CSS purs (après les @use)
 @import "normalize.css";

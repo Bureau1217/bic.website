@@ -1,5 +1,4 @@
 <template>
-  <div class="global">
     <div class="menu">
       <NuxtLink to="/" class="menu_logo w-inline-block">
         <img src="/images/Logo-Notre-Historia.svg" loading="lazy" alt="" class="menu_logo_image">
@@ -24,9 +23,6 @@
           <NuxtLink to="/parcours" class="menu_link w-inline-block" @click="closeMenu">
             <div>Parcours</div>
           </NuxtLink>
-          <NuxtLink to="/#agenda" class="menu_link w-inline-block" @click="closeMenu">
-            <div>Agenda</div>
-          </NuxtLink>
           <NuxtLink to="/ressources" class="menu_link w-inline-block" @click="closeMenu">
             <div>Ressources</div>
           </NuxtLink>
@@ -39,23 +35,15 @@
               </div>
             </div>
             <div class="menu_parcours_link_wrapper" v-show="lieuxOpen">
-              <slot name="lieux">
-                <NuxtLink to="/parcours/1" class="menu_parcours_link w-inline-block" @click="closeMenu">
-                  <div>1. Origine / langue</div>
-                </NuxtLink>
-                <NuxtLink to="/parcours/2" class="menu_parcours_link w-inline-block" @click="closeMenu">
-                  <div>2. Origine / langue</div>
-                </NuxtLink>
-                <NuxtLink to="/parcours/3" class="menu_parcours_link w-inline-block" @click="closeMenu">
-                  <div>3. Origine / langue</div>
-                </NuxtLink>
-                <NuxtLink to="/parcours/4" class="menu_parcours_link w-inline-block" @click="closeMenu">
-                  <div>4. Origine / langue</div>
-                </NuxtLink>
-                <NuxtLink to="/parcours/5" class="menu_parcours_link w-inline-block" @click="closeMenu">
-                  <div>5. Origine / langue</div>
-                </NuxtLink>
-              </slot>
+              <NuxtLink 
+                v-for="lieu in lieux" 
+                :key="lieu.slug"
+                :to="`/parcours/${lieu.slug}`" 
+                class="menu_parcours_link w-inline-block" 
+                @click="closeMenu"
+              >
+                <div>{{ lieu.num }}. {{ lieu.title }}</div>
+              </NuxtLink>
             </div>
           </div>
           <NuxtLink to="/a-propos" class="menu_link w-inline-block" @click="closeMenu">
@@ -77,32 +65,115 @@
             </div>
           </div>
           <div class="menu_catalogue_list">
-            <slot name="reportages">
-              <!-- Placeholder for Episodes-->
-
-            </slot>
+            <!-- Episodes / Reportages -->
+            <div
+              v-for="episode in episodes"
+              :key="episode.slug"
+              class="audio-card--menu"
+              @click="playEpisode(episode)"
+            >
+              <div class="audio-card_image_wrapper" v-if="episode.imagepodcast">
+                <img class="audio-card_image" :src="episode.imagepodcast.url" :alt="episode.imagepodcast.alt || episode.title" />
+                <div class="audio-card_button">
+                  <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
+                  <p class="audio-card_duration" v-if="audioDurations[episode.slug]">{{ audioDurations[episode.slug] }}</p>
+                </div>
+              </div>
+              <div class="audio-card_info is-bg-red">
+                <!--<p class="number">{{ episode.num }}.</p>-->
+                <p class="audio-card_title">{{ episode.title }}</p>
+              </div>
+            </div>
           </div>
           <div class="menu_catalogue_title_wrapper">
-            <p class="menu_catalogue_title">Lieux 1 à 12</p>
+            <p class="menu_catalogue_title">Lieux 1 à {{ lieux.length }}</p>
           </div>
           <div class="menu_catalogue_list">
-            <slot name="capsules">
-              <!-- Placeholder for Lieux -->
-
-            </slot>
+            <!-- Lieux / Capsules -->
+            <div
+              v-for="lieu in lieux"
+              :key="lieu.slug"
+              class="audio-card--menu"
+              @click="playLieu(lieu)"
+            >
+              <div class="audio-card_image_wrapper" v-if="lieu.imagepodcast">
+                <img class="audio-card_image" :src="lieu.imagepodcast.url" :alt="lieu.imagepodcast.alt || lieu.title" />
+                <div class="audio-card_button">
+                  <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
+                  <p class="audio-card_duration" v-if="audioDurations[lieu.slug]">{{ audioDurations[lieu.slug] }}</p>
+                </div>
+              </div>
+              <div class="audio-card_info is-bg-green">
+                <!--<p class="number">{{ lieu.num }}.</p>-->
+                <p class="audio-card_title">{{ lieu.title }}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 </template>
 
-<script setup>
-import { ref } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted, watch } from 'vue'
+
+// Utiliser le composable pour accéder aux données globales
+const { lieux, episodes, isLoaded } = usePodcastData()
+
+// Lecteur audio global
+const { playTrack } = useAudioPlayer()
 
 const menuOpen = ref(false)
 const catalogueOpen = ref(false)
 const lieuxOpen = ref(false)
+
+// --- Durées audio ---
+// Map slug -> durée formatée (ex: "12'34")
+const audioDurations = ref<Record<string, string>>({})
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
+
+const loadAudioDuration = (slug: string, url: string) => {
+  if (audioDurations.value[slug]) return // déjà chargé
+  const audio = new Audio()
+  audio.preload = 'metadata'
+  audio.addEventListener('loadedmetadata', () => {
+    if (audio.duration && isFinite(audio.duration)) {
+      audioDurations.value[slug] = formatDuration(audio.duration)
+    }
+  })
+  audio.src = url
+}
+
+const loadAllDurations = () => {
+  for (const episode of episodes.value) {
+    if (episode.audio?.url) {
+      loadAudioDuration(episode.slug, episode.audio.url)
+    }
+  }
+  for (const lieu of lieux.value) {
+    if (lieu.audio?.url) {
+      loadAudioDuration(lieu.slug, lieu.audio.url)
+    }
+  }
+}
+
+// Charger les durées quand les données sont prêtes
+onMounted(() => {
+  if (isLoaded.value) {
+    loadAllDurations()
+  }
+})
+
+watch(isLoaded, (loaded) => {
+  if (loaded) {
+    loadAllDurations()
+  }
+})
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value
@@ -129,7 +200,39 @@ const closeCatalogue = () => {
 const toggleLieux = () => {
   lieuxOpen.value = !lieuxOpen.value
 }
+
+// Lancer l'audio d'un épisode
+const playEpisode = (episode: any) => {
+  if (episode.audio?.url) {
+    playTrack({
+      title: episode.title,
+      num: episode.num,
+      audioUrl: episode.audio.url,
+      slug: episode.slug,
+      type: 'episode',
+    })
+  }
+  closeCatalogue()
+}
+
+// Lancer l'audio d'un lieu
+const playLieu = (lieu: any) => {
+  if (lieu.audio?.url) {
+    playTrack({
+      title: lieu.title,
+      num: lieu.num,
+      audioUrl: lieu.audio.url,
+      slug: lieu.slug,
+      type: 'lieu',
+    })
+  }
+  closeCatalogue()
+}
 </script>
+
+
+
+
 
 <style lang="scss">
 // Menu Component Styles
@@ -295,6 +398,48 @@ const toggleLieux = () => {
   display: grid;
 }
 
+.menu_catalogue_item {
+  text-decoration: none;
+  color: var(--white);
+  cursor: pointer;
+  transition: opacity 0.3s;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+.menu_catalogue_item_image {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  margin-bottom: var(--5);
+  
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.menu_catalogue_item_title {
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.menu_catalogue_item_duration {
+  font-size: 11px;
+  color: var(--yellow);
+  margin-top: 2px;
+}
+
+.audio-card_duration {
+  font-size: 11px;
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  color: var(--yellow);
+  margin: 0;
+}
+
 .menu_offset_wrapper {
   background-color: var(--red);
   flex-flow: column;
@@ -319,6 +464,8 @@ const toggleLieux = () => {
 
 .menu_parcours {
   border-top: 1px solid var(--white);
+  width: 100%;
+  cursor: pointer;
 }
 
 .menu_catalogue_wrapper {

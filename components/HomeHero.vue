@@ -28,7 +28,7 @@
     </div>
 
     <!-- Audio card optionnel -->
-    <div v-if="audioCard" class="audio-card is-home">
+    <div v-if="audioCard" class="audio-card is-home" @click="onPlayAudio">
       <div class="audio-card_image_wrapper">
         <img 
           v-if="audioCard.image?.url"
@@ -63,10 +63,29 @@ interface Props {
     description?: string
     duration?: string
     image?: CMS_API_File | null
+    audioUrl?: string
+    slug?: string
+    num?: string | number | null
+    type?: 'episode' | 'lieu'
   } | null
 }
 
 const props = defineProps<Props>()
+
+// Lecteur audio global (même player que le menu)
+const { playTrack } = useAudioPlayer()
+
+const onPlayAudio = () => {
+  if (props.audioCard?.audioUrl) {
+    playTrack({
+      title: props.audioCard.title,
+      num: props.audioCard.num ?? null,
+      audioUrl: props.audioCard.audioUrl,
+      slug: props.audioCard.slug ?? '',
+      type: props.audioCard.type ?? 'episode',
+    })
+  }
+}
 
 // Extraire le texte du soustitre depuis les blocks
 const subtitleText = computed(() => {

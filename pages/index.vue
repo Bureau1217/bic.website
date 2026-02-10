@@ -1,6 +1,5 @@
 <template>
   <main class="v-home">
-    <Menu />
 
     <template v-if="data?.result">
       <HomeHero
@@ -10,7 +9,11 @@
         :audio-card="firstEpisode ? {
           title: firstEpisode.title,
           description: firstEpisode.texte || undefined,
-          image: firstEpisode.imagepodcast
+          image: firstEpisode.imagepodcast,
+          audioUrl: firstEpisode.audio?.url,
+          slug: firstEpisode.slug,
+          num: firstEpisode.num,
+          type: 'episode' as const,
         } : undefined"
       />
 
@@ -20,48 +23,93 @@
           :center="[6.1432, 46.2044]"
           :zoom="5"
           :markers="mapMarkers"
+          id="map-home"
         />
       </div>
     </template>
 
     <PortraitSlider />
 
-   
-    <ListeAgenda />
+    <ListeAgenda 
+      v-if="data?.result?.ressources?.evenements" 
+      title="Agenda" 
+      :events="formattedEvents" 
+    />
 
-    <AppFooter />
+    <!-- Popup QR code : propose de lancer l'audio d'un épisode si ?qr=1&episode=slug -->
+    <QrAudioPopup
+      v-if="qrEpisode"
+      v-model="showQrPopup"
+      :title="qrEpisode.title"
+      @play="onPlayQrEpisode"
+    />
 
   </main>
 </template>
 
-
-
 <script setup lang="ts">
+import { computed } from 'vue'
 
-/* TYPES POUR LES DONNEES DU CMS - Utile pour le débogage et le typage */
+// FETCH DONNEES PODCAST
+const { lieux, episodes, firstEpisode, parseGpsCoordinates, getEpisodeBySlug } = usePodcastData()
 
-// Types pour les lieux
-type LieuData = {
-  title: string
-  slug: string
-  gps: string | null  // Format: "46.5191, 6.5668" (lat, lng)
-  picto: CMS_API_File | null
-  imagepodcast: CMS_API_File | null  // Image pour la popup
-  num: string | number | null        // Numéro du lieu (ordre de tri)
+// Lecteur audio global
+const { playTrack } = useAudioPlayer()
+
+// QR Code : détection du paramètre ?qr=1&episode=slug
+const route = useRoute()
+const router = useRouter()
+
+const showQrPopup = ref(false)
+const qrEpisode = ref<EpisodeData | null>(null)
+
+const hasQrParam = route.query.qr === '1'
+const qrEpisodeSlug = route.query.episode as string | undefined
+
+// Nettoyer l'URL immédiatement
+if (hasQrParam) {
+  router.replace({ query: { ...route.query, qr: undefined, episode: undefined } })
 }
 
-// Types pour les épisodes
-type EpisodeData = {
-  title: string
-  slug: string
-  num: string | number | null
-  texte: string | null  // Description de l'épisode
-  imagepodcast: CMS_API_File | null
-  audio: CMS_API_File | null
+// Ouvrir le popup une fois les données épisodes chargées
+if (hasQrParam && qrEpisodeSlug) {
+  watch(() => episodes.value, (eps) => {
+    if (eps.length > 0 && !qrEpisode.value) {
+      const ep = getEpisodeBySlug(qrEpisodeSlug)
+      if (ep?.audio?.url) {
+        qrEpisode.value = ep
+        showQrPopup.value = true
+      }
+    }
+  }, { immediate: true })
 }
 
-// Types pour les données du CMS
-type FetchData = CMS_API_Response & {
+// Lancer l'audio de l'épisode QR
+const onPlayQrEpisode = () => {
+  if (qrEpisode.value?.audio?.url) {
+    playTrack({
+      title: qrEpisode.value.title,
+      num: qrEpisode.value.num,
+      audioUrl: qrEpisode.value.audio.url,
+      slug: qrEpisode.value.slug,
+      type: 'episode',
+    })
+  }
+}
+
+
+// TYPES
+type ReferenceEvent = {
+  date: string | null
+  heuredebut: string | null
+  heurefin: string | null
+  nom: string | null
+  description: string | null
+  lieu: string | null
+}
+
+// FETCH DONNEES HOME
+type HomePageData = CMS_API_Response & {
   result: {
     home: {
       title: string
@@ -70,14 +118,14 @@ type FetchData = CMS_API_Response & {
       soustitre: CMS_API_Block[]
       cover: CMS_API_File | null
     }
-    nav: CMS_API_PageItem[]
-    lieux: LieuData[]
-    episodes: EpisodeData[]
+    ressources: {
+      evenements: ReferenceEvent[]
+    }
   }
 }
 
-/* FETCH DES DONNEES DU CMS */
-const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
+// Fetch des données de la page home + événements de la page ressources
+const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
   lazy: true,
   method: 'POST',
   body: {
@@ -101,60 +149,18 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           },
         },
       },
-      nav: {
-        query: 'site.children().listed()',
+      ressources: {
+        query: "site.find('ressources')",
         select: {
-          title: true,
-          slug: true,
-        },
-      },
-      // Récupérer les lieux avec coordonnées GPS et données pour AudioCardMap
-      lieux: {
-        query: "site.find('parcours').children().listed()",
-        select: {
-          title: true,
-          slug: true,
-          num: 'page.num',  // Numéro de tri Kirby
-          // Champ GPS - format texte "lat, lng"
-          gps: 'page.gps.value',
-          picto: {
-            query: 'page.picto.toFile',
+          evenements: {
+            query: 'page.evenements.toStructure()',
             select: {
-              url: true,
-              alt: true,
-            },
-          },
-          // Image pour la popup AudioCardMap
-          imagepodcast: {
-            query: 'page.imagepodcast.toFile',
-            select: {
-              url: true,
-              alt: true,
-            },
-          },
-        },
-      },
-      // Récupérer les épisodes du parcours
-      episodes: {
-        query: "site.find('parcours').children().template('episode').listed()",
-        select: {
-          title: true,
-          slug: true,
-          num: 'page.num',
-          texte: 'page.texte.value',
-          imagepodcast: {
-            query: 'page.images.template("poster").first',
-            select: {
-              url: true,
-              alt: true,
-              width: true,
-              height: true,
-            },
-          },
-          audio: {
-            query: 'page.files.template("audio").first',
-            select: {
-              url: true,
+              date: 'structureItem.date.value',
+              heuredebut: 'structureItem.heuredebut.value',
+              heurefin: 'structureItem.heurefin.value',
+              nom: 'structureItem.nom.value',
+              description: 'structureItem.description.value',
+              lieu: 'structureItem.lieu.value',
             },
           },
         },
@@ -163,53 +169,47 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
-
-watchEffect(() => {
-  if (data.value) {
-    console.log('[KQL response]', data.value)
-  }
+// Transformer les événements du CMS pour le composant ListeAgenda
+const formattedEvents = computed(() => {
+  const events = data.value?.result?.ressources?.evenements
+  if (!events) return []
+  
+  return events.map((event) => {
+    // Formater la date avec les heures
+    let dateStr = event.date || ''
+    if (event.heuredebut) {
+      dateStr += ` - ${event.heuredebut}`
+    }
+    if (event.heurefin) {
+      dateStr += ` à ${event.heurefin}`
+    }
+    
+    return {
+      date: dateStr,
+      title: event.nom || '',
+      venue: event.lieu || '',
+      description: event.description || ''
+    }
+  })
 })
 
-/* PREMIER EPISODE POUR L'AUDIOCARD DU HOMEHERO */
-const firstEpisode = computed(() => {
-  return data.value?.result?.episodes?.[0] || null
-})
-
-
-
-/* PARSE DES COORDONNEES GPS - UTILE POUR LA CARTE INTERACTIVE 
- * Parse les coordonnées GPS depuis le format texte "lat, lng"
- * Exemple: "46.5191, 6.5668" → { lat: 46.5191, lng: 6.5668 }
- */
-function parseGpsCoordinates(gps: string | null): { lat: number; lng: number } | null {
-  if (!gps) return null
-  
-  const parts = gps.split(',').map(p => parseFloat(p.trim()))
-  if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return null
-  
-  return { lat: parts[0], lng: parts[1] }
-}
-
-/* TRANSFORMER LES LIEUX KIRBY EN MARKERS POUR MAPVIEW AVEC STYLE AUDIOCARDMAP */
+// Transformer les lieux en markers pour MapView
 const mapMarkers = computed(() => {
-  //console.log('[Index] Lieux from Kirby:', data.value?.result?.lieux)
-  if (!data.value?.result?.lieux) return []
+  if (!lieux.value?.length) return []
   
-  return data.value.result.lieux
+  return lieux.value
     .map((lieu, index) => {
       const coords = parseGpsCoordinates(lieu.gps)
       if (!coords) return null
       
       return {
         id: lieu.slug || index,
-        coordinates: [coords.lng, coords.lat] as [number, number], // MapLibre: [lng, lat]
+        coordinates: [coords.lng, coords.lat] as [number, number],
         title: lieu.title,
         slug: lieu.slug,
-        // Données pour le style AudioCardMap
         number: lieu.num || (index + 1),
-        image: lieu.imagepodcast?.url,  // Image podcast (ou picto en fallback)
-        icon: lieu.picto?.url,          // Picto pour le marker sur la carte
-        // duration: '12min', // À récupérer depuis Kirby si disponible
+        image: lieu.imagepodcast?.url,
+        icon: lieu.picto?.url,
       }
     })
     .filter(Boolean) as Array<{
