@@ -43,6 +43,7 @@
       v-if="data?.result?.audio?.url"
       v-model="showQrPopup"
       :title="data?.result?.title ?? ''"
+      :image="data?.result?.imagepodcast?.url ?? ''"
       @play="onPlayAudio"
     />
 
@@ -149,14 +150,8 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
-// Ouvrir le popup QR une fois les données audio chargées
-if (hasQrParam) {
-  watch(() => data.value?.result?.audio?.url, (audioUrl) => {
-    if (audioUrl) {
-      showQrPopup.value = true
-    }
-  }, { immediate: true })
-}
+console.log('data imagepodcast', data.value?.result?.imagepodcast?.url)
+
 
 // Rows du layout
 const layoutRows = computed((): LayoutRow[] => {

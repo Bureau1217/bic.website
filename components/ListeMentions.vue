@@ -9,10 +9,10 @@
       >
         <div class="list_line_wrapper">
           <div class="list_case">
-            <p class="list_label"><strong>{{ item.label }}</strong></p>
+            <p class="list_label"><strong>{{ item.nom }}</strong></p>
           </div>
           <div class="list_case">
-            <p class="list_label">{{ item.content }}</p>
+            <p class="list_label">{{ item.description }}</p>
           </div>
         </div>
       </div>
@@ -30,8 +30,8 @@ defineProps({
     type: Array,
     default: () => [
       {
-        label: 'Éditeur du site',
-        content: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+        nom: 'Éditeur du site',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
       }
     ]
   }

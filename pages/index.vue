@@ -41,6 +41,7 @@
       v-if="qrEpisode"
       v-model="showQrPopup"
       :title="qrEpisode.title"
+      :image="qrEpisode.imagepodcast?.url ?? ''"
       @play="onPlayQrEpisode"
     />
 
