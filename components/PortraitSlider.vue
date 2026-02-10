@@ -1,42 +1,71 @@
 <template>
-  <div class="portrait">
+  <div v-if="portraits.length" class="portrait">
     <div class="portrait_title_wrapper">
       <h1 class="portrait_title">{{ title }}</h1>
     </div>
     <div class="portrait_slider">
-      <div 
-        v-for="(portrait, index) in portraits" 
-        :key="index" 
-        class="portrait_card"
+      <Swiper
+        :modules="[Navigation, Autoplay]"
+        :slides-per-view="3"
+        :space-between="0"
+        :navigation="true"
+        :autoplay="{
+          delay: 5000,
+          disableOnInteraction: true,
+        }"
+        :loop="true"
+        class="portrait_swiper"
+        @swiper="onSwiper"
       >
-        <img 
-          :src="portrait.image" 
-          loading="lazy" 
-          :sizes="portrait.sizes || '(max-width: 2400px) 100vw, 2400px'" 
-          :srcset="portrait.srcset" 
-          :alt="portrait.alt || ''" 
-          class="portrait_card_image"
+        <SwiperSlide 
+          v-for="(portrait, index) in portraits" 
+          :key="index" 
+          class="portrait_slide"
         >
-        <div class="portrait_card_info">
-          <p class="portrait_name">{{ portrait.name }}</p>
-          <p class="portrait_description">{{ portrait.description }}</p>
-        </div>
-      </div>
+          <NuxtLink 
+            :to="portrait.link?.slug ? `/parcours/${portrait.link.slug}` : '#'"
+            class="portrait_card_link"
+          >
+            <img 
+              :src="portrait.image?.url" 
+              loading="lazy" 
+              :alt="portrait.image?.alt || portrait.nom || ''" 
+              class="portrait_card_image"
+            >
+            <div class="portrait_card_info">
+              <p class="portrait_name">{{ portrait.nom }}</p>
+              <p class="portrait_description">{{ portrait.description }}</p>
+            </div>
+          </NuxtLink>
+        </SwiperSlide>
+      </Swiper>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
+import { Swiper, SwiperSlide } from 'swiper/vue'
+import { Navigation, Autoplay } from 'swiper/modules'
+import type { Swiper as SwiperType } from 'swiper'
+import 'swiper/css'
+import 'swiper/css/navigation'
+
+const { allPortraits } = usePodcastData()
+
 defineProps({
   title: {
     type: String,
     default: 'Portraits'
-  },
-  portraits: {
-    type: Array,
-    default: () => []
   }
 })
+
+const portraits = computed(() => allPortraits.value)
+
+const swiperInstance = ref<SwiperType | null>(null)
+
+const onSwiper = (swiper: SwiperType) => {
+  swiperInstance.value = swiper
+}
 </script>
 
 <style lang="scss">
@@ -47,19 +76,50 @@ defineProps({
   display: flex;
 }
 
-.portrait_card {
-  width: 100%;
+.portrait_slider {
+  width: 60%;
+  position: relative;
 }
 
-.portrait_card_info {
-  padding: var(--40) var(--10) var(--20);
-  background-color: var(--green);
+.portrait_swiper {
+  width: 100%;
+  height: 100%;
+
+  .swiper-button-prev,
+  .swiper-button-next {
+    color: var(--yellow);
+  }
+}
+
+.portrait_slide {
+  display: flex;
+  flex-direction: column;
+}
+
+.portrait_card_link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  height: 100%;
 }
 
 .portrait_card_image {
   width: var(--100);
   object-fit: cover;
   height: 20vw;
+  flex-shrink: 0;
+}
+
+.portrait_card_info {
+  padding: var(--40) var(--10) var(--20);
+  background-color: var(--green);
+  height: 100%;
+}
+
+.portrait_slide:nth-child(even) .portrait_card_info {
+  background-color: var(--blue);
 }
 
 .portrait_title_wrapper {
@@ -84,11 +144,6 @@ defineProps({
   color: var(--white);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 16px;
-}
-
-.portrait_slider {
-  width: 60%;
-  display: flex;
 }
 
 // Media queries

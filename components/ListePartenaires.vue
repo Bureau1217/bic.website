@@ -11,7 +11,7 @@
           <div 
             v-for="(partner, partnerIndex) in row" 
             :key="partnerIndex" 
-            class="list_case"
+            class="list_case is-partenaires"
           >
             <img 
               :src="partner.logo" 
@@ -19,7 +19,7 @@
               :alt="partner.name" 
               class="list_image"
             >
-            <p class="list_label">
+            <p class="list_label is-partenaires">
               <strong>{{ partner.name }}</strong><br>
               {{ partner.description }}
             </p>
@@ -44,7 +44,7 @@ const props = defineProps({
   },
   columnsPerRow: {
     type: Number,
-    default: 3
+    default: 1
   }
 })
 

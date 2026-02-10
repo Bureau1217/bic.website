@@ -19,8 +19,6 @@
       :categories="formattedRessources" 
     />
 
-    <AppFooter />
-
 
 
   </main>
@@ -29,6 +27,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+// TYPES
 type ReferenceRessource = {
   nom: string
   tag: string | string[] | null
@@ -44,6 +43,7 @@ type ReferenceEvent = {
   description: string | null
   lieu: string | null
 }
+
 
 type FetchData = CMS_API_Response & {
   result: {
@@ -65,6 +65,7 @@ type FetchData = CMS_API_Response & {
   }
 }
 
+// FETCH DONNEES RESOURCES
 const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   lazy: true,
   method: 'POST',

@@ -1,6 +1,5 @@
 <template>
   <main class="v-parcours-slug">
-    <Menu />
 
     <!-- Picto numéro du lieu (depuis le CMS) -->
     <img 
@@ -26,10 +25,9 @@
       :title="data?.result?.title ?? ''" 
       :image="data.result.imagepodcast.url" 
       :alt="data.result.imagepodcast.alt ?? ''"
+      style="background-color: #017f3f;"
+      @play="onPlayAudio"
     />
-
-    <!-- AudioPlayer -->
-    <AudioPlayer :title="data?.result?.title" :audio="data?.result?.audio?.url" />
 
 
     <!-- Layout: chaque row = une section .block-text -->
@@ -40,13 +38,46 @@
       :is-auto="rowIndex % 2 === 1"
     />
 
-    <AppFooter />
+    <!-- Popup QR code : propose de lancer l'audio si ?qr=1 -->
+    <QrAudioPopup
+      v-if="data?.result?.audio?.url"
+      v-model="showQrPopup"
+      :title="data?.result?.title ?? ''"
+      @play="onPlayAudio"
+    />
+
   </main>
 </template>
 
 <script setup lang="ts">
 const route = useRoute()
+const router = useRouter()
 const slug = route.params.slug as string
+
+// Lecteur audio global (même player que le menu)
+const { playTrack } = useAudioPlayer()
+
+// Popup QR code : détecte ?qr=1
+const showQrPopup = ref(false)
+const hasQrParam = route.query.qr === '1'
+
+// Nettoyer l'URL immédiatement
+if (hasQrParam) {
+  router.replace({ query: { ...route.query, qr: undefined } })
+}
+
+const onPlayAudio = () => {
+  const result = data.value?.result
+  if (result?.audio?.url) {
+    playTrack({
+      title: result.title,
+      num: null,
+      audioUrl: result.audio.url,
+      slug: result.slug,
+      type: 'lieu',
+    })
+  }
+}
 
 /** Bloc avec contenu résolu (images avec URLs) */
 type ResolvedBlock = {
@@ -117,6 +148,15 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
+
+// Ouvrir le popup QR une fois les données audio chargées
+if (hasQrParam) {
+  watch(() => data.value?.result?.audio?.url, (audioUrl) => {
+    if (audioUrl) {
+      showQrPopup.value = true
+    }
+  }, { immediate: true })
+}
 
 // Rows du layout
 const layoutRows = computed((): LayoutRow[] => {

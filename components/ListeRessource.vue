@@ -28,7 +28,7 @@
             <div class="list_case">
               <p class="list_label">{{ item.label }}</p>
             </div>
-            <div class="list_case is-last">
+            <div class="list_case">
               <a :href="item.link" class="list_label">{{ item.downloadText || 'Article pdf' }}</a>
             </div>
           </div>
