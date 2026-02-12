@@ -44,7 +44,7 @@ const props = defineProps({
   },
   columnsPerRow: {
     type: Number,
-    default: 1
+    default: 3
   }
 })
 
