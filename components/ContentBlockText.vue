@@ -26,6 +26,12 @@
         <p v-if="block.content.caption" class="block-image_legende">{{ block.content.caption }}</p>
       </div>
       
+      <!-- Citation -->
+      <blockquote v-else-if="block.type === 'quote'" class="block-quote">
+        <p v-if="block.content?.text" v-html="block.content.text" />
+        <footer v-if="block.content?.citation" v-html="block.content.citation" />
+      </blockquote>
+
       <!-- Galerie -->
       <BlockGallery
         v-else-if="block.type === 'gallery' && block.content?.images?.length"
@@ -47,6 +53,7 @@ type ResolvedBlock = {
     image?: { url: string; alt?: string } | null
     images?: { url: string; alt?: string }[]
     caption?: string
+    citation?: string
     alt?: string
     [key: string]: unknown
   }

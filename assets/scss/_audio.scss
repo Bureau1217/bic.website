@@ -8,8 +8,8 @@
   flex-flow: column;
   justify-content: space-between;
   align-items: center;
-  width: 16vw;
-  height: 16vw;
+  width: 240px;
+  height: 240px;
   display: flex;
   position: fixed;
   inset: 80px 20px auto auto;
@@ -117,7 +117,8 @@
   flex-flow: column;
   justify-content: space-between;
   align-items: center;
-  height: calc(20vw - 4px);
+  height: 240px;
+  width: 240px;
   display: flex;
 }
 
@@ -259,9 +260,9 @@
 // Media queries
 @media screen and (max-width: 991px) {
   .audio-card {
-    width: var(--100);
+    width: 50%;
     flex-flow: row;
-    height: 33.33vw;
+    height: 50vw;
     position: static;
   }
 
@@ -279,9 +280,9 @@
   }
 
   .audio-card_image_wrapper {
-    height: var(--100);
+    height: 30vw;
     flex: none;
-    width: 33.33%;
+    width: 100%;
   }
 
   .audio-card_button.is-map {
@@ -289,9 +290,6 @@
   }
 
   .audio-card_info {
-    padding-top: var(--40);
-    padding-right: var(--40);
-    padding-left: var(--40);
     flex-flow: column;
     height: 100%;
   }
@@ -320,9 +318,8 @@
   }
 
   .audio-card--menu {
-    width: var(--100);
-    flex-flow: row;
-    height: 33.33vw;
+    width: 100%;
+    height: 50vw;
     position: static;
   }
 
@@ -340,13 +337,28 @@
   .audioplayer_name {
     display: none;
   }
+
 }
 
 @media screen and (max-width: 479px) {
+
+  .audio-card--menu {
+    width: 100%;
+    flex-flow: row;
+    height: 40vw;
+  }
+
   .audio-card_info {
+    width: 60%;
     padding-top: var(--10);
     padding-right: var(--10);
     padding-left: var(--10);
+  }
+
+  .audio-card_image_wrapper {
+    height: 40vw;
+    flex: none;
+    width: 40%;
   }
 
   .audioplayer-wrapper {

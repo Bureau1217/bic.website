@@ -100,7 +100,7 @@ const subtitleText = computed(() => {
 <style lang="scss">
 // Hero section styles
 .hero {
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   width: 100%;
   display: flex;
@@ -136,83 +136,7 @@ const subtitleText = computed(() => {
   height: 100%;
 }
 
-// Audio card pour le hero
-.audio-card {
-  z-index: 800;
-  color: var(--white);
-  flex-flow: column;
-  justify-content: space-between;
-  align-items: center;
-  width: 16vw;
-  height: 16vw;
-  display: flex;
-  position: fixed;
-  inset: 80px 20px auto auto;
 
-  &.is-home {
-    position: absolute;
-    left: 2vw;
-    right: auto;
-  }
-}
-
-.audio-card_image {
-  width: var(--100);
-  height: var(--100);
-  object-fit: cover;
-  position: relative;
-}
-
-.audio-card_image_wrapper {
-  width: var(--100);
-  height: 60%;
-  position: relative;
-}
-
-.audio-card_button {
-  grid-column-gap: 10px;
-  grid-row-gap: 10px;
-  background-color: #00000080;
-  border-radius: 100px;
-  justify-content: center;
-  align-items: center;
-  padding: 5px 15px 5px 5px;
-  display: flex;
-  position: absolute;
-  inset: auto auto 10px 10px;
-}
-
-.audio-card_time {
-  color: var(--white);
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 12px;
-}
-
-.audio-card_title {
-  margin-bottom: 0;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
-  line-height: 1;
-}
-
-.audio-card_info {
-  width: var(--100);
-  height: var(--100);
-  padding: var(--10);
-  grid-column-gap: 5px;
-  grid-row-gap: 5px;
-  flex-flow: column;
-  display: flex;
-}
-
-.carte-card_info_text {
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
-
-  &.is-black {
-    color: var(--black);
-  }
-}
 
 // Media queries
 @media screen and (max-width: 991px) {
@@ -236,35 +160,6 @@ const subtitleText = computed(() => {
     display: none;
   }
 
-  .audio-card {
-    width: var(--100);
-    flex-flow: row;
-    height: 33.33vw;
-    position: static;
-
-    &.is-home {
-      flex-flow: row;
-      width: 100%;
-      height: 33.33vw;
-      position: relative;
-      top: auto;
-      left: auto;
-    }
-  }
-
-  .audio-card_image_wrapper {
-    height: var(--100);
-    flex: none;
-    width: 33.33%;
-  }
-
-  .audio-card_info {
-    padding-top: var(--40);
-    padding-right: var(--40);
-    padding-left: var(--40);
-    flex-flow: column;
-    height: 100%;
-  }
 }
 
 @media screen and (max-width: 479px) {
@@ -272,10 +167,5 @@ const subtitleText = computed(() => {
     padding-top: 60px;
   }
 
-  .audio-card_info {
-    padding-top: var(--10);
-    padding-right: var(--10);
-    padding-left: var(--10);
-  }
 }
 </style>
