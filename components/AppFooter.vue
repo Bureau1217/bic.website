@@ -1,15 +1,15 @@
 <template>
   <div class="footer">
     <div class="footer_info">
-      <p class="footer_title">{{ title }}</p>
-      <a :href="'mailto:' + email" class="footer_link">{{ email }}</a>
-      <a :href="'tel:' + phone" class="footer_link">{{ phone }}</a>
+      <div v-if="contact?.address" class="footer_title" v-html="contact.address" />
+      <a v-if="contact?.email" :href="'mailto:' + contact.email" class="footer_link">{{ contact.email }}</a>
+      <a v-if="contact?.phone" :href="'tel:' + contact.phone" class="footer_link">{{ contact.phone }}</a>
     </div>
     <div class="footer_logo_wrapper">
       <img 
-        v-for="(logo, index) in logos" 
+        v-for="(logo, index) in contact?.logos" 
         :key="index" 
-        :src="logo.src" 
+        :src="logo.url" 
         loading="lazy" 
         :alt="logo.alt || ''" 
         class="footer_logo"
@@ -18,29 +18,45 @@
   </div>
 </template>
 
-<script setup>
-defineProps({
-  title: {
-    type: String,
-    default: 'Département de la cohésion sociale (DCS)'
-  },
-  email: {
-    type: String,
-    default: 'secreteriat.dcs@etat.ge.ch'
-  },
-  phone: {
-    type: String,
-    default: '+241 22 327 93 10'
-  },
-  logos: {
-    type: Array,
-    default: () => [
-      { src: '/images/Logo-Ville-de-Genève.svg', alt: 'Ville de Genève' },
-      { src: '/images/Logo-CantonGE.svg', alt: 'Canton de Genève' },
-      { src: '/images/Logo-PIC.svg', alt: 'PIC' }
-    ]
+<script setup lang="ts">
+type FooterFetchData = CMS_API_Response & {
+  result: {
+    contact: {
+      address: string | null
+      email: string | null
+      phone: string | null
+      logos: CMS_API_File[]
+    }
   }
+}
+
+const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
+  lazy: true,
+  method: 'POST',
+  body: {
+    query: 'site',
+    select: {
+      contact: {
+        query: "site.find('a-propos')",
+        select: {
+          address: true,
+          email: true,
+          phone: true,
+          logos: {
+            query: 'page.logos.toFiles',
+            select: {
+              url: true,
+              alt: true,
+            },
+          },
+        },
+      },
+    },
+  },
 })
+
+const contact = computed(() => data.value?.result?.contact)
+
 </script>
 
 <style lang="scss">

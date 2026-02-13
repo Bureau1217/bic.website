@@ -4,7 +4,6 @@
     background-color: var(--white);
     flex-flow: column;
     width: 60%;
-    max-width: 800px;
     padding: 80px 40px;
     display: flex;
   
@@ -13,6 +12,7 @@
     }
     
     .block_p {
+      max-width: 800px;
       p {
         margin-bottom: 0.5rem;
       }

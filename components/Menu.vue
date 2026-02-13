@@ -46,7 +46,7 @@
               </NuxtLink>
             </div>
           </div>
-          <NuxtLink to="/a-propos" class="menu_link w-inline-block" @click="closeMenu">
+          <NuxtLink to="/a-propos" class="menu_link is-last" @click="closeMenu">
             <div>À propos</div>
           </NuxtLink>
         </div>
@@ -260,8 +260,6 @@ const playLieu = (lieu: any) => {
   grid-column-gap: var(--15);
   grid-row-gap: var(--15);
   background-color: var(--red);
-  width: 10%;
-  min-width: 135px;
   height: 60px;
   margin-left: auto;
   padding: 10px 20px;
@@ -319,6 +317,10 @@ const playLieu = (lieu: any) => {
   &.is-parcours {
     padding-right: var(--0);
     padding-left: var(--0);
+  }
+
+  &.is-last {
+    border-bottom: 1px solid var(--white);
   }
 }
 
@@ -473,7 +475,6 @@ const playLieu = (lieu: any) => {
   padding: var(--10);
   background-color: var(--black);
   flex: none;
-  width: 60%;
   overflow: auto;
 }
 
@@ -516,16 +517,11 @@ const playLieu = (lieu: any) => {
   }
 
   .menu_catalogue_list {
-    flex-flow: column;
-    display: flex;
+    grid-template-columns: 1fr 1fr;
   }
 
   .menu_offset_wrapper {
     width: 100%;
-  }
-
-  .menu_parcours {
-    border-bottom: 1px solid var(--white);
   }
 
   .menu_catalogue_wrapper {
@@ -538,6 +534,13 @@ const playLieu = (lieu: any) => {
 }
 
 @media screen and (max-width: 479px) {
+  .menu_catalogue_list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: var(--10);
+  }
+
   .menu_logo {
     padding-left: 10px;
     padding-right: 10px;

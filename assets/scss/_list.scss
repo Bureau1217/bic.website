@@ -1,6 +1,11 @@
 // Styles Liste - Notre Historia
 // Utilisé par: ListeAgenda, ListeRessource, ListePartenaires, ListeFaq, ListeMentions
 
+.v-legal {
+  min-height: 100vh;
+  padding: 80px 0;
+}
+
 .list {
   padding-bottom: var(--40);
   background-color: var(--white);
@@ -74,9 +79,10 @@
 }
 
 .list_case.is-partenaires {
-  width: 100%;
-  gap: 30px;
+  width: 33.33%;
+  gap: 10px;
   display: flex;
+  flex-direction: column;
 }
 
 .list_plus {
@@ -96,6 +102,7 @@
 
 .list_plus.is-menu {
   right: var(--20);
+  top: 4px;
 }
 
 .list_plus.is-close {
