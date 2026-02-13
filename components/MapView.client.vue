@@ -16,8 +16,38 @@
       class="map-view__popup"
       :style="{ left: popupPosition.x + 'px', top: popupPosition.y + 'px' }"
     >
-      <button class="map-view__popup-close" @click="closePopup">&times;</button>
-      <div v-html="activePopup.content"></div>
+      <!--<button class="map-view__popup-close" @click="closePopup">&times;</button>-->
+      <NuxtLink :to="`/parcours/${activePopup.slug || activePopup.id}`" class="map-card map-card--popup">
+        <div class="map-card_image_wrapper" :class="{ 'no-image': !activePopup.image }">
+          <img 
+            v-if="activePopup.image"
+            :src="activePopup.image" 
+            loading="lazy" 
+            :alt="activePopup.title || ''" 
+            class="audio-card_image"
+          >
+          <div v-else class="audio-card_image-placeholder">
+            <span>{{ activePopup.number || '?' }}</span>
+          </div>
+          <div 
+            class="audio-card_button" 
+            v-if="getAudioUrlForMarker(activePopup)"
+            @click.prevent.stop="playFromPopup(activePopup)"
+          >
+            <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
+            <p class="audio-card_duration" v-if="audioDurations[activePopup.slug || activePopup.id]">
+              {{ audioDurations[activePopup.slug || activePopup.id] }}
+            </p>
+          </div>
+        </div>
+        <div class="map-card_info">
+          <div class="audio-card_info_wrapper">
+            <div v-if="activePopup.number" class="audio-card_number">{{ activePopup.number }}.</div>
+            <p class="audio-card_title">{{ activePopup.title }}</p>
+          </div>
+          <p v-if="activePopup.description" class="audio-card_info_text">{{ activePopup.description }}</p>
+        </div>
+      </NuxtLink>
     </div>
     
     <!-- Attribution SITG -->
@@ -40,6 +70,10 @@ import MapView from '@arcgis/core/views/MapView'
 import VectorTileLayer from '@arcgis/core/layers/VectorTileLayer'
 import Point from '@arcgis/core/geometry/Point'
 import Extent from '@arcgis/core/geometry/Extent'
+
+// Composables pour l'audio
+const { lieux, isLoaded, getLieuBySlug } = usePodcastData()
+const { playTrack } = useAudioPlayer()
 
 // ============================================================================
 // TYPES
@@ -104,8 +138,64 @@ const markersContainer = ref<HTMLDivElement | null>(null)
 const mapError = ref<string | null>(null)
 
 // Popup state
-const activePopup = ref<{ content: string; marker: MapMarker } | null>(null)
+const activePopup = ref<MapMarker | null>(null)
 const popupPosition = ref({ x: 0, y: 0 })
+
+// --- Durées audio ---
+const audioDurations = ref<Record<string, string>>({})
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
+
+const loadAudioDuration = (slug: string, url: string) => {
+  if (audioDurations.value[slug]) return
+  const audio = new Audio()
+  audio.preload = 'metadata'
+  audio.addEventListener('loadedmetadata', () => {
+    if (audio.duration && isFinite(audio.duration)) {
+      audioDurations.value[slug] = formatDuration(audio.duration)
+    }
+  })
+  audio.src = url
+}
+
+const loadAllDurations = () => {
+  for (const lieu of lieux.value) {
+    if (lieu.audio?.url) {
+      loadAudioDuration(lieu.slug, lieu.audio.url)
+    }
+  }
+}
+
+/**
+ * Récupère l'URL audio d'un marker à partir des données podcast
+ */
+function getAudioUrlForMarker(marker: MapMarker): string | null {
+  const slug = marker.slug || String(marker.id)
+  const lieu = getLieuBySlug(slug)
+  return lieu?.audio?.url || null
+}
+
+/**
+ * Lance la lecture audio depuis la popup
+ */
+function playFromPopup(marker: MapMarker) {
+  const slug = marker.slug || String(marker.id)
+  const lieu = getLieuBySlug(slug)
+  if (lieu?.audio?.url) {
+    playTrack({
+      title: lieu.title,
+      num: lieu.num,
+      audioUrl: lieu.audio.url,
+      slug: lieu.slug,
+      type: 'lieu',
+    })
+  }
+  closePopup()
+}
 
 let view: MapView | null = null
 let esriMap: EsriMap | null = null
@@ -128,10 +218,7 @@ function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }) {
     x: screenPoint.x,
     y: screenPoint.y - 10 // Décalage vers le haut
   }
-  activePopup.value = {
-    content: createPopupContent(marker),
-    marker
-  }
+  activePopup.value = marker
 }
 
 function closePopup() {
@@ -163,14 +250,25 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
   // Gestionnaire de clic
   el.addEventListener('click', (e) => {
     e.stopPropagation()
-    const rect = el.getBoundingClientRect()
-    const containerRect = markersContainer.value?.getBoundingClientRect()
-    if (containerRect) {
-      openPopup(marker, { 
-        x: rect.left - containerRect.left + rect.width / 2, 
-        y: rect.top - containerRect.top 
+    
+    // Recentrer la carte sur le marker
+    if (view) {
+      const point = new Point({
+        longitude: marker.coordinates[0],
+        latitude: marker.coordinates[1]
+      })
+      view.goTo({ target: point }, { duration: 500 }).then(() => {
+        // Ouvrir la popup une fois le recentrage terminé
+        const screenPoint = view!.toScreen(point)
+        if (screenPoint && markersContainer.value) {
+          openPopup(marker, {
+            x: screenPoint.x,
+            y: screenPoint.y
+          })
+        }
       })
     }
+    
     emit('markerClick', marker)
   })
   
@@ -214,56 +312,6 @@ function scheduleMarkersUpdate() {
     cancelAnimationFrame(updateMarkersRAF)
   }
   updateMarkersRAF = requestAnimationFrame(updateMarkersPosition)
-}
-
-/**
- * Crée le contenu HTML d'une popup avec le style AudioCardMap
- * IDENTIQUE à l'ancienne version
- */
-function createPopupContent(marker: MapMarker): string {
-  const number = marker.number || ''
-  const title = marker.title || ''
-  const description = marker.description || ''
-  // Utilise imagepodcast, sinon picto, sinon un placeholder coloré
-  const image = marker.image || marker.icon || ''
-  const hasImage = !!image
-  const duration = marker.duration || ''
-  const slug = marker.slug || marker.id
-  
-  console.log('[MapView] Popup marker:', { title, image, icon: marker.icon })
-  
-  return `
-    <a href="/parcours/${slug}" class="map-card map-card--popup">
-      <div class="map-card_image_wrapper ${!hasImage ? 'no-image' : ''}">
-        ${hasImage ? `
-          <img 
-            src="${image}" 
-            loading="lazy" 
-            alt="${title}" 
-            class="audio-card_image"
-            onerror="this.style.display='none'"
-          >
-        ` : `
-          <div class="audio-card_image-placeholder">
-            <span>${number || '?'}</span>
-          </div>
-        `}
-        ${duration ? `
-        <div class="audio-card_button">
-          <img src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="" class="image">
-          <div class="audio-card_time">${duration}</div>
-        </div>
-        ` : ''}
-      </div>
-      <div class="map-card_info">
-        <div class="audio-card_info_wrapper">
-          ${number ? `<div class="audio-card_number">${number}.</div>` : ''}
-          <p class="audio-card_title">${title}</p>
-        </div>
-        ${description ? `<p class="audio-card_info_text">${description}</p>` : ''}
-      </div>
-    </a>
-  `
 }
 
 /**
@@ -377,6 +425,11 @@ async function initMap() {
       closePopup()
     })
     
+    // Fermer la popup quand on drag la carte
+    view.on('drag', () => {
+      closePopup()
+    })
+    
     // Émettre l'événement de chargement
     emit('mapLoad', view)
     
@@ -405,6 +458,17 @@ onMounted(async () => {
   await nextTick()
   console.log('[MapView] Container:', mapContainer.value)
   initMap()
+  // Charger les durées audio
+  if (isLoaded.value) {
+    loadAllDurations()
+  }
+})
+
+// Charger les durées quand les données podcast deviennent disponibles
+watch(isLoaded, (loaded) => {
+  if (loaded) {
+    loadAllDurations()
+  }
 })
 
 onBeforeUnmount(() => {
@@ -591,7 +655,7 @@ defineExpose({
 
 .map-view__popup {
   position: absolute;
-  transform: translate(-50%, -100%);
+  transform: translate(-50%, -125%);
   z-index: 200;
   pointer-events: auto;
   animation: popup-fade-in 0.2s ease-out;
@@ -600,11 +664,11 @@ defineExpose({
 @keyframes popup-fade-in {
   from {
     opacity: 0;
-    transform: translate(-50%, -90%);
+    transform: translate(-50%, -125%);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -100%);
+    transform: translate(-50%, -125%);
   }
 }
 
@@ -758,7 +822,7 @@ defineExpose({
   display: flex;
   flex-flow: row;
   width: 320px;
-  min-height: 120px;
+  height: 160px;
   position: relative;
   text-decoration: none;
   color: inherit;
@@ -807,10 +871,14 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(0, 0, 0, 0.6);
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 4px 8px 4px 4px;
+  transition: background 0.2s ease;
 }
+
+.map-card--popup .audio-card_button:hover {
+  background: rgba(0, 0, 0, 1);
+}
+
 
 .map-card--popup .audio-card_button .image {
   width: 16px;

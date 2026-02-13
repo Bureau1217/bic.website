@@ -2,50 +2,28 @@
   <main class="v-parcours-slug">
 
     <!-- Picto numéro du lieu (depuis le CMS) -->
-    <img 
-      v-if="data?.result?.picto?.url" 
-      :src="data?.result?.picto?.url" 
-      loading="lazy" 
-      :alt="`Lieu n°${data?.result?.title}`" 
-      class="number"
-    >
+    <img v-if="data?.result?.picto?.url" :src="data?.result?.picto?.url" loading="lazy"
+      :alt="`Lieu n°${data?.result?.title}`" class="number">
 
     <!-- Image de fond / cover (depuis le CMS) -->
-    <img 
-      v-if="data?.result?.cover?.url" 
-      :src="data.result.cover.url" 
-      loading="lazy" 
-      :alt="data.result.cover.alt || data.result.title" 
-      class="background"
-    >
+    <img v-if="data?.result?.cover?.url" :src="data.result.cover.url" loading="lazy"
+      :alt="data.result.cover.alt || data.result.title" class="background">
 
     <!-- AudioCard -->
-    <AudioCard 
-      v-if="data?.result?.imagepodcast?.url"
-      :title="data?.result?.title ?? ''" 
-      :image="data.result.imagepodcast.url" 
-      :alt="data.result.imagepodcast.alt ?? ''"
-      style="background-color: #017f3f;"
-      @play="onPlayAudio"
-    />
+    <AudioCard v-if="data?.result?.imagepodcast?.url" :title="data?.result?.title ?? ''"
+      :image="data.result.imagepodcast.url" :alt="data.result.imagepodcast.alt ?? ''" style="background-color: #017f3f;"
+      @play="onPlayAudio" />
 
 
     <!-- Layout: chaque row = une section .block-text -->
-    <ContentBlockText
-      v-for="(row, rowIndex) in layoutRows"
-      :key="row.id ?? rowIndex"
-      :blocks="getBlocksForRow(row)"
-      :is-auto="rowIndex % 2 === 1"
-    />
+    <div class="blocks-container">
+      <ContentBlockText v-for="(row, rowIndex) in layoutRows" :key="row.id ?? rowIndex" :blocks="getBlocksForRow(row)"
+        :is-auto="rowIndex % 2 === 1" />
+    </div>
 
     <!-- Popup QR code : propose de lancer l'audio si ?qr=1 -->
-    <QrAudioPopup
-      v-if="data?.result?.audio?.url"
-      v-model="showQrPopup"
-      :title="data?.result?.title ?? ''"
-      :image="data?.result?.imagepodcast?.url ?? ''"
-      @play="onPlayAudio"
-    />
+    <QrAudioPopup v-if="data?.result?.audio?.url" v-model="showQrPopup" :title="data?.result?.title ?? ''"
+      :image="data?.result?.imagepodcast?.url ?? ''" @play="onPlayAudio" />
 
   </main>
 </template>
@@ -99,10 +77,10 @@ type ResolvedBlock = {
 /** Une row du layout avec fichiers résolus */
 type LayoutRow = {
   id?: string
-  columns?: { 
+  columns?: {
     id?: string
     width?: string
-    blocks?: ResolvedBlock[] 
+    blocks?: ResolvedBlock[]
   }[]
 }
 

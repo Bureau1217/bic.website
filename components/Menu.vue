@@ -105,7 +105,7 @@
               </div>
               <div class="audio-card_info is-bg-green">
                 <!--<p class="number">{{ lieu.num }}.</p>-->
-                <p class="audio-card_title">{{ lieu.title }}</p>
+                <p class="audio-card_title"><span class="audio-card_number">{{ lieu.num }}.</span> {{ lieu.title }}</p>
               </div>
             </div>
           </div>
