@@ -20,6 +20,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { getImageSrc } from '~/types/image'
 
 // FETCH DONNEES PODCAST (lieux pour la carte)
 const { lieux, parseGpsCoordinates } = usePodcastData()
@@ -90,8 +91,10 @@ const mapMarkers = computed(() => {
         title: lieu.title,
         slug: lieu.slug,
         number: lieu.num || (index + 1),
-        image: lieu.imagepodcast?.url,
+        // Extraire l'URL de fallback depuis le format responsive
+        image: getImageSrc(lieu.imagepodcast),
         icon: lieu.picto?.url,
+        adresse: lieu.adresse || undefined,
       }
     })
     .filter(Boolean) as Array<{
@@ -102,6 +105,7 @@ const mapMarkers = computed(() => {
       number?: string | number
       image?: string
       icon?: string
+      adresse?: string
     }>
 })
 </script>

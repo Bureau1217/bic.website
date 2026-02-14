@@ -10,4 +10,13 @@ export default defineNuxtConfig({
   css: [
     '~/assets/scss/main.scss'
   ],
+  runtimeConfig: {
+    // Côté serveur seulement (pas exposé au client)
+    apiUrl: process.env.API_URL || 'http://localhost:8000',
+    // Côté client (public)
+    public: {
+      // URL de base du CMS, utilisée pour normaliser les URLs des médias
+      cmsBaseUrl: process.env.API_URL || 'http://localhost:8000',
+    },
+  },
 })

@@ -2,22 +2,17 @@
   <section class="hero">
     <!-- Côté gauche avec images -->
     <div class="hero_side">
-      <img 
-        v-if="cover?.url"
-        :src="cover.url" 
-        loading="lazy" 
-        :alt="cover.alt || ''" 
-        class="hero_image"
-      >
-      <div v-if="sideImages?.length" class="hero_image_wrapper">
-        <img 
-          v-for="(img, index) in sideImages" 
-          :key="index"
-          :src="img.url" 
-          loading="lazy" 
-          :alt="img.alt || ''" 
-          class="hero_image-2"
-        >
+      <!-- Cover : image responsive (AVIF + WebP + fallback) -->
+      <ResponsivePicture
+        v-if="cover"
+        :image="cover"
+        sizes="(min-width: 2500px) 2500px, (min-width: 992px) 40vw, 100vw"
+        loading="eager"
+        picture-class="hero_image_picture"
+      />
+      <div class="hero_image_wrapper">
+        <img src='/images/5-Université-et-éducation.jpg' loading="lazy" class="hero_image-2" alt="Picto Podcast jaune">
+        <img src='/images/6-Restauration-et-gastronomie.jpg' loading="lazy" class="hero_image-2" alt="Picto Podcast jaune">
       </div>
     </div>
 
@@ -30,13 +25,13 @@
     <!-- Audio card optionnel -->
     <div v-if="audioCard" class="audio-card is-home" @click="onPlayAudio">
       <div class="audio-card_image_wrapper">
-        <img 
-          v-if="audioCard.image?.url"
-          :src="audioCard.image.url" 
-          loading="lazy" 
-          :alt="audioCard.image.alt || ''" 
-          class="audio-card_image"
-        >
+        <!-- Image podcast : responsive si disponible, sinon fallback string -->
+        <ResponsivePicture
+          v-if="audioCard.image"
+          :image="audioCard.image"
+          sizes="240px"
+          picture-class="audio-card_image_picture"
+        />
         <div class="audio-card_button">
           <img src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="" class="image">
           <div v-if="audioCard.duration" class="audio-card_time">{{ audioCard.duration }}</div>
@@ -52,17 +47,20 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ResponsiveImage } from '~/types/image'
 
 interface Props {
   titre?: CMS_API_Block[]
   soustitre?: CMS_API_Block[]
-  cover?: CMS_API_File | null
+  /** Cover au format responsive (historiaImage('cover')) */
+  cover?: ResponsiveImage | null
   sideImages?: CMS_API_File[]
   audioCard?: {
     title: string
     description?: string
     duration?: string
-    image?: CMS_API_File | null
+    /** Image podcast au format responsive (historiaImage('podcast')) */
+    image?: ResponsiveImage | null
     audioUrl?: string
     slug?: string
     num?: string | number | null
@@ -107,6 +105,18 @@ const subtitleText = computed(() => {
   position: relative;
 }
 
+// Le <picture> prend toute la place du parent
+.hero_image_picture {
+  width: 100%;
+  height: 100%;
+
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+}
+
 .hero_image {
   object-fit: cover;
   width: 100%;
@@ -136,7 +146,17 @@ const subtitleText = computed(() => {
   height: 100%;
 }
 
+// Audio card image picture : même style que l'image directe
+.audio-card_image_picture {
+  width: 100%;
+  height: 100%;
 
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
+}
 
 // Media queries
 @media screen and (max-width: 991px) {
@@ -146,7 +166,7 @@ const subtitleText = computed(() => {
     align-items: center;
   }
 
-  .hero_image {
+  .hero_image_picture img {
     height: 100vw;
   }
 

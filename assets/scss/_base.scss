@@ -41,6 +41,13 @@ img {
   display: inline-block;
 }
 
+// Le <picture> est inline par défaut : on le passe en block
+// pour qu'il prenne la taille de son parent et que le <img>
+// interne se dimensionne correctement.
+picture {
+  display: block;
+}
+
 // Layout global
 .page {
   width: var(--100);
@@ -59,6 +66,7 @@ img {
   justify-content: center;
 }
 
+// Background cover : supporte <img class="background"> et <picture class="background">
 .background {
   z-index: -1;
   width: var(--100);
@@ -66,6 +74,13 @@ img {
   object-fit: cover;
   position: fixed;
   inset: 0%;
+
+  // Si c'est un <picture>, le img interne doit prendre toute la taille
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .block-text {
@@ -89,8 +104,19 @@ img {
   font-size: 16px;
 }
 
+// Image dans les blocs de contenu : ancien <img> et nouveau <picture>
 .block-image_image {
   width: var(--100);
+}
+
+.block-image_picture {
+  width: var(--100);
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
 }
 
 .image {
@@ -130,7 +156,6 @@ img {
 
   .block-text {
     width: 100%;
-    margin-bottom: 60vh;
   }
 
   .number {

@@ -45,7 +45,7 @@
             <div v-if="activePopup.number" class="audio-card_number">{{ activePopup.number }}.</div>
             <p class="audio-card_title">{{ activePopup.title }}</p>
           </div>
-          <p v-if="activePopup.description" class="audio-card_info_text">{{ activePopup.description }}</p>
+          <p v-if="activePopup.adresse" class="audio-card_info_text">{{ activePopup.adresse }}</p>
         </div>
       </NuxtLink>
     </div>
@@ -84,6 +84,7 @@ export interface MapMarker {
   coordinates: [number, number] // [lng, lat]
   title?: string
   description?: string
+  adresse?: string            // Adresse postale du lieu
   icon?: string // URL ou emoji
   color?: string
   // Données pour le style AudioCardMap

@@ -26,12 +26,14 @@
             :to="portrait.link?.slug ? `/parcours/${portrait.link.slug}` : '#'"
             class="portrait_card_link"
           >
-            <img 
-              :src="portrait.image?.url" 
-              loading="lazy" 
-              :alt="portrait.image?.alt || portrait.nom || ''" 
-              class="portrait_card_image"
-            >
+            <!-- Image portrait responsive (AVIF + WebP + fallback) -->
+            <ResponsivePicture
+              v-if="portrait.image"
+              :image="portrait.image"
+              sizes="(min-width: 992px) 20vw, 33vw"
+              :alt="portrait.nom || ''"
+              picture-class="portrait_card_picture"
+            />
             <div class="portrait_card_info">
               <p class="portrait_name">{{ portrait.nom }}</p>
               <p class="portrait_description">{{ portrait.description }}</p>
@@ -105,11 +107,17 @@ const onSwiper = (swiper: SwiperType) => {
   height: 100%;
 }
 
-.portrait_card_image {
+// Le <picture> prend la place de l'ancienne <img>
+.portrait_card_picture {
   width: var(--100);
-  object-fit: cover;
   height: 20vw;
   flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .portrait_card_info {
@@ -152,7 +160,7 @@ const onSwiper = (swiper: SwiperType) => {
     flex-flow: column;
   }
 
-  .portrait_card_image {
+  .portrait_card_picture {
     height: 33.33vw;
   }
 

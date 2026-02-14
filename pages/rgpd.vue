@@ -1,6 +1,5 @@
 <template>
   <main class="v-rgpd">
-    <AppHeader />
 
     <section class="v-rgpd__content">
       <h1>RGPD</h1>

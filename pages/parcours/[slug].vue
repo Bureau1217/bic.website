@@ -1,17 +1,26 @@
 <template>
   <main class="v-parcours-slug">
 
-    <!-- Picto numéro du lieu (depuis le CMS) -->
+    <!-- Picto numéro du lieu (SVG, pas de responsive nécessaire) -->
     <img v-if="data?.result?.picto?.url" :src="data?.result?.picto?.url" loading="lazy"
       :alt="`Lieu n°${data?.result?.title}`" class="number">
 
-    <!-- Image de fond / cover (depuis le CMS) -->
-    <img v-if="data?.result?.cover?.url" :src="data.result.cover.url" loading="lazy"
-      :alt="data.result.cover.alt || data.result.title" class="background">
+    <!-- Image de fond / cover : responsive (AVIF + WebP + fallback) -->
+    <ResponsivePicture
+      v-if="data?.result?.cover"
+      :image="data.result.cover"
+      sizes="(min-width: 2500px) 2500px, 100vw"
+      loading="eager"
+      picture-class="background"
+    />
 
-    <!-- AudioCard -->
-    <AudioCard v-if="data?.result?.imagepodcast?.url" :title="data?.result?.title ?? ''"
-      :image="data.result.imagepodcast.url" :alt="data.result.imagepodcast.alt ?? ''" style="background-color: #017f3f;"
+    <!-- AudioCard : on passe l'image responsive + ses propriétés -->
+    <AudioCard v-if="data?.result?.imagepodcast" :title="data?.result?.title ?? ''"
+      :image="getImageSrc(data.result.imagepodcast)"
+      :srcset="data.result.imagepodcast?.fallback?.srcset || ''"
+      :sizes="data.result.imagepodcast?.sizes || '240px'"
+      :alt="data.result.imagepodcast?.alt ?? ''"
+      style="background-color: #017f3f;"
       @play="onPlayAudio" />
 
 
@@ -23,12 +32,15 @@
 
     <!-- Popup QR code : propose de lancer l'audio si ?qr=1 -->
     <QrAudioPopup v-if="data?.result?.audio?.url" v-model="showQrPopup" :title="data?.result?.title ?? ''"
-      :image="data?.result?.imagepodcast?.url ?? ''" @play="onPlayAudio" />
+      :image="getImageSrc(data?.result?.imagepodcast)" @play="onPlayAudio" />
 
   </main>
 </template>
 
 <script setup lang="ts">
+import type { ResponsiveImage } from '~/types/image'
+import { getImageSrc } from '~/types/image'
+
 const route = useRoute()
 const router = useRouter()
 const slug = route.params.slug as string
@@ -58,7 +70,7 @@ const onPlayAudio = () => {
   }
 }
 
-/** Bloc avec contenu résolu (images avec URLs) */
+/** Bloc avec contenu résolu (images au format responsive) */
 type ResolvedBlock = {
   id: string
   type: string
@@ -66,8 +78,10 @@ type ResolvedBlock = {
   content: {
     text?: string
     level?: string
-    image?: { url: string; alt?: string; width?: number; height?: number } | null
-    images?: { url: string; alt?: string; width?: number; height?: number }[]
+    /** Image responsive (fallback + WebP + AVIF) depuis historiaImage('column') */
+    image?: ResponsiveImage | null
+    /** Images de galerie au format responsive */
+    images?: ResponsiveImage[]
     caption?: string
     alt?: string
     [key: string]: unknown
@@ -90,9 +104,11 @@ type FetchData = CMS_API_Response & {
     slug: string
     template: string
     layout?: LayoutRow[] | null
-    cover?: CMS_API_File | null
-    picto?: CMS_API_File | null
-    imagepodcast?: CMS_API_File | null
+    /** Cover au format responsive */
+    cover?: ResponsiveImage | null
+    picto?: CMS_API_File | null  // SVG, pas de responsive
+    /** Image podcast au format responsive */
+    imagepodcast?: ResponsiveImage | null
     audio?: CMS_API_File | null
   } | null
 }
@@ -106,20 +122,17 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
       title: true,
       slug: true,
       template: true,
-      // Utilise la méthode PHP personnalisée qui résout les fichiers
+      // Layout : les images sont déjà en format responsive via layoutWithResolvedFiles
       layout: 'page.layoutWithResolvedFiles',
-      cover: {
-        query: 'page.cover.toFile',
-        select: { url: true, alt: true },
-      },
+      // Cover responsive null-safe (AVIF + WebP + fallback)
+      cover: 'page.responsiveImage("cover", "cover")',
+      // Picto = SVG, pas besoin de responsive
       picto: {
         query: 'page.picto.toFile',
         select: { url: true, alt: true },
       },
-      imagepodcast: {
-        query: 'page.imagepodcast.toFile',
-        select: { url: true, alt: true },
-      },
+      // Image podcast responsive null-safe
+      imagepodcast: 'page.responsiveImage("imagepodcast", "podcast")',
       audio: {
         query: 'page.content.audio.toFile',
         select: { url: true, filename: true },
@@ -127,8 +140,6 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
-
-console.log('data imagepodcast', data.value?.result?.imagepodcast?.url)
 
 
 // Rows du layout

@@ -9,12 +9,12 @@
       class="block-slider_swiper"
     >
       <SwiperSlide v-for="(img, index) in images" :key="index" class="block-slider_item">
-        <img 
-          :src="img.url" 
-          loading="lazy" 
-          :alt="img.alt || ''" 
-          class="block-image_image"
-        >
+        <!-- Image responsive (AVIF + WebP + fallback) -->
+        <ResponsivePicture
+          :image="img"
+          sizes="(min-width: 1024px) 800px, 100vw"
+          picture-class="block-slider_picture"
+        />
       </SwiperSlide>
     </Swiper>
     <p v-if="caption" class="block-image_legende">{{ caption }}</p>
@@ -27,9 +27,11 @@ import { Navigation, Pagination } from 'swiper/modules'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/pagination'
+import type { ResponsiveImage } from '~/types/image'
 
 defineProps<{
-  images?: { url: string; alt?: string }[]
+  /** Images au format responsive (ou ancien format { url, alt } via rétrocompat) */
+  images?: (ResponsiveImage | { url: string; alt?: string })[]
   caption?: string
 }>()
 </script>
@@ -58,8 +60,14 @@ defineProps<{
     flex: none;
     display: flex;
     flex-direction: column;
-    
-    .block-image_image {
+  }
+
+  // Le <picture> prend toute la place du slide
+  .block-slider_picture {
+    width: 100%;
+    height: 100%;
+
+    img {
       width: 100%;
       height: 100%;
       object-fit: contain;

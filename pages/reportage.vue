@@ -1,6 +1,5 @@
 <template>
   <main class="v-reportage">
-    <AppHeader />
 
     <section v-if="data?.status === 'ok'" class="v-reportage__content">
       <h1>{{ data.result.reportage.title }}</h1>

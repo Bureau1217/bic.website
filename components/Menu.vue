@@ -73,7 +73,7 @@
               @click="playEpisode(episode)"
             >
               <div class="audio-card_image_wrapper" v-if="episode.imagepodcast">
-                <img class="audio-card_image" :src="episode.imagepodcast.url" :alt="episode.imagepodcast.alt || episode.title" />
+                <ResponsivePicture class="audio-card_image" :image="episode.imagepodcast" sizes="200px" :alt="episode.title" picture-class="audio-card_image_rp" />
                 <div class="audio-card_button">
                   <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
                   <p class="audio-card_duration" v-if="audioDurations[episode.slug]">{{ audioDurations[episode.slug] }}</p>
@@ -97,7 +97,7 @@
               @click="playLieu(lieu)"
             >
               <div class="audio-card_image_wrapper" v-if="lieu.imagepodcast">
-                <img class="audio-card_image" :src="lieu.imagepodcast.url" :alt="lieu.imagepodcast.alt || lieu.title" />
+                <ResponsivePicture class="audio-card_image" :image="lieu.imagepodcast" sizes="200px" :alt="lieu.title" picture-class="audio-card_image_rp" />
                 <div class="audio-card_button">
                   <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
                   <p class="audio-card_duration" v-if="audioDurations[lieu.slug]">{{ audioDurations[lieu.slug] }}</p>
