@@ -13,6 +13,12 @@
       :events="formattedEvents" 
     />
 
+    <Journal 
+      text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+      button-text="Découvrir le journal"
+      button-url="#"
+    />
+
     <ListeRessource 
       v-if="data?.result?.ressources?.ressources" 
       title="Références" 
@@ -26,6 +32,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import Journal from '~/components/Journal.vue'
 
 // TYPES
 type ReferenceRessource = {

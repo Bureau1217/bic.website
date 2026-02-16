@@ -14,7 +14,7 @@
         <div class="audio-card_time">{{ duration }}</div>
       </div>
     </div>
-    <div class="audio-card_info" :class="infoClass">
+    <div class="audio-card_info is-bg-green" :class="infoClass">
       <div v-if="number" class="audio-card_number">{{ number }}.</div>
       <p class="audio-card_title">{{ title }}</p>
       <p v-if="description" class="carte-card_info_text" :class="{ 'is-black': descriptionBlack }">{{ description }}</p>

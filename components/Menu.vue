@@ -20,10 +20,10 @@
               <div class="list_plus_line is-vertical is-white"></div>
             </div>
           </div>
-          <NuxtLink to="/parcours" class="menu_link w-inline-block" @click="closeMenu">
+          <NuxtLink to="/parcours" class="menu_link" @click="closeMenu">
             <div>Parcours</div>
           </NuxtLink>
-          <NuxtLink to="/ressources" class="menu_link w-inline-block" @click="closeMenu">
+          <NuxtLink to="/ressources" class="menu_link" @click="closeMenu">
             <div>Ressources</div>
           </NuxtLink>
           <div class="menu_parcours">
@@ -39,7 +39,7 @@
                 v-for="lieu in lieux" 
                 :key="lieu.slug"
                 :to="`/parcours/${lieu.slug}`" 
-                class="menu_parcours_link w-inline-block" 
+                class="menu_parcours_link" 
                 @click="closeMenu"
               >
                 <div>{{ lieu.num }}. {{ lieu.title }}</div>
@@ -49,6 +49,12 @@
           <NuxtLink to="/a-propos" class="menu_link is-last" @click="closeMenu">
             <div>À propos</div>
           </NuxtLink>
+          <div class="menu_offset_legals">
+            <NuxtLink to="/mentions-legales" target="_blank" class="menu_link--legals" @click="closeMenu">Mentions légales</NuxtLink>
+            <NuxtLink to="/protection-des-donnees" target="_blank" class="menu_link--legals" @click="closeMenu">Protection des données</NuxtLink>
+            <NuxtLink to="/engagement" target="_blank" class="menu_link--legals" @click="closeMenu">Engagement</NuxtLink>
+          </div>
+
         </div>
       </div>
       <div class="menu_catalogue" :style="{ display: catalogueOpen ? 'flex' : 'none' }">
@@ -324,6 +330,23 @@ const playLieu = (lieu: any) => {
   }
 }
 
+.menu_offset_legals {
+  display: flex;
+  flex-flow: column;
+  gap: 5px;
+  width: var(--100);
+  padding: var(--20) var(--20);
+  color: var(--white);
+  font-size: 14px;
+  text-decoration: none;
+  text-transform: none;
+  margin-top: auto;
+}
+.menu_link--legals {
+  color: var(--white);
+  text-decoration: none;
+}
+
 .menu_close {
   padding-top: var(--20);
   padding-bottom: var(--10);
@@ -341,6 +364,7 @@ const playLieu = (lieu: any) => {
 }
 
 .menu_parcours_link {
+  display: block;
   width: var(--100);
   padding: var(--10) var(--20);
   color: var(--white);
@@ -358,6 +382,7 @@ const playLieu = (lieu: any) => {
     position: relative;
   }
 }
+
 
 .menu_catalogue_header {
   width: var(--100);
