@@ -9,6 +9,7 @@
         :audio-card="firstEpisode ? {
           title: firstEpisode.title,
           description: firstEpisode.texte || undefined,
+          duration: firstEpisodeDuration || undefined,
           image: firstEpisode.imagepodcast,
           audioUrl: firstEpisode.audio?.url,
           slug: firstEpisode.slug,
@@ -41,7 +42,7 @@
       v-if="qrEpisode"
       v-model="showQrPopup"
       :title="qrEpisode.title"
-      :image="qrEpisode.imagepodcast?.url ?? ''"
+      :image="getImageSrc(qrEpisode.imagepodcast)"
       @play="onPlayQrEpisode"
     />
 
@@ -50,12 +51,36 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { ResponsiveImage } from '~/types/image'
+import { getImageSrc } from '~/types/image'
 
 // FETCH DONNEES PODCAST
 const { lieux, episodes, firstEpisode, parseGpsCoordinates, getEpisodeBySlug } = usePodcastData()
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
+
+// Durée audio du premier épisode (hero)
+const firstEpisodeDuration = ref('')
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
+
+watch(firstEpisode, (ep) => {
+  if (ep?.audio?.url && !firstEpisodeDuration.value) {
+    const audio = new Audio()
+    audio.preload = 'metadata'
+    audio.addEventListener('loadedmetadata', () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        firstEpisodeDuration.value = formatDuration(audio.duration)
+      }
+    })
+    audio.src = ep.audio.url
+  }
+}, { immediate: true })
 
 // QR Code : détection du paramètre ?qr=1&episode=slug
 const route = useRoute()
@@ -117,7 +142,8 @@ type HomePageData = CMS_API_Response & {
       slug: string
       titre: CMS_API_Block[]
       soustitre: CMS_API_Block[]
-      cover: CMS_API_File | null
+      /** Cover au format responsive (historiaImage('cover')) */
+      cover: ResponsiveImage | null
     }
     ressources: {
       evenements: ReferenceEvent[]
@@ -139,15 +165,9 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           slug: true,
           titre: 'page.titre.toBlocks',
           soustitre: 'page.soustitre.toBlocks',
-          cover: {
-            query: 'page.cover.toFile',
-            select: {
-              url: true,
-              alt: true,
-              width: true,
-              height: true,
-            },
-          },
+          // Image responsive null-safe : fallback + WebP + AVIF srcset
+          // au lieu de l'URL brute du fichier original (souvent 5–12 Mo)
+          cover: 'page.responsiveImage("cover", "cover")',
         },
       },
       ressources: {
@@ -195,6 +215,7 @@ const formattedEvents = computed(() => {
 })
 
 // Transformer les lieux en markers pour MapView
+// Les markers utilisent l'URL de fallback (string) pour la carte
 const mapMarkers = computed(() => {
   if (!lieux.value?.length) return []
   
@@ -209,8 +230,10 @@ const mapMarkers = computed(() => {
         title: lieu.title,
         slug: lieu.slug,
         number: lieu.num || (index + 1),
-        image: lieu.imagepodcast?.url,
+        // Extraire l'URL de fallback depuis le format responsive
+        image: getImageSrc(lieu.imagepodcast),
         icon: lieu.picto?.url,
+        adresse: lieu.adresse || undefined,
       }
     })
     .filter(Boolean) as Array<{
@@ -221,7 +244,7 @@ const mapMarkers = computed(() => {
       number?: string | number
       image?: string
       icon?: string
+      adresse?: string
     }>
 })
 </script>
-

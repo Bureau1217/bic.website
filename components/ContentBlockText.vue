@@ -15,15 +15,15 @@
         v-html="block.content?.text"
       />
       
-      <!-- Image simple -->
-      <div v-else-if="block.type === 'image' && block.content?.image?.url" class="block-image">
-        <img 
-          :src="block.content.image.url"
-          loading="lazy" 
-          :alt="block.content.image.alt || block.content.alt || ''" 
-          class="block-image_image"
-        >
-        <p v-if="block.content.caption" class="block-image_legende">{{ block.content.caption }}</p>
+      <!-- Image simple : responsive (AVIF + WebP + fallback) -->
+      <div v-else-if="block.type === 'image' && hasImage(block)" class="block-image">
+        <ResponsivePicture
+          :image="block.content?.image"
+          sizes="(min-width: 1024px) 800px, 100vw"
+          :alt="block.content?.alt || undefined"
+          picture-class="block-image_picture"
+        />
+        <p v-if="block.content?.caption" class="block-image_legende">{{ block.content.caption }}</p>
       </div>
       
       <!-- Citation -->
@@ -32,7 +32,7 @@
         <footer v-if="block.content?.citation" v-html="block.content.citation" />
       </blockquote>
 
-      <!-- Galerie -->
+      <!-- Galerie : images responsive -->
       <BlockGallery
         v-else-if="block.type === 'gallery' && block.content?.images?.length"
         :images="block.content.images"
@@ -43,15 +43,20 @@
 </template>
 
 <script setup lang="ts">
-/** Bloc avec contenu résolu */
+import type { ResponsiveImage } from '~/types/image'
+import { isResponsiveImage } from '~/types/image'
+
+/** Bloc avec contenu résolu (images au format responsive) */
 type ResolvedBlock = {
   id?: string
   type: string
   content?: {
     text?: string
     level?: string
-    image?: { url: string; alt?: string } | null
-    images?: { url: string; alt?: string }[]
+    /** Image responsive ou ancien format { url, alt } */
+    image?: ResponsiveImage | { url: string; alt?: string } | null
+    /** Images de galerie au format responsive */
+    images?: (ResponsiveImage | { url: string; alt?: string })[]
     caption?: string
     citation?: string
     alt?: string
@@ -72,8 +77,18 @@ function getHeadingTag(block: ResolvedBlock): string {
   }
   return 'h2'
 }
+
+/**
+ * Vérifie si un bloc image a une image valide
+ * (format responsive avec fallback.src OU ancien format avec url)
+ */
+function hasImage(block: ResolvedBlock): boolean {
+  const img = block.content?.image
+  if (!img) return false
+  if (isResponsiveImage(img)) return true
+  return typeof (img as any).url === 'string' && (img as any).url.length > 0
+}
 </script>
 
 <style lang="scss">
-
 </style>

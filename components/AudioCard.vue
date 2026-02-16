@@ -1,97 +1,82 @@
 <template>
-  <div class="audio-card" :class="modifierClass">
+  <div :class="rootClass" v-bind="$attrs">
     <div class="audio-card_image_wrapper">
-      <img 
-        :src="image" 
-        loading="lazy" 
-        :sizes="sizes || '(max-width: 2400px) 100vw, 2400px'" 
-        :srcset="srcset" 
-        :alt="alt || ''" 
-        class="audio-card_image"
-      >
-      <div class="audio-card_button" @click="$emit('play')">
-        <img src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="" class="image">
-        <div class="audio-card_time">{{ duration }}</div>
+      <slot name="image">
+        <img 
+          v-if="image" 
+          :src="image" 
+          :srcset="srcset" 
+          :sizes="sizes" 
+          :alt="alt" 
+          loading="lazy" 
+          class="audio-card_image"
+        />
+      </slot>
+      <div v-if="showButton" class="audio-card_button" @click.prevent.stop="$emit('play')">
+        <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
+        <span v-if="duration" class="audio-card_time">{{ duration }}</span>
       </div>
     </div>
-    <div class="audio-card_info" :class="infoClass">
-      <div v-if="number" class="audio-card_number">{{ number }}.</div>
-      <p class="audio-card_title">{{ title }}</p>
-      <p v-if="description" class="carte-card_info_text" :class="{ 'is-black': descriptionBlack }">{{ description }}</p>
+    <div class="audio-card_info" >
+      <slot name="info">
+        <div v-if="number" class="audio-card_number">{{ number }}.</div>
+        <p class="audio-card_title">{{ title }}</p>
+        <p v-if="description" class="audio-card_info_text">
+          {{ description }}
+        </p>
+      </slot>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
-  image: {
-    type: String,
-    required: true
-  },
-  srcset: {
-    type: String,
-    default: ''
-  },
-  sizes: {
-    type: String,
-    default: '(max-width: 2400px) 100vw, 2400px'
-  },
-  alt: {
-    type: String,
-    default: ''
-  },
-  duration: {
-    type: String,
-    default: '12min'
-  },
-  number: {
-    type: [String, Number],
-    default: null
-  },
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    default: ''
-  },
-  descriptionBlack: {
-    type: Boolean,
-    default: false
-  },
-  isHome: {
-    type: Boolean,
-    default: false
-  },
-  isCatalogue: {
-    type: Boolean,
-    default: false
-  },
-  isParcours: {
-    type: Boolean,
-    default: false
-  },
-  bgColor: {
-    type: String,
-    default: '' // 'green', 'red', or empty
-  }
+type AudioCardVariant = 'default' | 'home' | 'menu' | 'map-popup'
+
+const props = withDefaults(defineProps<{
+  /** Variante visuelle de la carte */
+  variant?: AudioCardVariant
+  /** URL de l'image (fallback si pas de slot #image) */
+  image?: string
+  srcset?: string
+  sizes?: string
+  alt?: string
+  /** Durée formatée (ex: "12'34") */
+  duration?: string
+  /** Numéro du lieu/épisode */
+  number?: string | number | null
+  title?: string
+  description?: string
+  descriptionBlack?: boolean
+  /** Couleur de fond de la zone info */
+  bgColor?: 'green' | 'red' | ''
+  /** Afficher le bouton play */
+  showButton?: boolean
+}>(), {
+  variant: 'default',
+  image: '',
+  srcset: '',
+  sizes: '(max-width: 2400px) 100vw, 2400px',
+  alt: '',
+  duration: '',
+  number: null,
+  title: '',
+  description: '',
+  descriptionBlack: false,
+  bgColor: '',
+  showButton: true,
 })
 
-defineEmits(['play'])
+defineEmits<{
+  play: []
+}>()
 
-const modifierClass = computed(() => ({
-  'is-home': props.isHome,
-  'is-catalogue': props.isCatalogue
-}))
+const rootClass = computed(() => [
+  'audio-card',
+  `audio-card--${props.variant}`,
+])
 
-const infoClass = computed(() => ({
-  'is-bg-green': props.bgColor === 'green',
-  'is-bg-red': props.bgColor === 'red',
-  'is-parcours': props.isParcours
-}))
 </script>
 
 <style lang="scss">

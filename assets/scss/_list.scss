@@ -79,10 +79,11 @@
 }
 
 .list_case.is-partenaires {
-  width: 33.33%;
+  width: calc(33.33% - var(--10));
   gap: 10px;
   display: flex;
   flex-direction: column;
+  text-decoration: none;
 }
 
 .list_plus {
@@ -170,6 +171,11 @@
   display: flex;
 }
 
+.list_line_wrapper.is-partenaires {
+  flex-wrap: wrap;
+  row-gap: var(--20);
+}
+
 .list_desc {
   width: 66.66%;
 }
@@ -233,6 +239,14 @@
     flex-flow: column;
   }
 
+  .list_line_wrapper.is-partenaires {
+    flex-flow: row wrap;
+  }
+
+  .list_case.is-partenaires {
+    width: calc(50% - var(--10));
+  }
+
   .list_desc {
     width: var(--100);
   }
@@ -264,5 +278,9 @@
   .list_line {
     padding-right: var(--10);
     padding-left: var(--10);
+  }
+
+  .list_case.is-partenaires {
+    width: 100%;
   }
 }

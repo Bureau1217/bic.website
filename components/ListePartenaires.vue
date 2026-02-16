@@ -2,16 +2,14 @@
   <div class="list" id="partenaires">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_wrapper">
-      <div 
-        v-for="(row, rowIndex) in partnersRows" 
-        :key="rowIndex" 
-        class="list_line"
-      >
-        <div class="list_line_wrapper">
-          <div 
-            v-for="(partner, partnerIndex) in row" 
-            :key="partnerIndex" 
+      <div class="list_line">
+        <div class="list_line_wrapper is-partenaires">
+          <NuxtLink 
+            v-for="(partner, index) in partners" 
+            :key="index" 
+            :to="partner.link"
             class="list_case is-partenaires"
+            target="_blank"
           >
             <img 
               :src="partner.logo" 
@@ -23,7 +21,7 @@
               <strong>{{ partner.name }}</strong><br>
               {{ partner.description }}
             </p>
-          </div>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -31,8 +29,6 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-
 const props = defineProps({
   title: {
     type: String,
@@ -41,20 +37,7 @@ const props = defineProps({
   partners: {
     type: Array,
     default: () => []
-  },
-  columnsPerRow: {
-    type: Number,
-    default: 3
   }
-})
-
-// Group partners into rows of columnsPerRow
-const partnersRows = computed(() => {
-  const rows = []
-  for (let i = 0; i < props.partners.length; i += props.columnsPerRow) {
-    rows.push(props.partners.slice(i, i + props.columnsPerRow))
-  }
-  return rows
 })
 </script>
 

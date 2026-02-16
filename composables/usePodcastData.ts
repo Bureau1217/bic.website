@@ -1,13 +1,19 @@
 /**
  * Composable pour accéder aux données globales du podcast (lieux et épisodes)
- * Ces données sont fetchées une seule fois et partagées entre tous les composants
+ * Ces données sont fetchées une seule fois et partagées entre tous les composants.
+ *
+ * Les images (imagepodcast, portraits) sont désormais au format ResponsiveImage
+ * (fallback + WebP + AVIF srcset) grâce à $file->historiaImage().
  */
+
+import type { ResponsiveImage } from '~/types/image'
 
 // Types pour les portraits (structure dans chaque lieu)
 export type PortraitData = {
   nom: string | null
   description: string | null
-  image: CMS_API_File | null
+  /** Image responsive (fallback + WebP + AVIF) */
+  image: ResponsiveImage | null
   link: { slug: string } | null
 }
 
@@ -16,8 +22,10 @@ export type LieuData = {
   title: string
   slug: string
   gps: string | null  // Format: "46.5191, 6.5668" (lat, lng)
-  picto: CMS_API_File | null
-  imagepodcast: CMS_API_File | null
+  adresse: string | null  // Adresse postale du lieu
+  picto: CMS_API_File | null  // SVG, pas de responsive nécessaire
+  /** Image podcast au format responsive */
+  imagepodcast: ResponsiveImage | null
   audio: CMS_API_File | null
   num: string | number | null
   portraitlayout: PortraitData[] | null
@@ -29,7 +37,8 @@ export type EpisodeData = {
   slug: string
   num: string | number | null
   texte: string | null
-  imagepodcast: CMS_API_File | null
+  /** Image podcast au format responsive */
+  imagepodcast: ResponsiveImage | null
   audio: CMS_API_File | null
 }
 
@@ -70,6 +79,8 @@ export function usePodcastData() {
                 slug: true,
                 num: 'page.num',
                 gps: 'page.gps.value',
+                adresse: 'page.adresse.value',
+                // Picto = SVG, pas besoin de responsive
                 picto: {
                   query: 'page.picto.toFile',
                   select: {
@@ -77,15 +88,9 @@ export function usePodcastData() {
                     alt: true,
                   },
                 },
-                imagepodcast: {
-                  query: 'page.imagepodcast.toFile',
-                  select: {
-                    url: true,
-                    alt: true,
-                    width: true,
-                    height: true,
-                  },
-                },
+                // Image podcast : format responsive null-safe (fallback + WebP + AVIF)
+                // au lieu de l'URL brute (fichiers originaux souvent 5–12 Mo)
+                imagepodcast: 'page.responsiveImage("imagepodcast", "podcast")',
                 audio: {
                   query: 'page.files.template("audio").first',
                   select: {
@@ -98,15 +103,10 @@ export function usePodcastData() {
                   select: {
                     nom: 'structureItem.nom.value',
                     description: 'structureItem.description.value',
-                    image: {
-                      query: 'structureItem.image.toFile',
-                      select: {
-                        url: true,
-                        alt: true,
-                        width: true,
-                        height: true,
-                      },
-                    },
+                    // Portrait image : chaîne KQL (null = '' côté frontend, géré par ResponsivePicture)
+                    image: 'structureItem.image.toFile.historiaImage("column")',
+                    // Note: pour les structureItems, pas de méthode null-safe possible.
+                    // Si toFile retourne null, KQL retourne '' → le composant ne rend rien.
                     link: {
                       query: 'structureItem.link.toPages.first',
                       select: {
@@ -125,15 +125,10 @@ export function usePodcastData() {
                 slug: true,
                 num: 'page.num',
                 texte: 'page.texte.value',
-                imagepodcast: {
-                  query: 'page.images.template("poster").first',
-                  select: {
-                    url: true,
-                    alt: true,
-                    width: true,
-                    height: true,
-                  },
-                },
+                // Image podcast : format responsive
+                // Les épisodes n'ont pas de champ "imagepodcast" mais des images template "poster"
+                // Si pas d'image poster, KQL retourne '' → le composant ne rend rien
+                imagepodcast: 'page.images.template("poster").first.historiaImage("podcast")',
                 audio: {
                   query: 'page.files.template("audio").first',
                   select: {
@@ -171,7 +166,7 @@ export function usePodcastData() {
       if (lieu.portraitlayout?.length) {
         for (const p of lieu.portraitlayout) {
           // Ne garder que les portraits ayant au moins une image
-          if (p.image?.url) {
+          if (p.image?.fallback?.src) {
             portraits.push(p)
           }
         }
