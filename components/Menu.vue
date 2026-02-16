@@ -78,6 +78,7 @@
               variant="menu"
               :duration="audioDurations[episode.slug]"
               :title="episode.title"
+              :description="episode.texte || ''"
               bg-color="red"
               @play="playEpisode(episode)"
             >

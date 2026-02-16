@@ -29,7 +29,6 @@
       :duration="audioCard.duration"
       :title="audioCard.title"
       :description="audioCard.description"
-      description-black
       @click="onPlayAudio"
       @play="onPlayAudio"
     >

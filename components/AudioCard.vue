@@ -17,11 +17,11 @@
         <span v-if="duration" class="audio-card_time">{{ duration }}</span>
       </div>
     </div>
-    <div class="audio-card_info" :class="infoBgClass">
+    <div class="audio-card_info" >
       <slot name="info">
         <div v-if="number" class="audio-card_number">{{ number }}.</div>
         <p class="audio-card_title">{{ title }}</p>
-        <p v-if="description" class="carte-card_info_text" :class="{ 'is-black': descriptionBlack }">
+        <p v-if="description" class="audio-card_info_text">
           {{ description }}
         </p>
       </slot>
@@ -77,10 +77,6 @@ const rootClass = computed(() => [
   `audio-card--${props.variant}`,
 ])
 
-const infoBgClass = computed(() => ({
-  'is-bg-green': props.bgColor === 'green',
-  'is-bg-red': props.bgColor === 'red',
-}))
 </script>
 
 <style lang="scss">

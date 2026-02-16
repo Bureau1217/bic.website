@@ -16,3 +16,14 @@
 // - AppFooter.vue -> .footer*
 // - PortraitSlider.vue -> .portrait*
 // - MapBlock.vue -> .map
+
+// --- Page transition : fondu blanc ---
+.page-enter-active,
+.page-leave-active {
+  transition: opacity 0.7s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+}

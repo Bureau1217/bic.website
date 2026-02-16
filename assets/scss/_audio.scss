@@ -11,6 +11,7 @@
   justify-content: space-between;
   align-items: center;
   display: flex;
+  background-color: var(--green);
 }
 
 // ============================================================================
@@ -49,6 +50,7 @@
   z-index: 800;
   width: 240px;
   height: 240px;
+  background-color: var(--red);
 }
 
 // Durée : jaune dans le menu
@@ -245,20 +247,12 @@
   display: flex;
 }
 
-.audio-card_info.is-bg-green {
-  background-color: var(--green);
-  justify-content: flex-end;
-}
-
-.audio-card_info.is-bg-red {
-  background-color: var(--red);
-}
-
 .audio-card_info_wrapper {
   display: flex;
 }
 
 .audio-card_info_text {
+  color: var(--black);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 16px;
 }
@@ -272,11 +266,6 @@
   justify-content: flex-start;
   align-items: flex-start;
   display: flex;
-}
-
-.carte-card_info_text {
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
 }
 
 .carte-card_info_text.is-black {
