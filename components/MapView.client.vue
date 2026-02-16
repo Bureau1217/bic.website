@@ -17,36 +17,33 @@
       :style="{ left: popupPosition.x + 'px', top: popupPosition.y + 'px' }"
     >
       <!--<button class="map-view__popup-close" @click="closePopup">&times;</button>-->
-      <NuxtLink :to="`/parcours/${activePopup.slug || activePopup.id}`" class="map-card map-card--popup">
-        <div class="map-card_image_wrapper" :class="{ 'no-image': !activePopup.image }">
-          <img 
-            v-if="activePopup.image"
-            :src="activePopup.image" 
-            loading="lazy" 
-            :alt="activePopup.title || ''" 
-            class="audio-card_image"
-          >
-          <div v-else class="audio-card_image-placeholder">
-            <span>{{ activePopup.number || '?' }}</span>
-          </div>
-          <div 
-            class="audio-card_button" 
-            v-if="getAudioUrlForMarker(activePopup)"
-            @click.prevent.stop="playFromPopup(activePopup)"
-          >
-            <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
-            <p class="audio-card_duration" v-if="audioDurations[activePopup.slug || activePopup.id]">
-              {{ audioDurations[activePopup.slug || activePopup.id] }}
-            </p>
-          </div>
-        </div>
-        <div class="map-card_info">
-          <div class="audio-card_info_wrapper">
-            <div v-if="activePopup.number" class="audio-card_number">{{ activePopup.number }}.</div>
-            <p class="audio-card_title">{{ activePopup.title }}</p>
-          </div>
-          <p v-if="activePopup.adresse" class="audio-card_info_text">{{ activePopup.adresse }}</p>
-        </div>
+      <NuxtLink :to="`/parcours/${activePopup.slug || activePopup.id}`" class="audio-card--map-popup-link">
+        <AudioCard
+          variant="map-popup"
+          :duration="audioDurations[activePopup.slug || activePopup.id]"
+          :show-button="!!getAudioUrlForMarker(activePopup)"
+          @play="playFromPopup(activePopup)"
+        >
+          <template #image>
+            <img 
+              v-if="activePopup.image"
+              :src="activePopup.image" 
+              loading="lazy" 
+              :alt="activePopup.title || ''" 
+              class="audio-card_image"
+            />
+            <div v-else class="audio-card_image-placeholder">
+              <span>{{ activePopup.number || '?' }}</span>
+            </div>
+          </template>
+          <template #info>
+            <div class="audio-card_info_wrapper">
+              <div v-if="activePopup.number" class="audio-card_number">{{ activePopup.number }}.</div>
+              <p class="audio-card_title">{{ activePopup.title }}</p>
+            </div>
+            <p v-if="activePopup.adresse" class="audio-card_info_text">{{ activePopup.adresse }}</p>
+          </template>
+        </AudioCard>
       </NuxtLink>
     </div>
     
@@ -818,113 +815,12 @@ defineExpose({
   display: none !important;
 }
 
-/* Style map-card pour les popups */
-.map-card--popup {
-  display: flex;
-  flex-flow: row;
-  width: 320px;
-  height: 160px;
-  position: relative;
+/* Lien wrapper pour la popup AudioCard */
+.audio-card--map-popup-link {
   text-decoration: none;
   color: inherit;
-  overflow: hidden;
-  inset: auto auto auto auto;
-}
-
-.map-card--popup .map-card_image_wrapper {
-  width: 50%;
-  height: 100%;
-  position: relative;
-  flex-shrink: 0;
-}
-
-.map-card--popup .audio-card_image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
   display: block;
 }
 
-.map-card--popup .audio-card_image-placeholder {
-  width: 100%;
-  height: 100%;
-  min-height: 120px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.map-card--popup .audio-card_image-placeholder span {
-  font-size: 32px;
-  font-weight: bold;
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.map-card--popup .map-card_image_wrapper.no-image {
-  background: #1a1a1a;
-}
-
-.map-card--popup .audio-card_button {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 8px 4px 4px;
-  transition: background 0.2s ease;
-}
-
-.map-card--popup .audio-card_button:hover {
-  background: rgba(0, 0, 0, 1);
-}
-
-
-.map-card--popup .audio-card_button .image {
-  width: 16px;
-  height: 16px;
-}
-
-.map-card--popup .audio-card_time {
-  color: white;
-  font-size: 11px;
-}
-
-.map-card--popup .map-card_info {
-  width: 50%;
-  height: 100%;
-  padding: 12px;
-  background-color: var(--green, #2D5A27);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  color: white;
-}
-
-.map-card--popup .audio-card_info_wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
-}
-
-.map-card--popup .audio-card_number {
-  font-size: 14px;
-  font-weight: bold;
-  flex-shrink: 0;
-}
-
-.map-card--popup .audio-card_title {
-  margin: 0;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.3;
-}
-
-.map-card--popup .audio-card_info_text {
-  margin: 8px 0 0 0;
-  font-size: 12px;
-  opacity: 0.9;
-  line-height: 1.4;
-}
+/* Map popup variant : styles spécifiques gérés dans _audio.scss */
 </style>

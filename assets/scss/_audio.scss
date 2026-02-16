@@ -1,33 +1,177 @@
 // Styles Audio - Notre Historia
-// Utilisé par: AudioCard, AudioCardMenu, AudioCardMap, AudioPlayer
+// Utilisé par: AudioCard (variants: default, home, menu, map-popup), AudioPlayer
 
-// === Audio Card ===
+// ============================================================================
+// AUDIO CARD — Base partagée
+// ============================================================================
+
 .audio-card {
-  z-index: 800;
   color: var(--white);
   flex-flow: column;
   justify-content: space-between;
   align-items: center;
-  width: 240px;
-  height: 240px;
   display: flex;
-  position: fixed;
-  inset: 80px 20px auto auto;
-  cursor: pointer;
 }
 
-.audio-card.is-home {
+// ============================================================================
+// AUDIO CARD — Variant: default (page parcours, position fixed)
+// ============================================================================
+
+.audio-card--default {
+  z-index: 800;
+  width: 240px;
+  height: 240px;
+  position: fixed;
+  inset: 80px 20px auto auto;
+}
+
+// ============================================================================
+// AUDIO CARD — Variant: home (hero section, position absolute)
+// ============================================================================
+
+.audio-card--home {
+  z-index: 800;
+  width: 240px;
+  height: 240px;
   position: absolute;
-  left: 2vw;
+  top: 80px;
+  left: 20px;
   right: auto;
   background-color: var(--red);
 }
 
-.audio-card.is-catalogue {
-  position: static;
+
+// ============================================================================
+// AUDIO CARD — Variant: menu (catalogue, position static)
+// ============================================================================
+
+.audio-card--menu {
+  z-index: 800;
+  width: 240px;
+  height: 240px;
 }
 
-// Image audio card : ancien <img> et nouveau <picture> (via ResponsivePicture)
+// Durée : jaune dans le menu
+.audio-card--menu .audio-card_time {
+  color: var(--yellow);
+  font-size: 11px;
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  margin: 0;
+}
+
+// ============================================================================
+// AUDIO CARD — Variant: map-popup (popup carte, layout horizontal)
+// ============================================================================
+
+.audio-card--map-popup {
+  flex-flow: row;
+  width: 320px;
+  height: 160px;
+  position: relative;
+  overflow: hidden;
+  inset: auto;
+  cursor: pointer;
+}
+
+.audio-card--map-popup .audio-card_image_wrapper {
+  width: 50%;
+  height: 100%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.audio-card--map-popup .audio-card_image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.audio-card--map-popup .audio-card_image-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.audio-card--map-popup .audio-card_image-placeholder span {
+  font-size: 32px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.audio-card--map-popup .audio-card_button {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px 4px 4px;
+  transition: background 0.2s ease;
+}
+
+.audio-card--map-popup .audio-card_button:hover {
+  background: rgba(0, 0, 0, 1);
+}
+
+.audio-card--map-popup .audio-card_button .image {
+  width: 16px;
+  height: 16px;
+}
+
+.audio-card--map-popup .audio-card_time {
+  color: var(--yellow);
+  font-size: 11px;
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  margin: 0;
+}
+
+.audio-card--map-popup .audio-card_info {
+  width: 50%;
+  height: 100%;
+  padding: 12px;
+  background-color: var(--green);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: white;
+}
+
+.audio-card--map-popup .audio-card_info_wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.audio-card--map-popup .audio-card_number {
+  font-size: 14px;
+  font-weight: bold;
+  flex-shrink: 0;
+}
+
+.audio-card--map-popup .audio-card_title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.audio-card--map-popup .audio-card_info_text {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  opacity: 0.9;
+  line-height: 1.4;
+}
+
+// ============================================================================
+// AUDIO CARD — Sous-éléments partagés
+// ============================================================================
+
+// Image (img natif et responsive picture)
 .audio-card_image {
   width: var(--100);
   height: var(--100);
@@ -53,6 +197,7 @@
   position: relative;
 }
 
+// Bouton play (picto + durée)
 .audio-card_button {
   grid-column-gap: 10px;
   grid-row-gap: 10px;
@@ -64,6 +209,7 @@
   display: flex;
   position: absolute;
   inset: auto auto 10px 10px;
+  cursor: pointer;
 }
 
 .audio-card_time {
@@ -72,6 +218,7 @@
   font-size: 12px;
 }
 
+// Titre
 .audio-card_title {
   margin-bottom: 0;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
@@ -79,6 +226,7 @@
   line-height: 1;
 }
 
+// Numéro
 .audio-card_number {
   color: var(--yellow);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
@@ -86,6 +234,7 @@
   line-height: 1.3;
 }
 
+// Zone info
 .audio-card_info {
   width: var(--100);
   height: var(--100);
@@ -101,14 +250,6 @@
   justify-content: flex-end;
 }
 
-.audio-card_info.is-parcours {
-  height: var(--100);
-  background-color: var(--green);
-  flex-flow: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-}
-
 .audio-card_info.is-bg-red {
   background-color: var(--red);
 }
@@ -122,50 +263,9 @@
   font-size: 16px;
 }
 
-// === Audio Card Menu ===
-.audio-card--menu {
-  z-index: 800;
-  width: var(--100);
-  color: var(--white);
-  cursor: pointer;
-  flex-flow: column;
-  justify-content: space-between;
-  align-items: center;
-  height: 240px;
-  width: 240px;
-  display: flex;
-}
-
-.audio-card--menu.is-home {
-  position: absolute;
-  left: 2vw;
-  right: auto;
-}
-
-.audio-card--menu.is-catalogue {
-  position: static;
-}
-
-// === Map Card ===
-
-.map-card_image_wrapper {
-  width: var(--100);
-  height: 100%;
-  position: relative;
-}
-
-.map-card_info {
-  width: var(--100);
-  height: var(--100);
-  padding: var(--10);
-  grid-column-gap: 5px;
-  grid-row-gap: 5px;
-  background-color: var(--green);
-  flex-flow: column;
-  justify-content: space-between;
-  align-items: flex-start;
-  display: flex;
-}
+// ============================================================================
+// LEGACY — carte-card classes (used for description in home & default variants)
+// ============================================================================
 
 .carte-card_info_wrapper {
   width: var(--100);
@@ -183,94 +283,34 @@
   color: var(--black);
 }
 
-// === Audio Player ===
-.audioplayer {
-  top: auto;
-  left: 0%;
-  right: 0%;
-  bottom: var(--10);
-  width: var(--100);
-  padding-right: var(--40);
-  padding-left: var(--40);
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  position: fixed;
-  z-index: 9999;
-}
 
-.audioplayer-wrapper {
-  width: var(--100);
-  padding: 5px var(--10);
-  grid-column-gap: var(--20);
-  grid-row-gap: var(--20);
-  background-color: #00000080;
-  border-radius: 100px;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 900px;
-  height: 50px;
-  display: flex;
-}
+// ============================================================================
+// MEDIA QUERIES
+// ============================================================================
 
-.audioplayer_icon {
-  width: 30px;
-  height: 30px;
-}
-
-.audioplayer_icon.is-sound {
-  width: 30px;
-  height: 30px;
-}
-
-.audioplayer_time {
-  color: var(--yellow);
-  flex: none;
-  justify-content: flex-start;
-  align-items: center;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 10px;
-  display: flex;
-}
-
-.audioplayer_line {
-  width: var(--100);
-  height: var(--100);
-  flex-flow: column;
-  justify-content: center;
-  align-items: flex-start;
-  display: flex;
-  position: relative;
-}
-
-.audioplayer_progression {
-  width: var(--100);
-  background-color: var(--yellow);
-  height: 2px;
-}
-
-.audioplayer_name {
-  color: var(--yellow);
-  flex: none;
-  justify-content: flex-start;
-  align-items: center;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 10px;
-  display: flex;
-  position: absolute;
-  inset: 0% auto auto 0%;
-}
-
-// Media queries
 @media screen and (max-width: 991px) {
-  .audio-card {
-    width: 50%;
+  // Default variant : passe en static, layout row
+  .audio-card--default {
     flex-flow: row;
-    height: 50vw;
+    width: 100%;
+    height: 33.33vw;
     position: static;
+    margin-top: 60px;
+    inset: auto;
   }
 
-  .audio-card.is-home {
+  .audio-card--default .audio-card_image_wrapper {
+    height: 100%;
+    width: 33.33vw;
+  }
+
+  .audio-card--default .audio-card_info {
+    width: 66.66%;
+    padding: var(--20);
+  }
+
+  // Home variant : relative, full width
+  .audio-card--home {
     flex-flow: row;
     width: 100%;
     height: 33.33vw;
@@ -279,18 +319,27 @@
     left: auto;
   }
 
-  .audio-card_image.is-map {
-    display: none;
+  .audio-card--home .audio-card_image_wrapper {
+    height: 100%;
+    width: 33.33vw;
   }
 
+  .audio-card--home .audio-card_info {
+    width: 60%;
+    padding: var(--20);
+  }
+
+  // Menu variant : full width
+  .audio-card--menu {
+    width: 100%;
+    height: 50vw;
+  }
+
+  // Sous-éléments partagés
   .audio-card_image_wrapper {
     height: 30vw;
     flex: none;
     width: 100%;
-  }
-
-  .audio-card_button.is-map {
-    display: none;
   }
 
   .audio-card_info {
@@ -298,54 +347,18 @@
     height: 100%;
   }
 
-  .map-card {
-    width: 66.66vw;
-    height: 33.33vw;
-    top: 2vw;
-    left: 2vw;
-  }
-
-  .map-card_image_wrapper {
-    display: none;
-  }
-
-  .map-card_info {
-    padding-top: var(--40);
-    padding-right: var(--40);
-    padding-left: var(--40);
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-
   .audio-card_info_wrapper {
     display: flex;
   }
 
-  .audio-card--menu {
-    width: 100%;
-    height: 50vw;
-    position: static;
-  }
-
-  .audio-card--menu.is-home {
-    flex-flow: row;
-    width: 100%;
-    height: 33.33vw;
-    position: relative;
-    top: auto;
-    left: auto;
-  }
 }
 
 @media screen and (max-width: 767px) {
-  .audioplayer_name {
-    display: none;
-  }
 
 }
 
 @media screen and (max-width: 479px) {
-
+  // Menu variant : passe en row layout
   .audio-card--menu {
     width: 100%;
     flex-flow: row;
@@ -354,9 +367,7 @@
 
   .audio-card_info {
     width: 60%;
-    padding-top: var(--10);
-    padding-right: var(--10);
-    padding-left: var(--10);
+    padding: var(--20);;
   }
 
   .audio-card_image_wrapper {
@@ -365,20 +376,11 @@
     width: 40%;
   }
 
-  .audioplayer-wrapper {
-    grid-column-gap: var(--10);
-    grid-row-gap: var(--10);
-  }
-
-  .map-card_info {
+  // Map popup info padding
+  .audio-card--map-popup .audio-card_info {
     padding-top: var(--10);
     padding-right: var(--10);
     padding-left: var(--10);
   }
 
-  .audioplayer {
-    padding-right: var(--10);
-    padding-left: var(--10);
-  }
 }
-

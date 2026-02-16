@@ -72,48 +72,40 @@
           </div>
           <div class="menu_catalogue_list">
             <!-- Episodes / Reportages -->
-            <div
+            <AudioCard
               v-for="episode in episodes"
               :key="episode.slug"
-              class="audio-card--menu"
-              @click="playEpisode(episode)"
+              variant="menu"
+              :duration="audioDurations[episode.slug]"
+              :title="episode.title"
+              bg-color="red"
+              @play="playEpisode(episode)"
             >
-              <div class="audio-card_image_wrapper" v-if="episode.imagepodcast">
-                <ResponsivePicture class="audio-card_image" :image="episode.imagepodcast" sizes="200px" :alt="episode.title" picture-class="audio-card_image_rp" />
-                <div class="audio-card_button">
-                  <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
-                  <p class="audio-card_duration" v-if="audioDurations[episode.slug]">{{ audioDurations[episode.slug] }}</p>
-                </div>
-              </div>
-              <div class="audio-card_info is-bg-red">
-                <!--<p class="number">{{ episode.num }}.</p>-->
-                <p class="audio-card_title">{{ episode.title }}</p>
-              </div>
-            </div>
+              <template #image>
+                <ResponsivePicture v-if="episode.imagepodcast" class="audio-card_image" :image="episode.imagepodcast" sizes="200px" :alt="episode.title" picture-class="audio-card_image_rp" />
+              </template>
+            </AudioCard>
           </div>
           <div class="menu_catalogue_title_wrapper">
             <p class="menu_catalogue_title">Lieux 1 à {{ lieux.length }}</p>
           </div>
           <div class="menu_catalogue_list">
             <!-- Lieux / Capsules -->
-            <div
+            <AudioCard
               v-for="lieu in lieux"
               :key="lieu.slug"
-              class="audio-card--menu"
-              @click="playLieu(lieu)"
+              variant="menu"
+              :duration="audioDurations[lieu.slug]"
+              bg-color="green"
+              @play="playLieu(lieu)"
             >
-              <div class="audio-card_image_wrapper" v-if="lieu.imagepodcast">
-                <ResponsivePicture class="audio-card_image" :image="lieu.imagepodcast" sizes="200px" :alt="lieu.title" picture-class="audio-card_image_rp" />
-                <div class="audio-card_button">
-                  <img class="image" src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
-                  <p class="audio-card_duration" v-if="audioDurations[lieu.slug]">{{ audioDurations[lieu.slug] }}</p>
-                </div>
-              </div>
-              <div class="audio-card_info is-bg-green">
-                <!--<p class="number">{{ lieu.num }}.</p>-->
+              <template #image>
+                <ResponsivePicture v-if="lieu.imagepodcast" class="audio-card_image" :image="lieu.imagepodcast" sizes="200px" :alt="lieu.title" picture-class="audio-card_image_rp" />
+              </template>
+              <template #info>
                 <p class="audio-card_title"><span class="audio-card_number">{{ lieu.num }}.</span> {{ lieu.title }}</p>
-              </div>
-            </div>
+              </template>
+            </AudioCard>
           </div>
         </div>
       </div>
@@ -458,13 +450,6 @@ const playLieu = (lieu: any) => {
   font-size: 11px;
   color: var(--yellow);
   margin-top: 2px;
-}
-
-.audio-card_duration {
-  font-size: 11px;
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  color: var(--yellow);
-  margin: 0;
 }
 
 .menu_offset_wrapper {

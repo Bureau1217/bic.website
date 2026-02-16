@@ -23,25 +23,25 @@
     </div>
 
     <!-- Audio card optionnel -->
-    <div v-if="audioCard" class="audio-card is-home" @click="onPlayAudio">
-      <div class="audio-card_image_wrapper">
-        <!-- Image podcast : responsive si disponible, sinon fallback string -->
+    <AudioCard
+      v-if="audioCard"
+      variant="home"
+      :duration="audioCard.duration"
+      :title="audioCard.title"
+      :description="audioCard.description"
+      description-black
+      @click="onPlayAudio"
+      @play="onPlayAudio"
+    >
+      <template #image>
         <ResponsivePicture
           v-if="audioCard.image"
           :image="audioCard.image"
           sizes="240px"
           picture-class="audio-card_image_picture"
         />
-        <div class="audio-card_button">
-          <img src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="" class="image">
-          <div v-if="audioCard.duration" class="audio-card_time">{{ audioCard.duration }}</div>
-        </div>
-      </div>
-      <div class="audio-card_info">
-        <p class="audio-card_title">{{ audioCard.title }}</p>
-        <p v-if="audioCard.description" class="carte-card_info_text is-black">{{ audioCard.description }}</p>
-      </div>
-    </div>
+      </template>
+    </AudioCard>
   </section>
 </template>
 

@@ -9,6 +9,7 @@
         :audio-card="firstEpisode ? {
           title: firstEpisode.title,
           description: firstEpisode.texte || undefined,
+          duration: firstEpisodeDuration || undefined,
           image: firstEpisode.imagepodcast,
           audioUrl: firstEpisode.audio?.url,
           slug: firstEpisode.slug,
@@ -58,6 +59,28 @@ const { lieux, episodes, firstEpisode, parseGpsCoordinates, getEpisodeBySlug } =
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
+
+// Durée audio du premier épisode (hero)
+const firstEpisodeDuration = ref('')
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
+
+watch(firstEpisode, (ep) => {
+  if (ep?.audio?.url && !firstEpisodeDuration.value) {
+    const audio = new Audio()
+    audio.preload = 'metadata'
+    audio.addEventListener('loadedmetadata', () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        firstEpisodeDuration.value = formatDuration(audio.duration)
+      }
+    })
+    audio.src = ep.audio.url
+  }
+}, { immediate: true })
 
 // QR Code : détection du paramètre ?qr=1&episode=slug
 const route = useRoute()

@@ -15,13 +15,18 @@
     />
 
     <!-- AudioCard : on passe l'image responsive + ses propriétés -->
-    <AudioCard v-if="data?.result?.imagepodcast" :title="data?.result?.title ?? ''"
+    <AudioCard
+      v-if="data?.result?.imagepodcast"
+      variant="default"
+      :title="data?.result?.title ?? ''"
       :image="getImageSrc(data.result.imagepodcast)"
       :srcset="data.result.imagepodcast?.fallback?.srcset || ''"
       :sizes="data.result.imagepodcast?.sizes || '240px'"
       :alt="data.result.imagepodcast?.alt ?? ''"
-      style="background-color: #017f3f;"
-      @play="onPlayAudio" />
+      :duration="audioDuration"
+      bg-color="green"
+      @play="onPlayAudio"
+    />
 
 
     <!-- Layout: chaque row = une section .block-text -->
@@ -47,6 +52,15 @@ const slug = route.params.slug as string
 
 // Lecteur audio global (même player que le menu)
 const { playTrack } = useAudioPlayer()
+
+// Durée audio du lieu
+const audioDuration = ref('')
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
 
 // Popup QR code : détecte ?qr=1
 const showQrPopup = ref(false)
@@ -141,6 +155,20 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
+
+// Charger la durée audio quand les données arrivent
+watch(() => data.value?.result?.audio?.url, (audioUrl) => {
+  if (audioUrl && !audioDuration.value) {
+    const audio = new Audio()
+    audio.preload = 'metadata'
+    audio.addEventListener('loadedmetadata', () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        audioDuration.value = formatDuration(audio.duration)
+      }
+    })
+    audio.src = audioUrl
+  }
+}, { immediate: true })
 
 // Rows du layout
 const layoutRows = computed((): LayoutRow[] => {
