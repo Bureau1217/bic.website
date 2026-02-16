@@ -6,6 +6,7 @@ export default defineEventHandler(async (event) => {// console.log('data', data)
     const authHeader = Buffer.from(`${email}:${password}`).toString('base64')
 
     const body = await readBody(event)
+    console.log('KQL Request body:', JSON.stringify(body, null, 2))
 
     const dataApi = await $fetch(`${process.env.API_URL}/api/query`, {
         lazy: true,
