@@ -1,6 +1,17 @@
 // Styles de base - Notre Historia
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  height: 100%;
+}
+
 body {
+  min-height: 100%;
   color: var(--black);
   background-color: var(--white);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
@@ -27,7 +38,7 @@ h2 {
 }
 
 p {
-  margin-bottom: 0;
+  margin: 0;
   font-family: Gt Sectra, Arial, sans-serif;
   font-size: 18px;
   line-height: 1.2;
