@@ -1,33 +1,32 @@
 <template>
   <main class="v-home">
 
-    <template v-if="data?.result">
-      <HomeHero
-        :titre="data.result.home.titre"
-        :soustitre="data.result.home.soustitre"
-        :cover="data.result.home.cover"
-        :audio-card="firstEpisode ? {
-          title: firstEpisode.title,
-          description: firstEpisode.texte || undefined,
-          duration: firstEpisodeDuration || undefined,
-          image: firstEpisode.imagepodcast,
-          audioUrl: firstEpisode.audio?.url,
-          slug: firstEpisode.slug,
-          num: firstEpisode.num,
-          type: 'episode' as const,
-        } : undefined"
-      />
+    <HomeHero
+      v-if="data?.result"
+      :titre="data.result.home.titre"
+      :soustitre="data.result.home.soustitre"
+      :cover="data.result.home.cover"
+      :audio-card="firstEpisode ? {
+        title: firstEpisode.title,
+        description: firstEpisode.texte || undefined,
+        duration: firstEpisodeDuration || undefined,
+        image: firstEpisode.imagepodcast,
+        audioUrl: firstEpisode.audio?.url,
+        slug: firstEpisode.slug,
+        num: firstEpisode.num,
+        type: 'episode' as const,
+      } : undefined"
+    />
 
-      <!-- Carte interactive SITG avec lieux Kirby -->
-      <div style="height: 100vh; width: 100%;">
-        <MapView
-          :center="[6.1432, 46.2044]"
-          :zoom="5"
-          :markers="mapMarkers"
-          id="map-home"
-        />
-      </div>
-    </template>
+    <!-- Carte interactive SITG avec lieux Kirby -->
+    <div class="map-wrapper">
+      <MapView
+        :center="[6.1432, 46.2044]"
+        :zoom="5"
+        :markers="mapMarkers"
+        id="map-home"
+      />
+    </div>
 
     <PortraitSlider />
 
@@ -248,3 +247,10 @@ const mapMarkers = computed(() => {
     }>
 })
 </script>
+
+<style lang="scss" scoped>
+.map-wrapper {
+  height: 100vh;
+  width: 100%;
+}
+</style>

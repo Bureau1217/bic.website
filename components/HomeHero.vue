@@ -11,8 +11,8 @@
         picture-class="hero_image_picture"
       />
       <div class="hero_image_wrapper">
-        <img src='/images/5-Université-et-éducation.jpg' loading="lazy" class="hero_image-2" alt="Picto Podcast jaune">
-        <img src='/images/6-Restauration-et-gastronomie.jpg' loading="lazy" class="hero_image-2" alt="Picto Podcast jaune">
+        <img src='/images/5-Universite-et-education.webp' loading="lazy" width="500" height="500" class="hero_image-2" alt="Université et éducation">
+        <img src='/images/6-Restauration-et-gastronomie.webp' loading="lazy" width="500" height="500" class="hero_image-2" alt="Restauration et gastronomie">
       </div>
     </div>
 
