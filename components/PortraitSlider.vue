@@ -1,5 +1,5 @@
 <template>
-  <div v-if="portraits.length" class="portrait">
+  <div v-show="portraits.length" class="portrait">
     <div class="portrait_title_wrapper">
       <h1 class="portrait_title">{{ title }}</h1>
     </div>
@@ -74,6 +74,7 @@ const onSwiper = (swiper: SwiperType) => {
 // Portrait Slider Component Styles
 .portrait {
   width: var(--100);
+  min-height: 30vw;
   background-color: var(--red);
   display: flex;
 }
@@ -158,6 +159,7 @@ const onSwiper = (swiper: SwiperType) => {
 @media screen and (max-width: 991px) {
   .portrait {
     flex-flow: column;
+    min-height: 50vw;
   }
 
   .portrait_card_picture {

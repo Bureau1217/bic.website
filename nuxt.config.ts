@@ -4,6 +4,12 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   app: {
     pageTransition: { name: 'page', mode: 'out-in' },
+    head: {
+      link: [
+        { rel: 'preload', href: '/fonts/GT-Sectra-Medium.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
+        { rel: 'preload', href: '/fonts/Solfa.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
+      ],
+    },
   },
   devServer: {
     port: 3002,
