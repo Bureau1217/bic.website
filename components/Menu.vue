@@ -1,6 +1,6 @@
 <template>
     <div class="menu">
-      <NuxtLink to="/" class="menu_logo w-inline-block">
+      <NuxtLink to="/" class="menu_logo">
         <img src="/images/Logo-Notre-Historia.svg" loading="lazy" alt="" class="menu_logo_image">
       </NuxtLink>
       <div class="menu_nav">

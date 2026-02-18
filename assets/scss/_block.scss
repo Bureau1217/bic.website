@@ -39,6 +39,25 @@
       font-size: 16px;
     }
   }
+
+  blockquote {
+    border-left: 2px solid var(--red);
+    width: 100%;
+    font-size: 18px;
+    line-height: 22px;
+    padding: 0 var(--20);
+    margin: 0;
+  }
+
+  blockquote p {
+    font-style: italic; 
+  }
+
+  blockquote footer {
+    font-size: 16px;
+    margin-top: 10px;
+    font-weight: 600;
+  }
   
   // Media queries
   @media screen and (max-width: 991px) {
