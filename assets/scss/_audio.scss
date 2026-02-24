@@ -26,6 +26,10 @@
   inset: 80px 20px auto auto;
 }
 
+.audio-card--default .audio-card_number {
+  color: var(--yellow);
+}
+
 // ============================================================================
 // AUDIO CARD — Variant: home (hero section, position absolute)
 // ============================================================================
@@ -46,7 +50,7 @@
 // AUDIO CARD — Variant: menu (catalogue, position static)
 // ============================================================================
 
-.audio-card--menu {
+.audio-card--menu-episode {
   z-index: 800;
   width: 240px;
   height: 240px;
@@ -54,12 +58,44 @@
 }
 
 // Durée : jaune dans le menu
-.audio-card--menu .audio-card_time {
+.audio-card--menu-episode .audio-card_time {
   color: var(--yellow);
   font-size: 11px;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   margin: 0;
 }
+
+.audio-card--menu-catalogue {
+  z-index: 800;
+  width: 240px;
+  height: 240px;
+  background-color: var(--green);
+}
+
+.audio-card--menu-catalogue .audio-card_time {
+  color: var(--yellow);
+  font-size: 11px;
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  margin: 0;
+}
+
+.audio-card--menu-catalogue .audio-card_info {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-end;
+}
+
+.audio-card--menu-catalogue .audio-card_info_wrapper {
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: var(--10);
+}
+
+.audio-card--menu-catalogue .audio-card_number {
+  color: var(--yellow);
+}
+
 
 // ============================================================================
 // AUDIO CARD — Variant: map-popup (popup carte, layout horizontal)
@@ -226,6 +262,7 @@
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 16px;
   line-height: 1;
+  font-weight: bold;
 }
 
 // Numéro
@@ -233,7 +270,8 @@
   color: var(--yellow);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 16px;
-  line-height: 1.3;
+  line-height: 1;
+  font-weight: bold;
 }
 
 // Zone info

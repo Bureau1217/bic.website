@@ -42,7 +42,7 @@
                 class="menu_parcours_link" 
                 @click="closeMenu"
               >
-                <div>{{ lieu.num }}. {{ lieu.title }}</div>
+                <div class="menu_parcours_link_title"><span>{{ lieu.num }}.</span> <span>{{ lieu.title }}</span></div>
               </NuxtLink>
             </div>
           </div>
@@ -75,7 +75,7 @@
             <AudioCard
               v-for="episode in episodes"
               :key="episode.slug"
-              variant="menu"
+              variant="menu-episode"
               :duration="audioDurations[episode.slug]"
               :title="episode.title"
               :description="episode.texte || ''"
@@ -95,16 +95,15 @@
             <AudioCard
               v-for="lieu in lieux"
               :key="lieu.slug"
-              variant="menu"
+              variant="menu-catalogue"
               :duration="audioDurations[lieu.slug]"
-              bg-color="green"
               @play="playLieu(lieu)"
             >
               <template #image>
                 <ResponsivePicture v-if="lieu.imagepodcast" class="audio-card_image" :image="lieu.imagepodcast" sizes="200px" :alt="lieu.title" picture-class="audio-card_image_rp" />
               </template>
               <template #info>
-                <p class="audio-card_title"><span class="audio-card_number">{{ lieu.num }}.</span> {{ lieu.title }}</p>
+                <p class="audio-card_title"><span class="audio-card_number">{{ lieu.num }}.  </span> {{ lieu.title }}</p>
               </template>
             </AudioCard>
           </div>
@@ -374,6 +373,14 @@ const playLieu = (lieu: any) => {
     display: flex;
     position: relative;
   }
+}
+
+.menu_parcours_link_title {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: var(--10);
 }
 
 

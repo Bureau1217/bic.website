@@ -1,21 +1,27 @@
 <template>
 
     <div class="journal">
-        <div class="journal_image_wrapper">
-            <img src="/images/2-Fig1-p-800.jpg" alt="Journal" class="journal_image">
-        </div>
+        <h2 class="list_title">{{ title }}</h2>
         <div class="journal_content">
-            <p class="journal_text">{{ text }}</p>
-            <NuxtLink :to="buttonUrl" class="journal_button">{{ buttonText }}</NuxtLink>
+            <div class="journal_content_wrapper">
+                <p class="journal_text">{{ text }}</p>
+                <NuxtLink :to="buttonUrl" class="journal_button">{{ buttonText }}</NuxtLink>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
 defineProps({
+    title: {
+        type: String,
+        required: true,
+        default: 'Notre journal',
+    },
     text: {
         type: String,
         required: true,
+        default: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     },
     buttonText: {
         type: String,
@@ -31,38 +37,30 @@ defineProps({
 <style lang="scss" scoped>
 
 .journal {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    //margin: var(--40) 0;
-    background-color: var(--green);
-}
-
-.journal_image_wrapper {
-    width: 40%;
-    height: 40vw;
-}
-
-.journal_image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    padding: var(--40) 0 0;
 }
 
 .journal_content {
+    width: 100%;
+    padding: var(--40) var(--40);
+    border-top: 1px solid var(--red);
+}
+
+.journal_content_wrapper {
     width: 60%;
-    padding: var(--40);
+    margin-left: auto;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
     align-items: flex-start;
-    justify-content: center;
     gap: var(--20);
 }
 
 .journal_text {
     font-size: 18px;
-    color: var(--white);
+    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+    color: var(--red);
 }
 
 .journal_button {
@@ -75,5 +73,17 @@ defineProps({
     text-decoration: none;
     font-style: normal;
     box-sizing: border-box;
+}
+
+@media screen and (max-width: 767px) {
+    .journal_content_wrapper {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 479px) {
+    .journal_content {
+        padding: var(--20) var(--10);
+    }
 }
 </style>

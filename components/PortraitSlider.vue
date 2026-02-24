@@ -6,12 +6,15 @@
     <div class="portrait_slider">
       <Swiper
         :modules="[Navigation, Autoplay]"
-        :slides-per-view="3"
+        :slides-per-view="1"
         :space-between="0"
         :navigation="true"
         :autoplay="{
           delay: 5000,
           disableOnInteraction: true,
+        }"
+        :breakpoints="{
+          480: { slidesPerView: 3 },
         }"
         :loop="true"
         class="portrait_swiper"
@@ -146,7 +149,7 @@ const onSwiper = (swiper: SwiperType) => {
   color: var(--yellow);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 16px;
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .portrait_description {
@@ -176,6 +179,11 @@ const onSwiper = (swiper: SwiperType) => {
 }
 
 @media screen and (max-width: 479px) {
+
+  .portrait_card_picture {
+        height: 100vw;
+    }
+
   .portrait_title_wrapper {
     padding-right: var(--10);
     padding-left: var(--10);

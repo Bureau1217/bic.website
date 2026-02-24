@@ -23,7 +23,7 @@
           <div 
             v-for="(item, itemIndex) in category.items" 
             :key="itemIndex" 
-            class="list_dev_line"
+            class="list_dev_line is-ressources"
           >
             <div class="list_case">
               <p class="list_label">{{ item.label }}</p>

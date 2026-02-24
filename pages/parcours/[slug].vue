@@ -18,13 +18,13 @@
     <AudioCard
       v-if="data?.result?.imagepodcast"
       variant="default"
+      :number="data?.result?.num ?? null"
       :title="data?.result?.title ?? ''"
       :image="getImageSrc(data.result.imagepodcast)"
       :srcset="data.result.imagepodcast?.fallback?.srcset || ''"
       :sizes="data.result.imagepodcast?.sizes || '240px'"
       :alt="data.result.imagepodcast?.alt ?? ''"
       :duration="audioDuration"
-      bg-color="green"
       @play="onPlayAudio"
     />
 
@@ -114,6 +114,7 @@ type LayoutRow = {
 
 type FetchData = CMS_API_Response & {
   result: {
+    num: string | number | null
     title: string
     slug: string
     template: string
@@ -133,6 +134,7 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   body: {
     query: `site.find('parcours').childrenAndDrafts().published().find('${slug}')`,
     select: {
+      num: 'page.num',
       title: true,
       slug: true,
       template: true,

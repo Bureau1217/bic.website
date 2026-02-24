@@ -40,6 +40,7 @@ defineProps<{
 .block-slider {
   overflow: hidden;
   width: var(--100);
+  margin-bottom: 20px;
 
   .block-slider_swiper {
     width: 100%;
