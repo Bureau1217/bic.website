@@ -32,8 +32,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
-type AudioCardVariant = 'default' | 'home' | 'menu' | 'map-popup'
-
+type AudioCardVariant = 'default' | 'home' | 'menu-episode' | 'menu-catalogue' | 'map-popup'
 const props = withDefaults(defineProps<{
   /** Variante visuelle de la carte */
   variant?: AudioCardVariant

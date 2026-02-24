@@ -645,6 +645,12 @@ defineExpose({
   height: 100%;
   object-fit: contain;
   padding: 4px;
+  transform: scale(1);
+  transition: transform 0.2s ease-in-out;
+}
+
+.map-view__marker-icon:hover {
+  transform: scale(1.15);
 }
 
 /* ============================================================================

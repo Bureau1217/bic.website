@@ -7,8 +7,6 @@
 }
 
 .block-text {
-    grid-column-gap: var(--40);
-    grid-row-gap: var(--40);
     background-color: var(--white);
     flex-flow: column;
     width: 60%;
@@ -21,13 +19,16 @@
     
     .block_p {
       max-width: 800px;
-      p {
-        margin-bottom: 0.5rem;
+      margin-bottom: 20px;
+
+      &_p {
+        margin-bottom: 20px;
       }
     }
   }
   
   .block-image {
+    margin-bottom: 20px;
     &_image {
       width: var(--100);
     }
@@ -40,13 +41,41 @@
     }
   }
 
+
+
+
+.block-image_legende {
+  margin-top: var(--10);
+  color: var(--red);
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+// Image dans les blocs de contenu : ancien <img> et nouveau <picture>
+.block-image_image {
+  width: var(--100);
+}
+
+.block-image_picture {
+  width: var(--100);
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 80vh;
+    object-fit: contain;
+  }
+}
+
   blockquote {
     border-left: 2px solid var(--red);
     width: 100%;
     font-size: 18px;
     line-height: 22px;
     padding: 0 var(--20);
-    margin: 0;
+    margin-top: 0;
+    margin-bottom: 20px;
   }
 
   blockquote p {

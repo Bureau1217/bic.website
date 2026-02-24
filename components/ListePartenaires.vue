@@ -2,7 +2,7 @@
   <div class="list" id="partenaires">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_wrapper">
-      <div class="list_line">
+      <div class="list_line is-partenaires">
         <div class="list_line_wrapper is-partenaires">
           <NuxtLink 
             v-for="(partner, index) in partners" 

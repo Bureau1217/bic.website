@@ -69,8 +69,8 @@ const contact = computed(() => data.value?.result?.contact)
   max-width: 2400px;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 80px;
-  padding-bottom: 40px;
+  padding-top: 40px;
+  padding-bottom: 20px;
   display: flex;
 }
 

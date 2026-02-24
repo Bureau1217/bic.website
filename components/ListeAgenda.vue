@@ -26,7 +26,7 @@
         </div>
         <div class="list_line_wrapper">
           <div class="list_case">
-            <p class="list_label">{{ event.date }}</p>
+            <p class="list_label">{{ formatEventDate(event.date) }}</p>
           </div>
           <div class="list_case">
             <p class="list_label is-bold">{{ event.title }}</p>
@@ -74,6 +74,67 @@ props.events.forEach((_, index) => {
 
 const toggleEvent = (index) => {
   openEvents[index] = !openEvents[index]
+}
+
+const formatDatePart = (value = '') => {
+  const trimmedValue = value.trim()
+  const isoDateMatch = trimmedValue.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+
+  if (!isoDateMatch) {
+    return trimmedValue
+  }
+
+  const [, year, month, day] = isoDateMatch
+  const parsedDate = new Date(`${year}-${month}-${day}T00:00:00`)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return trimmedValue
+  }
+
+  return new Intl.DateTimeFormat('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(parsedDate)
+}
+
+const formatTimePart = (value = '') => {
+  const trimmedValue = value.trim()
+  if (!trimmedValue) return ''
+
+  const timeMatch = trimmedValue.match(/^(\d{1,2})(?:[:hH](\d{1,2}))?$/)
+  if (!timeMatch) {
+    return trimmedValue
+  }
+
+  const hours = String(Math.min(23, Math.max(0, Number(timeMatch[1]))))
+  const minutes = String(Math.min(59, Math.max(0, Number(timeMatch[2] || '0')))).padStart(2, '0')
+  return `${hours}h${minutes}`
+}
+
+const formatEventDate = (value = '') => {
+  const trimmedValue = value.trim()
+  if (!trimmedValue) return ''
+
+  const dateWithTimeMatch = trimmedValue.match(/^(.*?)(?:\s+-\s+(.+?))(?:\s+à\s+(.+))?$/)
+
+  if (!dateWithTimeMatch) {
+    return formatDatePart(trimmedValue)
+  }
+
+  const [, rawDate, rawStartTime = '', rawEndTime = ''] = dateWithTimeMatch
+  const formattedDate = formatDatePart(rawDate)
+  const formattedStartTime = formatTimePart(rawStartTime)
+  const formattedEndTime = formatTimePart(rawEndTime)
+
+  if (formattedStartTime && formattedEndTime) {
+    return `${formattedDate} - ${formattedStartTime} à ${formattedEndTime}`
+  }
+
+  if (formattedStartTime) {
+    return `${formattedDate} - ${formattedStartTime}`
+  }
+
+  return formattedDate
 }
 </script>
 
