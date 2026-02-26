@@ -92,7 +92,9 @@ export function usePodcastData() {
                 // au lieu de l'URL brute (fichiers originaux souvent 5–12 Mo)
                 imagepodcast: 'page.responsiveImage("imagepodcast", "podcast")',
                 audio: {
-                  query: 'page.files.template("audio").first',
+                  // Lire le fichier explicitement choisi dans le champ "audio" du lieu
+                  // (évite de dépendre du template de fichier).
+                  query: 'page.content.audio.toFile',
                   select: {
                     url: true,
                     filename: true,

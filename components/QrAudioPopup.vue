@@ -2,7 +2,7 @@
   <Teleport to="body">
     <Transition name="qr-popup">
       <div v-if="modelValue" class="qr-popup-overlay" @click.self="dismiss">
-        <div class="qr-popup">
+        <div class="qr-popup" :class="popupTypeClass">
           <div v-if="image" class="qr-popup_image-wrapper">
             <img 
               :src="image" 
@@ -16,7 +16,7 @@
               Voulez-vous lancer l'audio de <strong>{{ title }}</strong>&nbsp;?
             </p>
             <div class="qr-popup_actions">
-              <button class="qr-popup_btn is-yes" @click="accept">
+              <button class="qr-popup_btn is-yes" :class="popupTypeClass" @click="accept">
                 Oui, écouter
               </button>
               <button class="qr-popup_btn is-no" @click="dismiss">
@@ -32,11 +32,14 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = withDefaults(defineProps<{
   title: string
   image: string
   modelValue: boolean
-}>()
+  popupType?: 'episode' | 'lieu'
+}>(), {
+  popupType: 'episode',
+})
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
@@ -51,6 +54,10 @@ const accept = () => {
 const dismiss = () => {
   emit('update:modelValue', false)
 }
+
+const popupTypeClass = computed(() =>
+  props.popupType === 'lieu' ? 'is-lieu' : 'is-episode'
+)
 </script>
 
 <style lang="scss">
@@ -68,7 +75,7 @@ const dismiss = () => {
 }
 
 .qr-popup {
-  background-color: var(--black);
+  background-color: var(--red);
   height: 400px;
   max-width: 400px;
   width: 100%;
@@ -77,6 +84,10 @@ const dismiss = () => {
   align-items: center;
   gap: var(--15);
   text-align: center;
+
+  &.is-lieu {
+    background-color: var(--green);
+  }
 }
 
 .qr-popup_content {
@@ -148,8 +159,8 @@ const dismiss = () => {
   }
 
   &.is-yes {
-    background-color: var(--green);
-    color: var(--white);
+    background-color: var(--yellow);
+    color: var(--black);
   }
 
   &.is-no {

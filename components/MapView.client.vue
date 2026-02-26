@@ -205,6 +205,8 @@ const markerDataMap = new Map<string | number, MapMarker>()
 
 // Handle pour l'animation frame
 let updateMarkersRAF: number | null = null
+let continuousUpdateRAF: number | null = null
+let isContinuousUpdateRunning = false
 
 // ============================================================================
 // POPUP MANAGEMENT
@@ -310,6 +312,31 @@ function scheduleMarkersUpdate() {
     cancelAnimationFrame(updateMarkersRAF)
   }
   updateMarkersRAF = requestAnimationFrame(updateMarkersPosition)
+}
+
+/**
+ * Met à jour les markers en continu pendant les animations de carte
+ * pour garder les markers synchronisés avec le déplacement de la vue.
+ */
+function startContinuousMarkersUpdate() {
+  if (isContinuousUpdateRunning) return
+  isContinuousUpdateRunning = true
+
+  const tick = () => {
+    if (!isContinuousUpdateRunning) return
+    updateMarkersPosition()
+    continuousUpdateRAF = requestAnimationFrame(tick)
+  }
+
+  tick()
+}
+
+function stopContinuousMarkersUpdate() {
+  isContinuousUpdateRunning = false
+  if (continuousUpdateRAF) {
+    cancelAnimationFrame(continuousUpdateRAF)
+    continuousUpdateRAF = null
+  }
 }
 
 /**
@@ -419,9 +446,14 @@ async function initMap() {
       scheduleMarkersUpdate()
     })
     
-    // Aussi lors des animations (zoom/pan)
-    view.watch('animation', () => {
-      scheduleMarkersUpdate()
+    // Pendant les animations/interactions, forcer une synchro frame par frame
+    view.watch('stationary', (isStationary) => {
+      if (isStationary) {
+        stopContinuousMarkersUpdate()
+        scheduleMarkersUpdate()
+      } else {
+        startContinuousMarkersUpdate()
+      }
     })
     
     // Fermer la popup quand on clique sur la carte (pas sur un marker)
@@ -481,6 +513,7 @@ onBeforeUnmount(() => {
     cancelAnimationFrame(updateMarkersRAF)
     updateMarkersRAF = null
   }
+  stopContinuousMarkersUpdate()
   
   clearMarkers()
   
@@ -631,12 +664,6 @@ defineExpose({
   justify-content: center;
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 0.15s ease-out;
-}
-
-.map-view__marker:hover {
-  transform: scale(1.15);
-  z-index: 10;
 }
 
 .map-view__marker-number {

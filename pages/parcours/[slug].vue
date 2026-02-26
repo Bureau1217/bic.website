@@ -41,7 +41,7 @@
 
     <!-- Popup QR code : propose de lancer l'audio si ?qr=1 -->
     <QrAudioPopup v-if="data?.result?.audio?.url" v-model="showQrPopup" :title="data?.result?.title ?? ''"
-      :image="getImageSrc(data?.result?.imagepodcast)" @play="onPlayAudio" />
+      :image="getImageSrc(data?.result?.imagepodcast)" popup-type="lieu" @play="onPlayAudio" />
 
   </main>
 </template>
@@ -69,11 +69,6 @@ const formatDuration = (seconds: number): string => {
 // Popup QR code : détecte ?qr=1
 const showQrPopup = ref(false)
 const hasQrParam = route.query.qr === '1'
-
-// Nettoyer l'URL immédiatement
-if (hasQrParam) {
-  router.replace({ query: { ...route.query, qr: undefined } })
-}
 
 const onPlayAudio = () => {
   const result = data.value?.result
@@ -160,6 +155,17 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
+
+// QR: ouvrir le popup dès que l'audio est disponible, puis nettoyer l'URL
+if (hasQrParam) {
+  const stopQrWatch = watch(() => data.value?.result?.audio?.url, (audioUrl) => {
+    if (audioUrl) {
+      showQrPopup.value = true
+      router.replace({ query: { ...route.query, qr: undefined } })
+      stopQrWatch()
+    }
+  }, { immediate: true })
+}
 
 
 // Charger la durée audio quand les données arrivent

@@ -40,6 +40,15 @@ bun run dev
 
 Variables for the CMS API connection live in `.env`.
 
+## QR Audio popup (URL params)
+
+Use the following query params to open the QR audio popup:
+
+- Home page (`/`): `?qr=1&episode=<slug>`
+  - Example: `/?qr=1&episode=mon-episode`
+- Lieu page (`/parcours/[slug]`): `?qr=1`
+  - Example: `/parcours/nom-du-lieu?qr=1`
+
 ## Production
 
 Build the application for production:

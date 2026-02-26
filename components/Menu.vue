@@ -1,6 +1,6 @@
 <template>
     <div class="menu">
-      <NuxtLink to="/" class="menu_logo">
+      <NuxtLink to="/" class="menu_logo" :class="{ 'is-hidden': !isLogoVisible }">
         <img src="/images/Logo-Notre-Historia.svg" loading="lazy" alt="" class="menu_logo_image">
       </NuxtLink>
       <div class="menu_nav">
@@ -11,7 +11,7 @@
           <img src="/images/Menu.svg" loading="lazy" alt="">
         </div>
       </div>
-      <div class="menu_offset" :style="{ display: menuOpen ? 'flex' : 'none' }">
+      <div class="menu_offset" :class="{ 'is-open': menuOpen }">
         <div class="menu_close" @click="closeMenu"></div>
         <div class="menu_offset_wrapper">
           <div class="menu_cross_wrapper">
@@ -57,7 +57,7 @@
 
         </div>
       </div>
-      <div class="menu_catalogue" :style="{ display: catalogueOpen ? 'flex' : 'none' }">
+      <div class="menu_catalogue" :class="{ 'is-open': catalogueOpen }">
         <div class="menu_close" @click="closeCatalogue"></div>
         <div class="menu_catalogue_wrapper">
           <div class="menu_catalogue_header">
@@ -113,7 +113,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 // Utiliser le composable pour accéder aux données globales
 const { lieux, episodes, isLoaded } = usePodcastData()
@@ -124,6 +124,10 @@ const { playTrack } = useAudioPlayer()
 const menuOpen = ref(false)
 const catalogueOpen = ref(false)
 const lieuxOpen = ref(false)
+const isLogoVisible = ref(false)
+const lastScrollY = ref(0)
+
+const SCROLL_DIRECTION_THRESHOLD = 6
 
 // --- Durées audio ---
 // Map slug -> durée formatée (ex: "12'34")
@@ -160,11 +164,29 @@ const loadAllDurations = () => {
   }
 }
 
+const handleWindowScroll = () => {
+  const currentScrollY = window.scrollY || 0
+  const delta = currentScrollY - lastScrollY.value
+
+  // Ignore micro-movements to avoid flickering.
+  if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) return
+
+  isLogoVisible.value = delta < 0
+  lastScrollY.value = currentScrollY
+}
+
 // Charger les durées quand les données sont prêtes
 onMounted(() => {
   if (isLoaded.value) {
     loadAllDurations()
   }
+
+  lastScrollY.value = window.scrollY || 0
+  window.addEventListener('scroll', handleWindowScroll, { passive: true })
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', handleWindowScroll)
 })
 
 watch(isLoaded, (loaded) => {
@@ -252,6 +274,12 @@ const playLieu = (lieu: any) => {
   padding-left: 20px;
   padding-right: 20px;
   display: flex;
+  position: relative;
+  transition: transform 0.25s ease;
+
+  &.is-hidden {
+    transform: translateY(-60px);
+  }
 }
 
 .menu_nav {
@@ -282,9 +310,17 @@ const playLieu = (lieu: any) => {
   text-transform: uppercase;
   flex-flow: row;
   width: 100%;
-  display: none;
+  display: flex;
   position: fixed;
   inset: 0% 0% 0% auto;
+  transform: translateX(100%);
+  transition: transform 0.5s ease-in-out;
+  pointer-events: none;
+
+  &.is-open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
 }
 
 .menu_catalogue {
@@ -292,10 +328,18 @@ const playLieu = (lieu: any) => {
   flex-flow: row;
   width: 100%;
   height: 100vh;
-  display: none;
+  display: flex;
   position: fixed;
   inset: 0% 0% auto auto;
   overflow: auto;
+  transform: translateX(100%);
+  transition: transform 0.5s ease-in-out;
+  pointer-events: none;
+
+  &.is-open {
+    transform: translateX(0);
+    pointer-events: auto;
+  }
 }
 
 .menu_link {
@@ -514,7 +558,6 @@ const playLieu = (lieu: any) => {
 // Media queries
 @media screen and (max-width: 991px) {
   .menu {
-    background-color: var(--red);
     justify-content: space-between;
     align-items: center;
     height: 60px;
@@ -522,8 +565,9 @@ const playLieu = (lieu: any) => {
 
   .menu_logo {
     height: var(--100);
-    width: auto;
+    width: var(--100);
     margin-left: 0%;
+    justify-content: flex-start;
   }
 
   .menu_nav {

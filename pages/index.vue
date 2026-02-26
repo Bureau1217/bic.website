@@ -44,6 +44,7 @@
       v-model="showQrPopup"
       :title="qrEpisode.title"
       :image="getImageSrc(qrEpisode.imagepodcast)"
+      popup-type="episode"
       @play="onPlayQrEpisode"
     />
 
