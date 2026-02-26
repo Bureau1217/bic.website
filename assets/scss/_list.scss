@@ -11,6 +11,15 @@
   background-color: var(--white);
 }
 
+.list.is-last {
+  padding-bottom: 0;
+}
+
+.list#ressources {
+  padding: var(--40) 0 0;
+  
+}
+
 .list_wrapper {
   width: var(--100);
   border-top: 1px solid var(--red);
@@ -88,7 +97,8 @@
 }
 
 .list_case.is-partenaires {
-  width: calc(33.33% - 30px);
+  width: calc(33.33% - 40px);
+  max-width: 320px;
   gap: 10px;
   display: flex;
   flex-direction: column;
@@ -183,8 +193,8 @@
 
 .list_line_wrapper.is-partenaires {
   flex-wrap: wrap;
-  row-gap: var(--40);
-  column-gap: var(--40);
+  row-gap: 40px;
+  column-gap: 40px;
 }
 
 .list_desc {

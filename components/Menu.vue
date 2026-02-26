@@ -549,7 +549,13 @@ const playLieu = (lieu: any) => {
   .menu_close {
     display: none;
   }
+
+  .menu_offset_legals {
+    padding: var(--20) var(--20) var(--40);
+  }
 }
+
+
 
 @media screen and (max-width: 479px) {
   .menu_catalogue_list {

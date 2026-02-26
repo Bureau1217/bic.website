@@ -11,8 +11,18 @@
         picture-class="hero_image_picture"
       />
       <div class="hero_image_wrapper">
-        <img src='/images/5-Universite-et-education.webp' loading="lazy" width="500" height="500" class="hero_image-2" alt="Université et éducation">
-        <img src='/images/6-Restauration-et-gastronomie.webp' loading="lazy" width="500" height="500" class="hero_image-2" alt="Restauration et gastronomie">
+        <ResponsivePicture
+          v-if="image1"
+          :image="image1"
+          sizes="(min-width: 2500px) 1250px, (min-width: 992px) 20vw, 50vw"
+          picture-class="hero_image-2"
+        />
+        <ResponsivePicture
+          v-if="image2"
+          :image="image2"
+          sizes="(min-width: 2500px) 1250px, (min-width: 992px) 20vw, 50vw"
+          picture-class="hero_image-2"
+        />
       </div>
     </div>
 
@@ -53,7 +63,10 @@ interface Props {
   soustitre?: CMS_API_Block[]
   /** Cover au format responsive (historiaImage('cover')) */
   cover?: ResponsiveImage | null
-  sideImages?: CMS_API_File[]
+  /** Image secondaire 1 du hero */
+  image1?: ResponsiveImage | null
+  /** Image secondaire 2 du hero */
+  image2?: ResponsiveImage | null
   audioCard?: {
     title: string
     description?: string
@@ -140,9 +153,14 @@ const subtitleText = computed(() => {
 }
 
 .hero_image-2 {
-  object-fit: cover;
   width: 50%;
   height: 100%;
+
+  img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+  }
 }
 
 // Audio card image picture : même style que l'image directe
@@ -163,6 +181,10 @@ const subtitleText = computed(() => {
     flex-flow: column;
     justify-content: flex-start;
     align-items: center;
+  }
+
+  .hero .block-text {
+    margin-bottom: 0;
   }
 
   .hero_image_picture img {

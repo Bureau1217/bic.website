@@ -13,10 +13,11 @@
       :events="formattedEvents" 
     />
 
-    <Journal 
-      text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-      button-text="Découvrir le journal"
-      button-url="#"
+    <Journal
+      :title="data?.result?.ressources?.journal_titre || 'Notre journal'"
+      :text="data?.result?.ressources?.journal_texte || ''"
+      :button-text="data?.result?.ressources?.journal_bouton_texte || ''"
+      :button-url="data?.result?.ressources?.journal_bouton_url || '#'"
     />
 
     <ListeRessource 
@@ -62,12 +63,10 @@ type FetchData = CMS_API_Response & {
       cover: CMS_API_File | null
       ressources: ReferenceRessource[]
       evenements: ReferenceEvent[]
-      journal: {
-        titre: string | null
-        texte: string | null
-        bouton_texte: string | null
-        bouton_url: string | null
-      }
+      journal_titre: string | null
+      journal_texte: string | null
+      journal_bouton_texte: string | null
+      journal_bouton_url: string | null
     }
   }
 }
@@ -119,12 +118,10 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               lieu: 'structureItem.lieu.value',
             },
           },
-          journal: {
-            titre: 'page.journal_titre.value',
-            texte: 'page.journal_texte.value',
-            bouton_texte: 'page.journal_bouton_texte.value',
-            bouton_url: 'page.journal_bouton_url.value',
-          },
+          journal_titre: 'page.journal_titre.value',
+          journal_texte: 'page.journal_texte.value',
+          journal_bouton_texte: 'page.journal_bouton_texte.value',
+          journal_bouton_url: 'page.journal_bouton_url.value',
         },
       },
     },
@@ -183,7 +180,7 @@ const formattedEvents = computed(() => {
 })
 
 const goToJournal = () => {
-  const url = data.value?.result.ressources.journal.bouton_url
+  const url = data.value?.result.ressources.journal_bouton_url
   if (url) {
     window.open(url, '_blank', 'noopener')
   }

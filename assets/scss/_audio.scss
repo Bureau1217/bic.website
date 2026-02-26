@@ -320,7 +320,7 @@
   .audio-card--default {
     flex-flow: row;
     width: 100%;
-    height: 33.33vw;
+    height: 30vw;
     position: static;
     margin-top: 60px;
     inset: auto;
@@ -328,11 +328,11 @@
 
   .audio-card--default .audio-card_image_wrapper {
     height: 100%;
-    width: 33.33vw;
+    width: 30vw;
   }
 
   .audio-card--default .audio-card_info {
-    width: 66.66%;
+    width: 70%;
     padding: var(--20);
   }
 
@@ -340,7 +340,7 @@
   .audio-card--home {
     flex-flow: row;
     width: 100%;
-    height: 33.33vw;
+    height: 30vw;
     position: relative;
     top: auto;
     left: auto;
@@ -348,16 +348,21 @@
 
   .audio-card--home .audio-card_image_wrapper {
     height: 100%;
-    width: 33.33vw;
+    width: 30vw;
   }
 
   .audio-card--home .audio-card_info {
-    width: 60%;
+    width: 70%;
     padding: var(--20);
   }
 
   // Menu variant : full width
-  .audio-card--menu {
+  .audio-card--menu-episode {
+    width: 100%;
+    height: 50vw;
+  }
+
+  .audio-card--menu-catalogue {
     width: 100%;
     height: 50vw;
   }
@@ -386,10 +391,16 @@
 
 @media screen and (max-width: 479px) {
   // Menu variant : passe en row layout
-  .audio-card--menu {
+  .audio-card--menu-episode {
     width: 100%;
     flex-flow: row;
     height: 40vw;
+  }
+
+  .audio-card--menu-catalogue {
+    width: 100%;
+    height: 40vw;
+    flex-flow: row;
   }
 
   .audio-card_info {

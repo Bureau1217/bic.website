@@ -6,6 +6,8 @@
       :titre="data.result.home.titre"
       :soustitre="data.result.home.soustitre"
       :cover="data.result.home.cover"
+      :image1="data.result.home.image1"
+      :image2="data.result.home.image2"
       :audio-card="firstEpisode ? {
         title: firstEpisode.title,
         description: firstEpisode.texte || undefined,
@@ -143,6 +145,9 @@ type HomePageData = CMS_API_Response & {
       soustitre: CMS_API_Block[]
       /** Cover au format responsive (historiaImage('cover')) */
       cover: ResponsiveImage | null
+      /** Images secondaires du hero */
+      image1: ResponsiveImage | null
+      image2: ResponsiveImage | null
     }
     ressources: {
       evenements: ReferenceEvent[]
@@ -167,6 +172,8 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           // Image responsive null-safe : fallback + WebP + AVIF srcset
           // au lieu de l'URL brute du fichier original (souvent 5–12 Mo)
           cover: 'page.responsiveImage("cover", "cover")',
+          image1: 'page.responsiveImage("image1", "cover")',
+          image2: 'page.responsiveImage("image2", "cover")',
         },
       },
       ressources: {

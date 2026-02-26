@@ -1,5 +1,5 @@
 <template>
-  <div class="list" id="agenda">
+  <div class="list is-last" id="agenda">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_line--header">
       <div class="list_line_wrapper">

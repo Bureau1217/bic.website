@@ -16,9 +16,10 @@
     </div>
 
     <Journal
-      text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
-      button-text="Découvrir le journal"
-      button-url="#"
+      :title="data?.result?.references?.journal_titre || 'Notre journal'"
+      :text="data?.result?.references?.journal_texte || ''"
+      :button-text="data?.result?.references?.journal_bouton_texte || ''"
+      :button-url="data?.result?.references?.journal_bouton_url || '#'"
     />
 
   </main>
@@ -44,6 +45,12 @@ type FetchData = CMS_API_Response & {
       soustitre: CMS_API_Block[]
       cover: CMS_API_File | null
       children: ParcoursChild[]
+    }
+    references: {
+      journal_titre: string | null
+      journal_texte: string | null
+      journal_bouton_texte: string | null
+      journal_bouton_url: string | null
     }
   }
 }
@@ -76,6 +83,15 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               template: true,
             },
           },
+        },
+      },
+      references: {
+        query: "site.find('ressources')",
+        select: {
+          journal_titre: 'page.journal_titre.value',
+          journal_texte: 'page.journal_texte.value',
+          journal_bouton_texte: 'page.journal_bouton_texte.value',
+          journal_bouton_url: 'page.journal_bouton_url.value',
         },
       },
     },

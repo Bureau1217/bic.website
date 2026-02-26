@@ -1,5 +1,5 @@
 <template>
-  <div class="list" id="partenaires">
+  <div class="list is-last" id="partenaires">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_wrapper">
       <div class="list_line is-partenaires">

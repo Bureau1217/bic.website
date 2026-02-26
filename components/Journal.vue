@@ -45,6 +45,7 @@ defineProps({
     width: 100%;
     padding: var(--40) var(--40);
     border-top: 1px solid var(--red);
+    border-bottom: 1px solid var(--red);
 }
 
 .journal_content_wrapper {
@@ -66,8 +67,8 @@ defineProps({
 .journal_button {
     font-size: 18px;
     font-weight: 500;
-    color: var(--white);
-    background-color: var(--black);
+    color: var(--black);
+    background-color: var(--yellow);
     padding: var(--10) var(--20);
     border-radius: 100px;
     text-decoration: none;

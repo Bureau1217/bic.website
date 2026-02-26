@@ -26,7 +26,11 @@
       :alt="data.result.imagepodcast?.alt ?? ''"
       :duration="audioDuration"
       @play="onPlayAudio"
-    />
+    >
+      <template #info>
+        <p class="audio-card_title"><span class="audio-card_number">{{ data?.result?.num ?? null }}.  </span> {{ data?.result?.title ?? '' }}</p>
+      </template>
+    </AudioCard>
 
 
     <!-- Layout: chaque row = une section .block-text -->

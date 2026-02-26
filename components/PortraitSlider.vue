@@ -75,11 +75,20 @@ const onSwiper = (swiper: SwiperType) => {
 
 <style lang="scss">
 // Portrait Slider Component Styles
+.swiper-wrapper {
+  align-items: stretch !important;
+}
+
+.swiper-slide {
+  height: auto;
+}
+
 .portrait {
   width: var(--100);
   min-height: 30vw;
   background-color: var(--red);
   display: flex;
+  margin-bottom: var(--40);
 }
 
 .portrait_slider {

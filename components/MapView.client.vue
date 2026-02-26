@@ -404,6 +404,12 @@ async function initMap() {
     view.on('mouse-wheel', (event) => {
       event.stopPropagation()
     })
+
+    // Sur appareils tactiles (iPad/smartphone), garder le scroll page à 1 doigt.
+    // La navigation de la carte reste possible avec des gestes à 2 doigts.
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      view.navigation.browserTouchPanEnabled = false
+    }
     
     // Ajouter les markers HTML initiaux
     addMarkers()
