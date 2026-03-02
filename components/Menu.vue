@@ -79,7 +79,7 @@
               :duration="audioDurations[episode.slug]"
               :title="episode.title"
               :description="episode.texte || ''"
-              bg-color="red"
+              @click="playEpisode(episode)"
               @play="playEpisode(episode)"
             >
               <template #image>
@@ -97,6 +97,7 @@
               :key="lieu.slug"
               variant="menu-catalogue"
               :duration="audioDurations[lieu.slug]"
+              @click="playLieu(lieu)"
               @play="playLieu(lieu)"
             >
               <template #image>
@@ -120,6 +121,7 @@ const { lieux, episodes, isLoaded } = usePodcastData()
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
+const route = useRoute()
 
 const menuOpen = ref(false)
 const catalogueOpen = ref(false)
@@ -128,6 +130,10 @@ const isLogoVisible = ref(false)
 const lastScrollY = ref(0)
 
 const SCROLL_DIRECTION_THRESHOLD = 6
+
+const isParcoursSlugPage = (path: string): boolean => {
+  return /^\/parcours\/[^/]+\/?$/.test(path)
+}
 
 // --- Durées audio ---
 // Map slug -> durée formatée (ex: "12'34")
@@ -181,6 +187,8 @@ onMounted(() => {
     loadAllDurations()
   }
 
+  // Sur les pages /parcours/[slug], le logo doit être visible dès le chargement.
+  isLogoVisible.value = isParcoursSlugPage(route.path)
   lastScrollY.value = window.scrollY || 0
   window.addEventListener('scroll', handleWindowScroll, { passive: true })
 })
@@ -193,6 +201,10 @@ watch(isLoaded, (loaded) => {
   if (loaded) {
     loadAllDurations()
   }
+})
+
+watch(() => route.path, (path) => {
+  isLogoVisible.value = isParcoursSlugPage(path)
 })
 
 const toggleMenu = () => {
@@ -275,7 +287,7 @@ const playLieu = (lieu: any) => {
   padding-right: 20px;
   display: flex;
   position: relative;
-  transition: transform 0.25s ease;
+  transition: transform 0.4s ease 0.3s;
 
   &.is-hidden {
     transform: translateY(-60px);
@@ -392,6 +404,17 @@ const playLieu = (lieu: any) => {
   width: 60%;
   height: 100vh;
   display: flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 1s ease;
+  transition-delay: 0s;
+}
+
+.menu_offset.is-open .menu_close,
+.menu_catalogue.is-open .menu_close {
+  opacity: 1;
+  pointer-events: auto;
+  transition-delay: 0.5s;
 }
 
 .menu_close_cross {

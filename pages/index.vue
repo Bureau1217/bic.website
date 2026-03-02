@@ -197,6 +197,10 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
   },
 })
 
+useHead({
+  title: 'Accueil',
+})
+
 // Transformer les événements du CMS pour le composant ListeAgenda
 const formattedEvents = computed(() => {
   const events = data.value?.result?.ressources?.evenements
@@ -260,5 +264,11 @@ const mapMarkers = computed(() => {
 .map-wrapper {
   height: 100vh;
   width: 100%;
+}
+
+@media screen and (max-width: 991px) {
+  .map-wrapper {
+    height: 100vw;
+  }
 }
 </style>

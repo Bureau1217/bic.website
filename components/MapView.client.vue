@@ -138,6 +138,7 @@ const mapError = ref<string | null>(null)
 // Popup state
 const activePopup = ref<MapMarker | null>(null)
 const popupPosition = ref({ x: 0, y: 0 })
+const selectedMarkerId = ref<string | number | null>(null)
 
 // --- Durées audio ---
 const audioDurations = ref<Record<string, string>>({})
@@ -219,10 +220,14 @@ function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }) {
     y: screenPoint.y - 10 // Décalage vers le haut
   }
   activePopup.value = marker
+  selectedMarkerId.value = marker.id
+  updateSelectedMarkerStyles()
 }
 
 function closePopup() {
   activePopup.value = null
+  selectedMarkerId.value = null
+  updateSelectedMarkerStyles()
 }
 
 // ============================================================================
@@ -275,6 +280,13 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
   return el
 }
 
+function updateSelectedMarkerStyles() {
+  markerElements.forEach((el, id) => {
+    const isSelected = selectedMarkerId.value !== null && id === selectedMarkerId.value
+    el.classList.toggle('map-view__marker--selected', isSelected)
+  })
+}
+
 /**
  * Met à jour la position de tous les markers HTML sur l'écran
  * Utilise requestAnimationFrame pour la performance
@@ -295,7 +307,8 @@ function updateMarkersPosition() {
     
     if (screenPoint) {
       // Utiliser transform pour de meilleures performances
-      el.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px)`
+      const scale = selectedMarkerId.value !== null && id === selectedMarkerId.value ? 1.15 : 1
+      el.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px) scale(${scale})`
       el.style.display = 'flex'
     } else {
       // Point hors de l'écran
@@ -362,6 +375,7 @@ function addMarkers() {
   
   // Mettre à jour les positions
   updateMarkersPosition()
+  updateSelectedMarkerStyles()
 }
 
 /**
@@ -486,6 +500,21 @@ async function initMap() {
   }
 }
 
+function handleWindowResize() {
+  closePopup()
+}
+
+function isMobilePhoneViewport() {
+  return window.matchMedia('(pointer: coarse)').matches && window.matchMedia('(max-width: 768px)').matches
+}
+
+function handleTouchMoveOnMap(event: TouchEvent) {
+  if (!isMobilePhoneViewport()) return
+  if (event.touches.length >= 2) {
+    closePopup()
+  }
+}
+
 // ============================================================================
 // LIFECYCLE & WATCHERS
 // ============================================================================
@@ -493,6 +522,8 @@ async function initMap() {
 onMounted(async () => {
   await nextTick()
   console.log('[MapView] Container:', mapContainer.value)
+  window.addEventListener('resize', handleWindowResize)
+  mapContainer.value?.addEventListener('touchmove', handleTouchMoveOnMap, { passive: true })
   initMap()
   // Charger les durées audio
   if (isLoaded.value) {
@@ -515,6 +546,9 @@ onBeforeUnmount(() => {
   }
   stopContinuousMarkersUpdate()
   
+  window.removeEventListener('resize', handleWindowResize)
+  mapContainer.value?.removeEventListener('touchmove', handleTouchMoveOnMap)
+
   clearMarkers()
   
   if (view) {
@@ -664,6 +698,7 @@ defineExpose({
   justify-content: center;
   cursor: pointer;
   pointer-events: auto;
+  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
 }
 
 .map-view__marker-number {
@@ -678,12 +713,15 @@ defineExpose({
   height: 100%;
   object-fit: contain;
   padding: 4px;
-  transform: scale(1);
-  transition: transform 0.2s ease-in-out;
+  transition: filter 0.2s ease-in-out;
 }
 
-.map-view__marker-icon:hover {
-  transform: scale(1.15);
+.map-view__marker--selected .map-view__marker-icon {
+  color: var(--green);
+}
+
+.map-view__marker--selected .map-view__marker-number {
+  color: var(--green);
 }
 
 /* ============================================================================

@@ -128,6 +128,10 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
+useHead(() => ({
+  title: data.value?.result?.ressources?.title || 'Ressources',
+}))
+
 // Transformer les ressources du CMS pour le composant ListeRessource (groupées par tag)
 const formattedRessources = computed(() => {
   const ressources = data.value?.result?.ressources?.ressources

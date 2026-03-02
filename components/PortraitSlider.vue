@@ -6,7 +6,7 @@
     <div class="portrait_slider">
       <Swiper
         :modules="[Navigation, Autoplay]"
-        :slides-per-view="1"
+        :slides-per-view="2"
         :space-between="0"
         :navigation="true"
         :autoplay="{
@@ -190,7 +190,7 @@ const onSwiper = (swiper: SwiperType) => {
 @media screen and (max-width: 479px) {
 
   .portrait_card_picture {
-        height: 100vw;
+        height: 50vw;
     }
 
   .portrait_title_wrapper {

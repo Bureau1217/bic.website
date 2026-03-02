@@ -12,6 +12,7 @@
   align-items: center;
   display: flex;
   background-color: var(--green);
+  cursor: pointer;
 }
 
 // ============================================================================
@@ -203,6 +204,7 @@
   font-size: 12px;
   opacity: 0.9;
   line-height: 1.4;
+  color: var(--white);
 }
 
 // ============================================================================
@@ -248,10 +250,14 @@
   position: absolute;
   inset: auto auto 10px 10px;
   cursor: pointer;
+
+  .image {
+    width: 30px;
+  }
 }
 
 .audio-card_time {
-  color: var(--white);
+  color: var(--yellow);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 12px;
 }
@@ -316,19 +322,27 @@
 // ============================================================================
 
 @media screen and (max-width: 991px) {
+
+  .audio-card {
+    position: relative;
+  }
   // Default variant : passe en static, layout row
   .audio-card--default {
     flex-flow: row;
     width: 100%;
     height: 30vw;
-    position: static;
-    margin-top: 60px;
+    position: relative;
     inset: auto;
+    margin-top: 60px;
   }
 
   .audio-card--default .audio-card_image_wrapper {
     height: 100%;
     width: 30vw;
+    position: static;
+  }
+  .audio-card--default .audio-card_button {
+    inset: auto auto 20px calc(30vw + 20px);
   }
 
   .audio-card--default .audio-card_info {
@@ -349,6 +363,11 @@
   .audio-card--home .audio-card_image_wrapper {
     height: 100%;
     width: 30vw;
+    position: static;
+  }
+
+  .audio-card--home .audio-card_button {
+    inset: auto auto 10px calc(30vw + 20px);
   }
 
   .audio-card--home .audio-card_info {
@@ -356,10 +375,18 @@
     padding: var(--20);
   }
 
+  .audio-card--home .audio-card_title {
+    color: var(--yellow);
+  }
+
   // Menu variant : full width
   .audio-card--menu-episode {
     width: 100%;
     height: 50vw;
+  }
+
+  .audio-card--menu-episode .audio-card_title {
+    color: var(--yellow);
   }
 
   .audio-card--menu-catalogue {
@@ -387,9 +414,28 @@
 
 @media screen and (max-width: 767px) {
 
+
+
 }
 
 @media screen and (max-width: 479px) {
+
+  .audio-card--home .audio-card_info {
+    padding: var(--10);
+  }
+
+  .audio-card--home .audio-card_button {
+    inset: auto auto 10px calc(30vw + 10px);
+  }
+
+  .audio-card--default .audio-card_button {
+    inset: auto auto 10px calc(30vw + 10px);
+  }
+
+  .audio-card--default .audio-card_info {
+    padding: var(--10);
+  }
+  
   // Menu variant : passe en row layout
   .audio-card--menu-episode {
     width: 100%;
@@ -403,10 +449,27 @@
     flex-flow: row;
   }
 
+  .audio-card--menu-catalogue .audio-card_info {
+    align-items: flex-start;
+  }
+
+  .audio-card_image_wrapper {
+    position: static;
+  }
+
+  .audio-card_button {
+    inset: auto auto 10px 40vw;
+
+    .image {
+      width: 22px;
+    }
+  }
+
   .audio-card_info {
     width: 60%;
-    padding: var(--20);;
+    padding: var(--10);
   }
+
 
   .audio-card_image_wrapper {
     height: 40vw;

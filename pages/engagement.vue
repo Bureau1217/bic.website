@@ -35,4 +35,8 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
+
+useHead(() => ({
+  title: data.value?.result?.title || 'Engagement',
+}))
 </script>

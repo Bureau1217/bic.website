@@ -26,6 +26,7 @@
       :alt="data.result.imagepodcast?.alt ?? ''"
       :duration="audioDuration"
       @play="onPlayAudio"
+      @click="onPlayAudio"
     >
       <template #info>
         <p class="audio-card_title"><span class="audio-card_number">{{ data?.result?.num ?? null }}.  </span> {{ data?.result?.title ?? '' }}</p>
@@ -155,6 +156,10 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
     },
   },
 })
+
+useHead(() => ({
+  title: data.value?.result?.title || 'Parcours',
+}))
 
 // QR: ouvrir le popup dès que l'audio est disponible, puis nettoyer l'URL
 if (hasQrParam) {

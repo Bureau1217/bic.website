@@ -89,6 +89,7 @@ const onProgressClick = (event) => {
 .audioplayer_icon {
   width: 30px;
   height: 30px;
+  cursor: pointer;
 }
 
 .audioplayer_icon.is-sound {
@@ -108,18 +109,21 @@ const onProgressClick = (event) => {
 
 .audioplayer_line {
   width: var(--100);
-  height: var(--100);
+  height: 1px;
   flex-flow: column;
   justify-content: center;
   align-items: flex-start;
   display: flex;
   position: relative;
+  cursor: pointer;
+  background-color: var(--yellow);
 }
 
 .audioplayer_progression {
   width: var(--100);
   background-color: var(--yellow);
-  height: 2px;
+  height: 4px;
+  flex-shrink: 0;
 }
 
 .audioplayer_name {

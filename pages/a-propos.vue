@@ -78,6 +78,10 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
+useHead(() => ({
+  title: data.value?.result?.apropos?.title || 'A propos',
+}))
+
 // Formater les partenaires pour le composant ListePartenaires
 const formattedPartenaires = computed(() => {
   if (!data.value?.result?.apropos?.partenaires) return []

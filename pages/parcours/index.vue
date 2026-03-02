@@ -98,6 +98,10 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
+useHead(() => ({
+  title: data.value?.result?.parcours?.title || 'Parcours',
+}))
+
 // Transformer les lieux en markers pour MapView
 const mapMarkers = computed(() => {
   if (!lieux.value?.length) return []
