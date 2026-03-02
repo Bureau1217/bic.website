@@ -135,6 +135,10 @@ const isParcoursSlugPage = (path: string): boolean => {
   return /^\/parcours\/[^/]+\/?$/.test(path)
 }
 
+const isHomePage = (path: string): boolean => {
+  return path === '/'
+}
+
 // --- Durées audio ---
 // Map slug -> durée formatée (ex: "12'34")
 const audioDurations = ref<Record<string, string>>({})
@@ -173,6 +177,13 @@ const loadAllDurations = () => {
 const handleWindowScroll = () => {
   const currentScrollY = window.scrollY || 0
   const delta = currentScrollY - lastScrollY.value
+
+  // Sur la home uniquement, le logo doit se cacher au retour en haut de page.
+  if (isHomePage(route.path) && currentScrollY <= 0) {
+    isLogoVisible.value = false
+    lastScrollY.value = currentScrollY
+    return
+  }
 
   // Ignore micro-movements to avoid flickering.
   if (Math.abs(delta) < SCROLL_DIRECTION_THRESHOLD) return

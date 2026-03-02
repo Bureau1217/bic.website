@@ -420,16 +420,34 @@
 
 @media screen and (max-width: 479px) {
 
+  .audio-card--home {
+    height: 40vw;
+  }
+
+  .audio-card--home .audio-card_image_wrapper {
+    height: 40vw;
+    width: 40vw;
+  }
+
   .audio-card--home .audio-card_info {
     padding: var(--10);
   }
 
   .audio-card--home .audio-card_button {
-    inset: auto auto 10px calc(30vw + 10px);
+    inset: auto auto 10px calc(40vw + 10px);
+  }
+
+  .audio-card--default {
+    height: 40vw;
+  }
+
+  .audio-card--default .audio-card_image_wrapper {
+    height: 40vw;
+    width: 40vw;
   }
 
   .audio-card--default .audio-card_button {
-    inset: auto auto 10px calc(30vw + 10px);
+    inset: auto auto 10px calc(40vw + 10px);
   }
 
   .audio-card--default .audio-card_info {
@@ -474,7 +492,7 @@
   .audio-card_image_wrapper {
     height: 40vw;
     flex: none;
-    width: 40%;
+    width: 40vw;
   }
 
   // Map popup info padding

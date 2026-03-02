@@ -204,9 +204,7 @@ const subtitleText = computed(() => {
 }
 
 @media screen and (max-width: 479px) {
-  .hero_side {
-    padding-top: 60px;
-  }
+
 
 }
 </style>
