@@ -262,6 +262,9 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
         longitude: marker.coordinates[0],
         latitude: marker.coordinates[1]
       })
+      // Démarrer la synchro frame-by-frame dès le clic
+      // pour éviter un décalage au début de l'animation goTo.
+      startContinuousMarkersUpdate()
       view.goTo({ target: point }, { duration: 500 }).then(() => {
         // Ouvrir la popup une fois le recentrage terminé
         const screenPoint = view!.toScreen(point)
@@ -271,6 +274,8 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
             y: screenPoint.y
           })
         }
+      }).finally(() => {
+        scheduleMarkersUpdate()
       })
     }
     
@@ -698,7 +703,9 @@ defineExpose({
   justify-content: center;
   cursor: pointer;
   pointer-events: auto;
-  transition: transform 0.2s ease-in-out, filter 0.2s ease-in-out;
+  /* Pas de transition sur transform: évite l'effet de "retard" pendant les déplacements */
+  transition: filter 0.2s ease-in-out;
+  will-change: transform;
 }
 
 .map-view__marker-number {
