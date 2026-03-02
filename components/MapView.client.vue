@@ -435,6 +435,14 @@ async function initMap() {
         rotationEnabled: false,
         minZoom: 5,
         maxZoom: 10,
+        geometry: new Extent({
+          // Limites de navigation "ville centre" de Genève (WGS84)
+          xmin: 6.11,  // ouest
+          ymin: 46.18, // sud
+          xmax: 6.18,  // est
+          ymax: 46.23, // nord
+          spatialReference: { wkid: 4326 }
+        })
       }
     })
     
