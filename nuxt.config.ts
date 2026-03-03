@@ -28,6 +28,9 @@ export default defineNuxtConfig({
     public: {
       // URL de base du CMS, utilisée pour normaliser les URLs des médias
       cmsBaseUrl: process.env.API_URL || 'http://localhost:8000',
+      // Mode maintenance : true = affiche page "en construction"
+      // Bypass avec ?preview=true dans l'URL (stocke un cookie)
+      maintenanceMode: process.env.MAINTENANCE_MODE === 'true',
     },
   },
 })

@@ -3,14 +3,18 @@
     <Transition name="loader-fade" @after-leave="loaderGone = true">
       <div v-if="showLoader" class="app-loader"></div>
     </Transition>
-    <Menu />
+    <Menu v-if="!isMaintenancePage" />
     <NuxtPage/>
-    <AppFooter />
-    <AudioPlayer />
+    <AppFooter v-if="!isMaintenancePage" />
+    <AudioPlayer v-if="!isMaintenancePage" />
   </div>
 </template>
 
 <script setup lang="ts">
+// Détecter si on est sur la page maintenance
+const route = useRoute()
+const isMaintenancePage = computed(() => route.path === '/maintenance')
+
 // Initialiser le fetch des données globales (lieux et épisodes)
 // Ces données seront disponibles dans tous les composants via usePodcastData()
 const { fetchPodcastData } = usePodcastData()
