@@ -1,5 +1,4 @@
-export default defineEventHandler(async (event) => {// console.log('data', data)
-
+export default defineEventHandler(async (event) => {
     const email = process.env.API_AUTH_EMAIL
     const password = process.env.API_AUTH_PASSWORD
 
@@ -8,18 +7,46 @@ export default defineEventHandler(async (event) => {// console.log('data', data)
     const body = await readBody(event)
     console.log('KQL Request body:', JSON.stringify(body, null, 2))
 
-    const dataApi = await $fetch(`${process.env.API_URL}/api/query`, {
-        lazy: true,
-        method: 'POST',
-        headers: {
-            'Authorization': `Basic ${authHeader}`
-        },
-        body,
-    })
+    if (!body) {
+        throw createError({ statusCode: 400, message: 'Missing request body' })
+    }
 
-    console.log('dataApi', dataApi)
+    // Retry logic for PHP built-in server limitations
+    const maxRetries = 3
+    let lastError: Error | null = null
 
-    return dataApi
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+            const dataApi = await $fetch(`${process.env.API_URL}/api/query`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Basic ${authHeader}`,
+                    'Content-Type': 'application/json'
+                },
+                body,
+            })
+
+            console.log('dataApi', dataApi)
+            return dataApi
+        } catch (error: any) {
+            lastError = error
+            // Log detailed error info
+            console.warn(`KQL request attempt ${attempt}/${maxRetries} failed:`, {
+                message: error.message,
+                statusCode: error.statusCode,
+                data: error.data,
+                response: error.response?._data
+            })
+
+            // Only retry on 400 errors (PHP server overload)
+            if (error.statusCode !== 400 || attempt === maxRetries) {
+                throw error
+            }
+
+            // Wait before retry (exponential backoff)
+            await new Promise(resolve => setTimeout(resolve, 100 * attempt))
+        }
+    }
+
+    throw lastError
 })
-
-

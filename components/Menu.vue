@@ -336,13 +336,16 @@ const playLieu = (lieu: any) => {
   display: flex;
   position: fixed;
   inset: 0% 0% 0% auto;
-  transform: translateX(100%);
-  transition: transform 0.5s ease-in-out;
+  transform: translateX(0);
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s;
   pointer-events: none;
+  visibility: hidden;
 
   &.is-open {
-    transform: translateX(0);
+    opacity: 1;
     pointer-events: auto;
+    visibility: visible;
   }
 }
 
@@ -355,13 +358,16 @@ const playLieu = (lieu: any) => {
   position: fixed;
   inset: 0% 0% auto auto;
   overflow: auto;
-  transform: translateX(100%);
-  transition: transform 0.5s ease-in-out;
+  transform: translateX(0);
+  opacity: 0;
+  transition: opacity 0.05s ease-in-out, visibility 0.05s;
   pointer-events: none;
+  visibility: hidden;
 
   &.is-open {
-    transform: translateX(0);
+    opacity: 1;
     pointer-events: auto;
+    visibility: visible;
   }
 }
 
@@ -417,15 +423,13 @@ const playLieu = (lieu: any) => {
   display: flex;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 1s ease;
-  transition-delay: 0s;
+  transition: opacity 0.5s ease-in-out;
 }
 
 .menu_offset.is-open .menu_close,
 .menu_catalogue.is-open .menu_close {
   opacity: 1;
   pointer-events: auto;
-  transition-delay: 0.5s;
 }
 
 .menu_close_cross {

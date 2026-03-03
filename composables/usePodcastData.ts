@@ -59,14 +59,14 @@ export function usePodcastData() {
 
   // Fonction pour fetcher les données (appelée une seule fois)
   const fetchPodcastData = async () => {
-    // Si les données sont déjà chargées, ne pas refetcher
+    // Si les données sont déjà chargées (SSR ou précédent fetch), ne pas refetcher
     if (isLoaded.value && lieux.value.length > 0) {
       return
     }
 
     try {
-      const { data } = await useFetch<PodcastDataResponse>('/api/CMS_KQLRequest', {
-        key: 'podcast-global-data',
+      // Utiliser $fetch directement pour éviter le re-fetch automatique de useFetch
+      const data = await $fetch<PodcastDataResponse>('/api/CMS_KQLRequest', {
         method: 'POST',
         body: {
           query: 'site',
@@ -105,10 +105,8 @@ export function usePodcastData() {
                   select: {
                     nom: 'structureItem.nom.value',
                     description: 'structureItem.description.value',
-                    // Portrait image : chaîne KQL (null = '' côté frontend, géré par ResponsivePicture)
-                    image: 'structureItem.image.toFile.historiaImage("column")',
-                    // Note: pour les structureItems, pas de méthode null-safe possible.
-                    // Si toFile retourne null, KQL retourne '' → le composant ne rend rien.
+                    // Portrait image : méthode null-safe (retourne null si pas d'image)
+                    image: 'structureItem.safeImage("image", "column")',
                     link: {
                       query: 'structureItem.link.toPages.first',
                       select: {
@@ -127,10 +125,8 @@ export function usePodcastData() {
                 slug: true,
                 num: 'page.num',
                 texte: 'page.texte.value',
-                // Image podcast : format responsive
-                // Les épisodes n'ont pas de champ "imagepodcast" mais des images template "poster"
-                // Si pas d'image poster, KQL retourne '' → le composant ne rend rien
-                imagepodcast: 'page.images.template("poster").first.historiaImage("podcast")',
+                // Image podcast : méthode null-safe (retourne null si pas d'image poster)
+                imagepodcast: 'page.templateImage("poster", "podcast")',
                 audio: {
                   query: 'page.files.template("audio").first',
                   select: {
@@ -144,9 +140,9 @@ export function usePodcastData() {
         },
       })
 
-      if (data.value?.result) {
-        lieux.value = data.value.result.lieux || []
-        episodes.value = data.value.result.episodes || []
+      if (data?.result) {
+        lieux.value = data.result.lieux || []
+        episodes.value = data.result.episodes || []
         isLoaded.value = true
       }
     } catch (e) {
