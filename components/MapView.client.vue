@@ -20,6 +20,7 @@
       <NuxtLink :to="`/parcours/${activePopup.slug || activePopup.id}`" class="audio-card--map-popup-link">
         <AudioCard
           variant="map-popup"
+          :track-audio-url="getAudioUrlForMarker(activePopup) || ''"
           :duration="audioDurations[activePopup.slug || activePopup.id]"
           :show-button="!!getAudioUrlForMarker(activePopup)"
           @play="playFromPopup(activePopup)"
@@ -433,7 +434,8 @@ async function initMap() {
       },
       constraints: {
         rotationEnabled: false,
-        minZoom: 5,
+        snapToZoom: false,
+        minZoom: 4,
         maxZoom: 10,
         geometry: new Extent({
           // Limites de navigation "ville centre" de Genève (WGS84)
@@ -646,6 +648,21 @@ defineExpose({
 </script>
 
 <style>
+/* ============================================================================
+   MAP WRAPPER
+   ============================================================================ */
+
+.map-wrapper.map-view {
+  width: 100%;
+  height: 100vh;
+}
+
+@media screen and (max-width: 991px) {
+  .map-wrapper.map-view {
+    height: 70vw;
+  }
+}
+
 /* ============================================================================
    MAP CONTAINER
    ============================================================================ */

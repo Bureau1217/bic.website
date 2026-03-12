@@ -127,6 +127,47 @@ export function useAudioPlayer() {
   }
 
   /**
+   * Jouer la piste précédente dans la liste courante.
+   * Épisode -> épisode précédent, Lieu -> lieu précédent
+   * Si c'est le premier, on ne change pas de piste.
+   */
+  const playPrevious = () => {
+    if (!currentTrack.value) return
+
+    const { lieux, episodes } = usePodcastData()
+    const track = currentTrack.value
+
+    if (track.type === 'episode') {
+      const currentIndex = episodes.value.findIndex(e => e.slug === track.slug)
+      const previousEpisode = episodes.value[currentIndex - 1]
+      if (previousEpisode?.audio?.url) {
+        playTrack({
+          title: previousEpisode.title,
+          num: previousEpisode.num,
+          audioUrl: previousEpisode.audio.url,
+          slug: previousEpisode.slug,
+          type: 'episode',
+        })
+      }
+      return
+    }
+
+    if (track.type === 'lieu') {
+      const currentIndex = lieux.value.findIndex(l => l.slug === track.slug)
+      const previousLieu = lieux.value[currentIndex - 1]
+      if (previousLieu?.audio?.url) {
+        playTrack({
+          title: previousLieu.title,
+          num: previousLieu.num,
+          audioUrl: previousLieu.audio.url,
+          slug: previousLieu.slug,
+          type: 'lieu',
+        })
+      }
+    }
+  }
+
+  /**
    * Jouer une piste audio
    */
   const playTrack = (track: AudioTrack) => {
@@ -222,6 +263,8 @@ export function useAudioPlayer() {
     // Actions
     initAudioListeners,
     playTrack,
+    playNext,
+    playPrevious,
     togglePlay,
     toggleMute,
     close,

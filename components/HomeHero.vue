@@ -36,10 +36,10 @@
     <AudioCard
       v-if="audioCard"
       variant="home"
+      :track-audio-url="audioCard.audioUrl || ''"
       :duration="audioCard.duration"
       :title="audioCard.title"
       :description="audioCard.description"
-      @click="onPlayAudio"
       @play="onPlayAudio"
     >
       <template #image>

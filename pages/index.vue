@@ -24,7 +24,7 @@
     <div class="map-wrapper">
       <MapView
         :center="[6.1432, 46.2044]"
-        :zoom="5"
+        :zoom="4.7"
         :markers="mapMarkers"
         id="map-home"
       />
@@ -268,7 +268,7 @@ const mapMarkers = computed(() => {
 
 @media screen and (max-width: 991px) {
   .map-wrapper {
-    height: 100vw;
+    height: 70vw;
   }
 }
 </style>

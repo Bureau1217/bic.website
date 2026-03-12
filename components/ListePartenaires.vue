@@ -18,7 +18,7 @@
               class="list_image"
             >
             <p class="list_label is-partenaires">
-              <strong>{{ partner.name }}</strong><br>
+              <strong>{{ partner.name }}</strong>
               {{ partner.description }}
             </p>
           </NuxtLink>

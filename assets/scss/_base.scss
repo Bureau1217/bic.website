@@ -52,7 +52,7 @@ h3 {
 p {
   margin: 0;
   font-family: Gt Sectra, Arial, sans-serif;
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.2; 
   margin-top: 0;
   margin-bottom: 0;
@@ -171,6 +171,22 @@ picture {
 }
 
 @media screen and (max-width: 479px) {
+
+  h1 {
+    font-size: 60px;
+  }
+
+  h2 {
+    font-size: 60px;
+  }
+
+  h3 {
+    font-size: 60px;
+  }
+
+  p {
+    font-size: 18px;
+  }
 
   .page_header {
     padding: 80px 10px 40px;
