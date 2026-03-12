@@ -5,9 +5,37 @@
         :src="isPlaying ? '/images/son-pause.svg' : '/images/son-play.svg'" 
         loading="lazy" 
         alt="Play/Pause" 
-        class="audioplayer_icon"
+        class="audioplayer_icon audioplayer_icon--play-toggle"
         @click="togglePlay"
       >
+      <div class="audioplayer_track-controls">
+        <button
+          type="button"
+          class="audioplayer_track-button"
+          aria-label="Piste précédente"
+          @click="playPrevious"
+        >
+          <img
+            src="/images/prev.svg"
+            loading="lazy"
+            alt=""
+            class="audioplayer_track-icon"
+          >
+        </button>
+        <button
+          type="button"
+          class="audioplayer_track-button"
+          aria-label="Piste suivante"
+          @click="playNext"
+        >
+          <img
+            src="/images/next.svg"
+            loading="lazy"
+            alt=""
+            class="audioplayer_track-icon"
+          >
+        </button>
+      </div>
       <img 
         :src="isMuted ? '/images/son-muted.svg' : '/images/Son-Player.svg'" 
         loading="lazy" 
@@ -16,7 +44,9 @@
         @click="toggleMute"
       >
       <div class="audioplayer_line" @click="onProgressClick">
-        <p class="audioplayer_name">{{ currentTrack?.title }}</p>
+        <p class="audioplayer_name">
+          {{ currentTrack?.type === 'lieu' && currentTrack?.num != null ? `${currentTrack.num}. ` : '' }}{{ currentTrack?.title }}
+        </p>
         <div class="audioplayer_progression" :style="{ width: progress + '%' }"></div>
       </div>
       <p class="audioplayer_time">{{ currentTimeFormatted }} / {{ durationFormatted }}</p>
@@ -24,7 +54,7 @@
         src="/images/player-close.svg" 
         loading="lazy" 
         alt="Fermer" 
-        class="audioplayer_icon"
+        class="audioplayer_icon audioplayer_icon--close"
         @click="close"
       >
     </div>
@@ -43,6 +73,8 @@ const {
   currentTimeFormatted,
   durationFormatted,
   togglePlay,
+  playNext,
+  playPrevious,
   toggleMute,
   close,
   seekTo,
@@ -75,8 +107,8 @@ const onProgressClick = (event) => {
 .audioplayer-wrapper {
   width: var(--100);
   padding: 5px var(--10);
-  grid-column-gap: var(--20);
-  grid-row-gap: var(--20);
+  grid-column-gap: var(--10);
+  grid-row-gap: var(--10);
   background-color: #00000080;
   border-radius: 100px;
   justify-content: space-between;
@@ -90,6 +122,60 @@ const onProgressClick = (event) => {
   width: 30px;
   height: 30px;
   cursor: pointer;
+}
+
+.audioplayer_track-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.audioplayer_track-button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.audioplayer_track-icon {
+  width: 30px;
+  height: 30px;
+  display: block;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.audioplayer_track-button:hover {
+  background: #00000040;
+}
+
+.audioplayer_track-button:hover .audioplayer_track-icon,
+.audioplayer_track-button:focus-visible .audioplayer_track-icon {
+  opacity: 0.7;
+}
+
+.audioplayer_icon--play-toggle {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.audioplayer_icon--play-toggle:hover {
+  opacity: 0.7;
+}
+
+.audioplayer_icon--close {
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.audioplayer_icon--close:hover {
+  opacity: 0.7;
 }
 
 .audioplayer_icon.is-sound {
@@ -132,10 +218,11 @@ const onProgressClick = (event) => {
   justify-content: flex-start;
   align-items: center;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   display: flex;
   position: absolute;
-  inset: 0% auto auto 0%;
+  inset: -21px auto auto 0%;
+  line-height: 1.2;
 }
 
 @media screen and (max-width: 767px) {

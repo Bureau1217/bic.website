@@ -18,6 +18,7 @@
     <AudioCard
       v-if="data?.result?.imagepodcast"
       variant="default"
+      :track-audio-url="data?.result?.audio?.url || ''"
       :number="data?.result?.num ?? null"
       :title="data?.result?.title ?? ''"
       :image="getImageSrc(data.result.imagepodcast)"
@@ -26,7 +27,6 @@
       :alt="data.result.imagepodcast?.alt ?? ''"
       :duration="audioDuration"
       @play="onPlayAudio"
-      @click="onPlayAudio"
     >
       <template #info>
         <p class="audio-card_title"><span class="audio-card_number">{{ data?.result?.num ?? null }}.  </span> {{ data?.result?.title ?? '' }}</p>

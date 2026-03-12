@@ -7,10 +7,10 @@
     </section>
 
     <!-- Carte interactive SITG avec lieux Kirby -->
-    <div style="height: 100vh; width: 100%;">
+    <div class="map-wrapper">
       <MapView
         :center="[6.1432, 46.2044]"
-        :zoom="5"
+        :zoom="4.7"
         :markers="mapMarkers"
       />
     </div>
@@ -135,3 +135,17 @@ const mapMarkers = computed(() => {
     }>
 })
 </script>
+
+
+<style lang="scss" scoped>
+.map-wrapper {
+  height: 100vh;
+  width: 100%;
+}
+
+@media screen and (max-width: 991px) {
+  .map-wrapper {
+    height: 70vw;
+  }
+}
+</style>

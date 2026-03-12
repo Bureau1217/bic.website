@@ -59,9 +59,7 @@ defineProps({
 }
 
 .journal_text {
-    font-size: 18px;
-    font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-    color: var(--red);
+   
 }
 
 .journal_button {
@@ -74,6 +72,12 @@ defineProps({
     text-decoration: none;
     font-style: normal;
     box-sizing: border-box;
+    transition: background-color 0.3s ease;
+}
+
+.journal_button:hover {
+    background-color: var(--green);
+    color: var(--white);
 }
 
 @media screen and (max-width: 767px) {

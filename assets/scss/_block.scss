@@ -6,11 +6,15 @@
   width: 100%;
 }
 
+.block-text:nth-child(1) {
+  padding-top: 80px;
+}
+
 .block-text {
     background-color: var(--white);
     flex-flow: column;
     width: 60%;
-    padding: 80px 40px;
+    padding: 40px;
     display: flex;
   
     &.is-auto {
@@ -66,22 +70,27 @@
 }
 
   blockquote {
-    border-left: 2px solid var(--red);
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    justify-content: center;
     width: 100%;
-    font-size: 18px;
-    line-height: 22px;
-    padding: 0 var(--20);
-    margin: 0 0 var(--40) 0;
+    padding: 0;
+    margin: 0;
   }
 
   blockquote p {
-    font-style: italic; 
+    width: 60%;
+    font-size: 28px;
+    text-align: center;
+    color: var(--red);
   }
 
   blockquote footer {
     font-size: 16px;
-    margin-top: 10px;
+    margin-top: var(--20);
     font-weight: 600;
+    color: var(--red);
   }
   
   // Media queries

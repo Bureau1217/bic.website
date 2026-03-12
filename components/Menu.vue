@@ -4,11 +4,27 @@
         <img src="/images/Logo-Notre-Historia.svg" loading="lazy" alt="" class="menu_logo_image">
       </NuxtLink>
       <div class="menu_nav">
-        <div class="menu_icon" @click="toggleCatalogue">
-          <img src="/images/Picto-Podcast-jaune.svg" loading="lazy" alt="">
+        <div class="menu_icon menu_icon--podcast" @click="toggleCatalogue">
+          <svg class="menu_icon_svg menu_icon_svg--podcast" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 69.32 69.32" aria-hidden="true">
+            <path class="menu_icon_svg_podcast_bg" d="M34.66,0C15.55,0,0,15.55,0,34.66s15.55,34.66,34.66,34.66,34.66-15.55,34.66-34.66S53.77,0,34.66,0Z"/>
+            <g>
+              <rect class="menu_icon_svg_podcast_bars" x="41.86" y="21.01" width="5.11" height="27.3"/>
+              <rect class="menu_icon_svg_podcast_bars" x="51.73" y="26.12" width="5.11" height="17.09"/>
+              <rect class="menu_icon_svg_podcast_bars" x="22.35" y="21.01" width="5.11" height="27.3"/>
+              <rect class="menu_icon_svg_podcast_bars" x="12.49" y="26.12" width="5.11" height="17.09"/>
+              <rect class="menu_icon_svg_podcast_bars" x="32.18" y="13.02" width="5.11" height="43.27"/>
+            </g>
+          </svg>
         </div>
-        <div class="menu_icon" @click="toggleMenu">
-          <img src="/images/Menu.svg" loading="lazy" alt="">
+        <div class="menu_icon menu_icon--menu" @click="toggleMenu">
+          <svg class="menu_icon_svg menu_icon_svg--menu" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 54.33 54.33" aria-hidden="true">
+            <path d="M27.16,54.33C12.19,54.33,0,42.14,0,27.16S12.19,0,27.16,0s27.16,12.19,27.16,27.16-12.19,27.16-27.16,27.16ZM27.16,2.5C13.56,2.5,2.5,13.56,2.5,27.16s11.06,24.66,24.66,24.66,24.66-11.06,24.66-24.66S40.76,2.5,27.16,2.5Z"/>
+            <g>
+              <rect x="10.97" y="18.19" width="32.38" height="2.5"/>
+              <rect x="10.97" y="25.88" width="32.38" height="2.5"/>
+              <rect x="10.97" y="33.64" width="32.38" height="2.5"/>
+            </g>
+          </svg>
         </div>
       </div>
       <div class="menu_offset" :class="{ 'is-open': menuOpen }">
@@ -76,10 +92,10 @@
               v-for="episode in episodes"
               :key="episode.slug"
               variant="menu-episode"
+              :track-audio-url="episode.audio?.url || ''"
               :duration="audioDurations[episode.slug]"
               :title="episode.title"
               :description="episode.texte || ''"
-              @click="playEpisode(episode)"
               @play="playEpisode(episode)"
             >
               <template #image>
@@ -96,8 +112,8 @@
               v-for="lieu in lieux"
               :key="lieu.slug"
               variant="menu-catalogue"
+              :track-audio-url="lieu.audio?.url || ''"
               :duration="audioDurations[lieu.slug]"
-              @click="playLieu(lieu)"
               @play="playLieu(lieu)"
             >
               <template #image>
@@ -320,6 +336,52 @@ const playLieu = (lieu: any) => {
   background-color: var(--red);
   width: 40px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu_icon_svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.menu_icon_svg--podcast {
+  width: 40px;
+  height: 40px;
+}
+
+.menu_icon_svg_podcast_bg {
+  fill: var(--yellow);
+  transition: fill 0.25s ease;
+}
+
+.menu_icon_svg_podcast_bars {
+  fill: var(--black);
+  transition: fill 0.25s ease;
+}
+
+.menu_icon_svg--menu {
+  width: 40px;
+  height: 40px;
+  color: var(--white);
+  opacity: 1;
+  transition: color 0.25s ease, opacity 0.25s ease;
+}
+
+.menu_icon_svg--menu path,
+.menu_icon_svg--menu rect {
+  fill: currentColor;
+}
+
+.menu_icon--menu:hover .menu_icon_svg--menu {
+  color: var(--yellow);
+  opacity: 0.7;
+}
+
+.menu_icon--podcast:hover .menu_icon_svg_podcast_bg {
+  fill: var(--white);
 }
 
 .menu_sound {
@@ -440,6 +502,7 @@ const playLieu = (lieu: any) => {
   color: var(--white);
   text-decoration: none;
   transition: background-color .3s;
+  line-height: 1.2;
 
   &:hover {
     background-color: var(--green);
@@ -558,6 +621,12 @@ const playLieu = (lieu: any) => {
   display: flex;
   transform: rotate(45deg);
   cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.menu_cross:hover {
+  opacity: 0.7;
 }
 
 .menu_parcours {
@@ -657,8 +726,5 @@ const playLieu = (lieu: any) => {
     padding-right: 10px;
   }
 
-  .menu_logo_image {
-    height: 15px;
-  }
 }
 </style>
