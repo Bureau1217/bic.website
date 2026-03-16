@@ -19,6 +19,7 @@
     <AudioCard
       v-if="data?.result?.imagepodcast"
       variant="default"
+      :entrance-animation="true"
       :track-audio-url="data?.result?.audio?.url || ''"
       :number="data?.result?.num ?? null"
       :title="data?.result?.title ?? ''"

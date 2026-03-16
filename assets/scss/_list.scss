@@ -40,11 +40,13 @@
   align-items: flex-end;
   display: flex;
   position: relative;
+  cursor: pointer;
 }
 
 .list_line.is-partenaires {
   padding-top: var(--40);
   padding-bottom: var(--40);
+  cursor: default;
 }
 
 .list_label {
@@ -99,7 +101,7 @@
 .list_case.is-partenaires {
   width: calc(33.33% - 40px);
   max-width: 320px;
-  gap: 10px;
+  gap: var(--20);
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -119,6 +121,12 @@
   position: absolute;
   bottom: auto;
   cursor: pointer;
+  transform: scale(1);
+  transition: transform 0.3s ease;
+}
+
+.list_line:hover .list_plus {
+  transform: scale(0.8);
 }
 
 .list_plus.is-menu {

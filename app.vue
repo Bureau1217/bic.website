@@ -18,13 +18,10 @@ const isMaintenancePage = computed(() => route.path === '/maintenance')
 // Initialiser le fetch des données globales (lieux et épisodes)
 // Ces données seront disponibles dans tous les composants via usePodcastData()
 const { fetchPodcastData } = usePodcastData()
-const route = useRoute()
 
-const shouldPrefetchPodcastData = (path: string) => {
-  return path === '/parcours' || path.startsWith('/parcours/')
-}
-
-if (shouldPrefetchPodcastData(route.path)) {
+// Précharger les données globales sur toutes les pages (sauf maintenance)
+// pour alimenter menu, cartes audio et slider portraits.
+if (route.path !== '/maintenance') {
   await fetchPodcastData()
 }
 

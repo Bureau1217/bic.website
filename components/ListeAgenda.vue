@@ -19,8 +19,9 @@
         v-for="(event, index) in events" 
         :key="index" 
         class="list_line"
+        @click="toggleEvent(index)"
       >
-        <div class="list_plus" @click="toggleEvent(index)">
+        <div class="list_plus" >
           <div class="list_plus_line"></div>
           <div class="list_plus_line is-vertical" v-show="!openEvents[index]"></div>
         </div>

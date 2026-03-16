@@ -39,6 +39,7 @@
     <AudioCard
       v-if="audioCard"
       variant="home"
+      :entrance-animation="true"
       :track-audio-url="audioCard.audioUrl || ''"
       :duration="audioCard.duration"
       :title="audioCard.title"

@@ -440,7 +440,7 @@ const playLieu = (lieu: any) => {
   overflow: auto;
   transform: translateX(0);
   opacity: 0;
-  transition: opacity 0.05s ease-in-out, visibility 0.05s;
+  transition: opacity 0.35s ease;
   pointer-events: none;
   visibility: hidden;
 

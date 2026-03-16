@@ -72,6 +72,8 @@ const props = withDefaults(defineProps<{
   showButton?: boolean
   /** URL audio de la card (pour sync play/pause) */
   trackAudioUrl?: string
+  /** Animation d'entrée (slide + opacity) */
+  entranceAnimation?: boolean
 }>(), {
   variant: 'default',
   image: '',
@@ -86,6 +88,7 @@ const props = withDefaults(defineProps<{
   bgColor: '',
   showButton: true,
   trackAudioUrl: '',
+  entranceAnimation: false,
 })
 
 const emit = defineEmits<{
@@ -100,6 +103,8 @@ const rootClass = computed(() => [
   {
     'is-draggable': isCardDraggable.value,
     'is-dragging': isDragging.value,
+    'is-entering': props.entranceAnimation && !hasEntered.value,
+    'has-entered': props.entranceAnimation && hasEntered.value,
   },
 ])
 
@@ -117,6 +122,8 @@ const isDragging = ref(false)
 const dragPosition = ref<{ left: number; top: number } | null>(null)
 const dragStartMouse = ref({ x: 0, y: 0 })
 const dragStartPosition = ref({ left: 0, top: 0 })
+const hasEntered = ref(!props.entranceAnimation)
+let entranceTimer: ReturnType<typeof setTimeout> | null = null
 
 const isDragEnabledVariant = computed(() => props.variant === 'home' || props.variant === 'default')
 const isCardDraggable = computed(() => isDragEnabledVariant.value && isDesktop.value)
@@ -252,6 +259,12 @@ onMounted(async () => {
   updateDesktopState()
   window.addEventListener('resize', updateDesktopState, { passive: true })
 
+  if (props.entranceAnimation) {
+    entranceTimer = setTimeout(() => {
+      hasEntered.value = true
+    }, 500)
+  }
+
   await nextTick()
   if (!isDragEnabledVariant.value) return
 
@@ -264,6 +277,9 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  if (entranceTimer) {
+    clearTimeout(entranceTimer)
+  }
   window.removeEventListener('resize', updateDesktopState)
   stopDrag()
 })
@@ -277,6 +293,17 @@ onBeforeUnmount(() => {
 
 .audio-card.is-dragging {
   cursor: grabbing;
+}
+
+.audio-card.is-entering {
+  opacity: 0;
+  transform: translateY(-14px);
+}
+
+.audio-card.has-entered {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s ease;
 }
 
 .audio-card_close {

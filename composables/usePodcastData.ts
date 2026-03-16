@@ -105,8 +105,9 @@ export function usePodcastData() {
                   select: {
                     nom: 'structureItem.nom.value',
                     description: 'structureItem.description.value',
-                    // Portrait image : méthode null-safe (retourne null si pas d'image)
-                    image: 'structureItem.safeImage("image", "column")',
+                    // Portrait image : convertir explicitement le fichier du champ structure
+                    // vers le format responsive attendu par <ResponsivePicture>.
+                    image: 'structureItem.image.toFile.historiaImage("column")',
                     link: {
                       query: 'structureItem.link.toPages.first',
                       select: {
@@ -125,8 +126,8 @@ export function usePodcastData() {
                 slug: true,
                 num: 'page.num',
                 texte: 'page.texte.value',
-                // Image podcast : méthode null-safe (retourne null si pas d'image poster)
-                imagepodcast: 'page.templateImage("poster", "podcast")',
+                // Les épisodes stockent l'image dans un fichier template "poster".
+                imagepodcast: 'page.files.template("poster").first.historiaImage("podcast")',
                 audio: {
                   query: 'page.files.template("audio").first',
                   select: {

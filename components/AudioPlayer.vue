@@ -1,6 +1,7 @@
 <template>
-  <div class="audioplayer" v-show="isVisible">
-    <div class="audioplayer-wrapper">
+  <Transition name="audioplayer-reveal">
+    <div class="audioplayer" v-show="isVisible">
+      <div class="audioplayer-wrapper">
       <img 
         :src="isPlaying ? '/images/son-pause.svg' : '/images/son-play.svg'" 
         loading="lazy" 
@@ -72,8 +73,9 @@
         height="30"
         @click="close"
       >
+      </div>
     </div>
-  </div>
+  </Transition>
 </template>
 
 <script setup>
@@ -117,6 +119,20 @@ const onProgressClick = (event) => {
   display: flex;
   position: fixed;
   z-index: 9999;
+}
+
+.audioplayer-reveal-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.audioplayer-reveal-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.audioplayer-reveal-enter-from,
+.audioplayer-reveal-leave-to {
+  opacity: 0;
+  transform: translateY(-12px);
 }
 
 .audioplayer-wrapper {
