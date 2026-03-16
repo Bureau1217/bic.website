@@ -4,8 +4,11 @@
       <img 
         :src="isPlaying ? '/images/son-pause.svg' : '/images/son-play.svg'" 
         loading="lazy" 
+        decoding="async"
         alt="Play/Pause" 
         class="audioplayer_icon audioplayer_icon--play-toggle"
+        width="30"
+        height="30"
         @click="togglePlay"
       >
       <div class="audioplayer_track-controls">
@@ -18,8 +21,11 @@
           <img
             src="/images/prev.svg"
             loading="lazy"
+            decoding="async"
             alt=""
             class="audioplayer_track-icon"
+            width="30"
+            height="30"
           >
         </button>
         <button
@@ -31,16 +37,22 @@
           <img
             src="/images/next.svg"
             loading="lazy"
+            decoding="async"
             alt=""
             class="audioplayer_track-icon"
+            width="30"
+            height="30"
           >
         </button>
       </div>
       <img 
         :src="isMuted ? '/images/son-muted.svg' : '/images/Son-Player.svg'" 
         loading="lazy" 
+        decoding="async"
         alt="Volume" 
         class="audioplayer_icon is-sound"
+        width="30"
+        height="30"
         @click="toggleMute"
       >
       <div class="audioplayer_line" @click="onProgressClick">
@@ -53,8 +65,11 @@
       <img 
         src="/images/player-close.svg" 
         loading="lazy" 
+        decoding="async"
         alt="Fermer" 
         class="audioplayer_icon audioplayer_icon--close"
+        width="30"
+        height="30"
         @click="close"
       >
     </div>

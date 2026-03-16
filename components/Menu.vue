@@ -1,7 +1,15 @@
 <template>
     <div class="menu">
-      <NuxtLink to="/" class="menu_logo" :class="{ 'is-hidden': !isLogoVisible }">
-        <img src="/images/Logo-Notre-Historia.svg" loading="lazy" alt="" class="menu_logo_image">
+      <NuxtLink to="/" :prefetch="false" class="menu_logo" :class="{ 'is-hidden': !isLogoVisible }">
+        <img
+          src="/images/Logo-Notre-Historia.svg"
+          loading="eager"
+          decoding="async"
+          alt="Notre Historia"
+          class="menu_logo_image"
+          width="468"
+          height="44"
+        >
       </NuxtLink>
       <div class="menu_nav">
         <div class="menu_icon menu_icon--podcast" @click="toggleCatalogue">
@@ -36,10 +44,10 @@
               <div class="list_plus_line is-vertical is-white"></div>
             </div>
           </div>
-          <NuxtLink to="/parcours" class="menu_link" @click="closeMenu">
+          <NuxtLink to="/parcours" :prefetch="false" class="menu_link" @click="closeMenu">
             <div>Parcours</div>
           </NuxtLink>
-          <NuxtLink to="/ressources" class="menu_link" @click="closeMenu">
+          <NuxtLink to="/ressources" :prefetch="false" class="menu_link" @click="closeMenu">
             <div>Ressources</div>
           </NuxtLink>
           <div class="menu_parcours">
@@ -55,6 +63,7 @@
                 v-for="lieu in lieux" 
                 :key="lieu.slug"
                 :to="`/parcours/${lieu.slug}`" 
+                :prefetch="false"
                 class="menu_parcours_link" 
                 @click="closeMenu"
               >
@@ -62,13 +71,13 @@
               </NuxtLink>
             </div>
           </div>
-          <NuxtLink to="/a-propos" class="menu_link is-last" @click="closeMenu">
+          <NuxtLink to="/a-propos" :prefetch="false" class="menu_link is-last" @click="closeMenu">
             <div>À propos</div>
           </NuxtLink>
           <div class="menu_offset_legals">
-            <NuxtLink to="/mentions-legales" target="_blank" class="menu_link--legals" @click="closeMenu">Mentions légales</NuxtLink>
-            <NuxtLink to="/protection-des-donnees" target="_blank" class="menu_link--legals" @click="closeMenu">Protection des données</NuxtLink>
-            <NuxtLink to="/engagement" target="_blank" class="menu_link--legals" @click="closeMenu">Engagement</NuxtLink>
+            <NuxtLink to="/mentions-legales" :prefetch="false" target="_blank" class="menu_link--legals" @click="closeMenu">Mentions légales</NuxtLink>
+            <NuxtLink to="/protection-des-donnees" :prefetch="false" target="_blank" class="menu_link--legals" @click="closeMenu">Protection des données</NuxtLink>
+            <NuxtLink to="/engagement" :prefetch="false" target="_blank" class="menu_link--legals" @click="closeMenu">Engagement</NuxtLink>
           </div>
 
         </div>
@@ -133,7 +142,7 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 
 // Utiliser le composable pour accéder aux données globales
-const { lieux, episodes, isLoaded } = usePodcastData()
+const { lieux, episodes, isLoaded, fetchPodcastData } = usePodcastData()
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
@@ -144,6 +153,7 @@ const catalogueOpen = ref(false)
 const lieuxOpen = ref(false)
 const isLogoVisible = ref(false)
 const lastScrollY = ref(0)
+const audioDurationsLoaded = ref(false)
 
 const SCROLL_DIRECTION_THRESHOLD = 6
 
@@ -178,6 +188,9 @@ const loadAudioDuration = (slug: string, url: string) => {
 }
 
 const loadAllDurations = () => {
+  if (audioDurationsLoaded.value) return
+  audioDurationsLoaded.value = true
+
   for (const episode of episodes.value) {
     if (episode.audio?.url) {
       loadAudioDuration(episode.slug, episode.audio.url)
@@ -187,6 +200,12 @@ const loadAllDurations = () => {
     if (lieu.audio?.url) {
       loadAudioDuration(lieu.slug, lieu.audio.url)
     }
+  }
+}
+
+const ensurePodcastDataLoaded = async () => {
+  if (!isLoaded.value) {
+    await fetchPodcastData()
   }
 }
 
@@ -210,10 +229,6 @@ const handleWindowScroll = () => {
 
 // Charger les durées quand les données sont prêtes
 onMounted(() => {
-  if (isLoaded.value) {
-    loadAllDurations()
-  }
-
   // Sur les pages /parcours/[slug], le logo doit être visible dès le chargement.
   isLogoVisible.value = isParcoursSlugPage(route.path)
   lastScrollY.value = window.scrollY || 0
@@ -224,17 +239,18 @@ onUnmounted(() => {
   window.removeEventListener('scroll', handleWindowScroll)
 })
 
-watch(isLoaded, (loaded) => {
-  if (loaded) {
+watch([catalogueOpen, isLoaded], ([isCatalogueOpen, loaded]) => {
+  if (isCatalogueOpen && loaded) {
     loadAllDurations()
   }
-})
+}, { immediate: true })
 
 watch(() => route.path, (path) => {
   isLogoVisible.value = isParcoursSlugPage(path)
 })
 
 const toggleMenu = () => {
+  void ensurePodcastDataLoaded()
   menuOpen.value = !menuOpen.value
   if (menuOpen.value) {
     catalogueOpen.value = false
@@ -246,6 +262,7 @@ const closeMenu = () => {
 }
 
 const toggleCatalogue = () => {
+  void ensurePodcastDataLoaded()
   catalogueOpen.value = !catalogueOpen.value
   if (catalogueOpen.value) {
     menuOpen.value = false
@@ -257,6 +274,7 @@ const closeCatalogue = () => {
 }
 
 const toggleLieux = () => {
+  void ensurePodcastDataLoaded()
   lieuxOpen.value = !lieuxOpen.value
 }
 

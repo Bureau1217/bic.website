@@ -15,6 +15,7 @@
     :alt="alt || ''"
     :loading="loading"
     :decoding="decoding"
+    :fetchpriority="fetchpriority"
     :class="pictureClass"
   >
 
@@ -37,6 +38,7 @@
       :height="image.fallback.height || undefined"
       :loading="loading"
       :decoding="decoding"
+      :fetchpriority="fetchpriority"
     >
   </picture>
 </template>
@@ -56,6 +58,8 @@ interface Props {
   loading?: 'lazy' | 'eager'
   /** Stratégie de décodage */
   decoding?: 'async' | 'auto' | 'sync'
+  /** Priorité de récupération réseau de l'image */
+  fetchpriority?: 'high' | 'low' | 'auto'
   /** Classes CSS appliquées au <picture> (ou <img> en fallback string) */
   pictureClass?: string
 }
@@ -65,6 +69,7 @@ const props = withDefaults(defineProps<Props>(), {
   alt: undefined,
   loading: 'lazy',
   decoding: 'async',
+  fetchpriority: 'auto',
   pictureClass: undefined,
 })
 

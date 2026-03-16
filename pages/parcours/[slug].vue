@@ -9,8 +9,9 @@
     <ResponsivePicture
       v-if="data?.result?.cover"
       :image="data.result.cover"
-      sizes="(min-width: 2500px) 2500px, 100vw"
-      loading="eager"
+      sizes="(max-width: 767px) 100vw, (max-width: 1400px) 85vw, 1200px"
+      loading="lazy"
+      fetchpriority="low"
       picture-class="background"
     />
 
@@ -21,13 +22,17 @@
       :track-audio-url="data?.result?.audio?.url || ''"
       :number="data?.result?.num ?? null"
       :title="data?.result?.title ?? ''"
-      :image="getImageSrc(data.result.imagepodcast)"
-      :srcset="data.result.imagepodcast?.fallback?.srcset || ''"
-      :sizes="data.result.imagepodcast?.sizes || '240px'"
-      :alt="data.result.imagepodcast?.alt ?? ''"
       :duration="audioDuration"
       @play="onPlayAudio"
     >
+      <template #image>
+        <ResponsivePicture
+          :image="data.result.imagepodcast"
+          sizes="240px"
+          :alt="data.result.imagepodcast?.alt ?? ''"
+          picture-class="audio-card_image_rp"
+        />
+      </template>
       <template #info>
         <p class="audio-card_title"><span class="audio-card_number">{{ data?.result?.num ?? null }}.  </span> {{ data?.result?.title ?? '' }}</p>
       </template>
@@ -50,6 +55,8 @@
 <script setup lang="ts">
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
+const { fetchPodcastData } = usePodcastData()
+await fetchPodcastData()
 
 const route = useRoute()
 const router = useRouter()

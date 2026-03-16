@@ -21,16 +21,22 @@
     />
 
     <!-- Carte interactive SITG avec lieux Kirby -->
-    <div class="map-wrapper">
-      <MapView
+    <div ref="mapSectionRef" class="map-wrapper">
+      <component
+        :is="AsyncMapView"
+        v-if="shouldMountMap"
         :center="[6.1432, 46.2044]"
         :zoom="4.7"
         :markers="mapMarkers"
         id="map-home"
       />
+      <div v-else class="map-placeholder" aria-hidden="true"></div>
     </div>
 
-    <PortraitSlider />
+    <div ref="portraitSectionRef" class="portrait-wrapper">
+      <PortraitSlider v-if="shouldMountPortraitSlider" />
+      <div v-else class="portrait-placeholder" aria-hidden="true"></div>
+    </div>
 
     <ListeAgenda 
       v-if="data?.result?.ressources?.evenements" 
@@ -52,12 +58,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted } from 'vue'
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
 
 // FETCH DONNEES PODCAST
-const { lieux, episodes, firstEpisode, parseGpsCoordinates, getEpisodeBySlug } = usePodcastData()
+const { lieux, episodes, firstEpisode, parseGpsCoordinates, getEpisodeBySlug, fetchPodcastData } = usePodcastData()
+void fetchPodcastData()
+
+const AsyncMapView = defineAsyncComponent(() => import('~/components/MapView.client.vue'))
+const mapSectionRef = ref<HTMLElement | null>(null)
+const portraitSectionRef = ref<HTMLElement | null>(null)
+const shouldMountMap = ref(false)
+const shouldMountPortraitSlider = ref(false)
+let sectionsObserver: IntersectionObserver | null = null
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
@@ -83,6 +97,45 @@ watch(firstEpisode, (ep) => {
     audio.src = ep.audio.url
   }
 }, { immediate: true })
+
+onMounted(() => {
+  sectionsObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (!entry.isIntersecting) continue
+
+        if (entry.target === mapSectionRef.value) {
+          shouldMountMap.value = true
+          sectionsObserver?.unobserve(entry.target)
+          continue
+        }
+
+        if (entry.target === portraitSectionRef.value) {
+          shouldMountPortraitSlider.value = true
+          sectionsObserver?.unobserve(entry.target)
+        }
+      }
+    },
+    {
+      root: null,
+      rootMargin: '300px 0px',
+      threshold: 0.01,
+    },
+  )
+
+  if (mapSectionRef.value) {
+    sectionsObserver.observe(mapSectionRef.value)
+  }
+
+  if (portraitSectionRef.value) {
+    sectionsObserver.observe(portraitSectionRef.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  sectionsObserver?.disconnect()
+  sectionsObserver = null
+})
 
 // QR Code : détection du paramètre ?qr=1&episode=slug
 const route = useRoute()
@@ -264,6 +317,21 @@ const mapMarkers = computed(() => {
 .map-wrapper {
   height: 100vh;
   width: 100%;
+}
+
+.map-placeholder,
+.portrait-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, #f3f3f3 0%, #e9e9e9 100%);
+}
+
+.portrait-wrapper {
+  min-height: 60vh;
+}
+
+.portrait-placeholder {
+  min-height: 60vh;
 }
 
 @media screen and (max-width: 991px) {

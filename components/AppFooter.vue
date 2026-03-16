@@ -7,12 +7,15 @@
     </div>
     <div class="footer_logo_wrapper">
       <img 
-        v-for="(logo, index) in contact?.logos" 
+        v-for="(logo, index) in validLogos" 
         :key="index" 
         :src="logo.url" 
         loading="lazy" 
+        decoding="async"
         :alt="logo.alt || ''" 
         class="footer_logo"
+        :width="logo.width || 240"
+        :height="logo.height || 120"
       >
     </div>
   </div>
@@ -31,7 +34,6 @@ type FooterFetchData = CMS_API_Response & {
 }
 
 const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
-  lazy: true,
   method: 'POST',
   body: {
     query: 'site',
@@ -47,6 +49,8 @@ const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
             select: {
               url: true,
               alt: true,
+              width: true,
+              height: true,
             },
           },
         },
@@ -56,6 +60,7 @@ const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
 })
 
 const contact = computed(() => data.value?.result?.contact)
+const validLogos = computed(() => (contact.value?.logos || []).filter((logo) => !!logo?.url))
 
 </script>
 

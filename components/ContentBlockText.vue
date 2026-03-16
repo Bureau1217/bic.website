@@ -20,6 +20,8 @@
         <ResponsivePicture
           :image="block.content?.image"
           sizes="(min-width: 1024px) 800px, 100vw"
+          :loading="isPriorityImage(index) ? 'eager' : 'lazy'"
+          :fetchpriority="isPriorityImage(index) ? 'high' : 'auto'"
           :alt="block.content?.alt || undefined"
           picture-class="block-image_picture"
         />
@@ -64,7 +66,7 @@ type ResolvedBlock = {
   }
 }
 
-defineProps<{
+const props = defineProps<{
   blocks?: ResolvedBlock[]
   isAuto?: boolean
 }>()
@@ -87,6 +89,23 @@ function hasImage(block: ResolvedBlock): boolean {
   if (!img) return false
   if (isResponsiveImage(img)) return true
   return typeof (img as any).url === 'string' && (img as any).url.length > 0
+}
+
+/**
+ * La première image de contenu est souvent au-dessus de la ligne de flottaison
+ * sur les pages lieu : on la priorise pour améliorer le LCP.
+ */
+function isPriorityImage(blockIndex: number): boolean {
+  const list = props.blocks || []
+
+  for (let i = 0; i < list.length; i++) {
+    const current = list[i]
+    if (current.type === 'image' && hasImage(current)) {
+      return i === blockIndex
+    }
+  }
+
+  return false
 }
 </script>
 
