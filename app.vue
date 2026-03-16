@@ -18,7 +18,15 @@ const isMaintenancePage = computed(() => route.path === '/maintenance')
 // Initialiser le fetch des données globales (lieux et épisodes)
 // Ces données seront disponibles dans tous les composants via usePodcastData()
 const { fetchPodcastData } = usePodcastData()
-await fetchPodcastData()
+const route = useRoute()
+
+const shouldPrefetchPodcastData = (path: string) => {
+  return path === '/parcours' || path.startsWith('/parcours/')
+}
+
+if (shouldPrefetchPodcastData(route.path)) {
+  await fetchPodcastData()
+}
 
 // Loader initial : fondu blanc au premier chargement
 const showLoader = ref(true)

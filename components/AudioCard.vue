@@ -15,7 +15,7 @@
       aria-label="Masquer la carte"
       @click.prevent.stop="hideCard"
     >
-      <img src="/images/player-close.svg" loading="lazy" alt="" class="audio-card_close-icon">
+      <img src="/images/player-close.svg" loading="lazy" decoding="async" alt="" class="audio-card_close-icon" width="30" height="30">
     </button>
     <div class="audio-card_image_wrapper">
       <slot name="image">
@@ -30,7 +30,7 @@
         />
       </slot>
       <div v-if="showButton" class="audio-card_button" @click.prevent.stop="onPlayButtonClick">
-        <img class="image" :src="playButtonIcon" loading="lazy" alt="">
+        <img class="image" :src="playButtonIcon" loading="lazy" decoding="async" alt="" width="30" height="30">
         <span v-if="duration" class="audio-card_time">{{ duration }}</span>
       </div>
     </div>

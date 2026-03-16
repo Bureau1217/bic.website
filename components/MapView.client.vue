@@ -1,6 +1,9 @@
 <template>
   <div class="map-view">
-    <div ref="mapContainer" class="map-view__container"></div>
+    <div ref="mapContainer" class="map-view__container" :class="{ 'is-ready': isMapReady }"></div>
+    <Transition name="map-reveal-fade">
+      <div v-if="!isMapReady" class="map-view__reveal"></div>
+    </Transition>
     
     <!-- Conteneur des markers HTML -->
     <div ref="markersContainer" class="map-view__markers"></div>
@@ -58,19 +61,8 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 
-// ArcGIS CSS (chargé côté client uniquement)
-import '@arcgis/core/assets/esri/themes/dark/main.css'
-
-// ArcGIS imports
-import esriConfig from '@arcgis/core/config'
-import EsriMap from '@arcgis/core/Map'
-import MapView from '@arcgis/core/views/MapView'
-import VectorTileLayer from '@arcgis/core/layers/VectorTileLayer'
-import Point from '@arcgis/core/geometry/Point'
-import Extent from '@arcgis/core/geometry/Extent'
-
 // Composables pour l'audio
-const { lieux, isLoaded, getLieuBySlug } = usePodcastData()
+const { getLieuBySlug } = usePodcastData()
 const { playTrack } = useAudioPlayer()
 
 // ============================================================================
@@ -113,18 +105,13 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<{
   markerClick: [marker: MapMarker]
-  mapLoad: [view: MapView]
+  mapLoad: [view: unknown]
 }>()
 
 // ============================================================================
 // CONFIGURATION ArcGIS SITG
 // ============================================================================
 
-// Portail ArcGIS Enterprise de Genève
-esriConfig.portalUrl = 'https://app2.ge.ch/tergeoportal'
-
-// URL du VectorTileServer SITG "Tons sombres"
-const SITG_VECTOR_TILE_URL = 'https://vector.sitg.ge.ch/arcgis/rest/services/Hosted/PLAN_SITG_EPSG3857/VectorTileServer'
 // PortalItem ID pour le style "Tons sombres"
 const SITG_PORTAL_ITEM_ID = '753d065ee1ba4d29be9a6de655abd94f'
 
@@ -135,6 +122,7 @@ const SITG_PORTAL_ITEM_ID = '753d065ee1ba4d29be9a6de655abd94f'
 const mapContainer = ref<HTMLDivElement | null>(null)
 const markersContainer = ref<HTMLDivElement | null>(null)
 const mapError = ref<string | null>(null)
+const isMapReady = ref(false)
 
 // Popup state
 const activePopup = ref<MapMarker | null>(null)
@@ -162,14 +150,6 @@ const loadAudioDuration = (slug: string, url: string) => {
   audio.src = url
 }
 
-const loadAllDurations = () => {
-  for (const lieu of lieux.value) {
-    if (lieu.audio?.url) {
-      loadAudioDuration(lieu.slug, lieu.audio.url)
-    }
-  }
-}
-
 /**
  * Récupère l'URL audio d'un marker à partir des données podcast
  */
@@ -177,6 +157,14 @@ function getAudioUrlForMarker(marker: MapMarker): string | null {
   const slug = marker.slug || String(marker.id)
   const lieu = getLieuBySlug(slug)
   return lieu?.audio?.url || null
+}
+
+function ensureAudioDurationForMarker(marker: MapMarker) {
+  const slug = marker.slug || String(marker.id)
+  const audioUrl = getAudioUrlForMarker(marker)
+  if (audioUrl) {
+    loadAudioDuration(slug, audioUrl)
+  }
 }
 
 /**
@@ -197,8 +185,8 @@ function playFromPopup(marker: MapMarker) {
   closePopup()
 }
 
-let view: MapView | null = null
-let esriMap: EsriMap | null = null
+let view: any | null = null
+let esriMap: any | null = null
 
 // Stockage des éléments DOM des markers
 const markerElements = new Map<string | number, HTMLElement>()
@@ -209,12 +197,64 @@ const markerDataMap = new Map<string | number, MapMarker>()
 let updateMarkersRAF: number | null = null
 let continuousUpdateRAF: number | null = null
 let isContinuousUpdateRunning = false
+let mapInitTimeoutId: number | null = null
+let mapInitIdleId: number | null = null
+let hasMapInitStarted = false
+
+type ArcGISModules = {
+  esriConfig: any
+  EsriMap: any
+  MapView: any
+  VectorTileLayer: any
+  Point: any
+  Extent: any
+}
+
+let arcgisModules: ArcGISModules | null = null
+
+async function loadArcGISModules(): Promise<ArcGISModules> {
+  if (arcgisModules) return arcgisModules
+
+  // Charger ArcGIS à la demande pour ne pas pénaliser le FCP/LCP du shell.
+  await import('@arcgis/core/assets/esri/themes/dark/main.css')
+
+  const [
+    { default: esriConfig },
+    { default: EsriMap },
+    { default: MapView },
+    { default: VectorTileLayer },
+    { default: Point },
+    { default: Extent },
+  ] = await Promise.all([
+    import('@arcgis/core/config'),
+    import('@arcgis/core/Map'),
+    import('@arcgis/core/views/MapView'),
+    import('@arcgis/core/layers/VectorTileLayer'),
+    import('@arcgis/core/geometry/Point'),
+    import('@arcgis/core/geometry/Extent'),
+  ])
+
+  esriConfig.portalUrl = 'https://app2.ge.ch/tergeoportal'
+
+  arcgisModules = {
+    esriConfig,
+    EsriMap,
+    MapView,
+    VectorTileLayer,
+    Point,
+    Extent,
+  }
+
+  return arcgisModules
+}
 
 // ============================================================================
 // POPUP MANAGEMENT
 // ============================================================================
 
 function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }) {
+  ensureAudioDurationForMarker(marker)
+
   // Positionner la popup au-dessus du marker
   popupPosition.value = {
     x: screenPoint.x,
@@ -259,7 +299,8 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
     
     // Recentrer la carte sur le marker
     if (view) {
-      const point = new Point({
+      if (!arcgisModules?.Point) return
+      const point = new arcgisModules.Point({
         longitude: marker.coordinates[0],
         latitude: marker.coordinates[1]
       })
@@ -299,12 +340,14 @@ function updateSelectedMarkerStyles() {
  */
 function updateMarkersPosition() {
   if (!view || !markersContainer.value) return
+  const PointCtor = arcgisModules?.Point
+  if (!PointCtor) return
   
   markerElements.forEach((el, id) => {
     const markerData = markerDataMap.get(id)
     if (!markerData) return
     
-    const point = new Point({
+    const point = new PointCtor({
       longitude: markerData.coordinates[0],
       latitude: markerData.coordinates[1]
     })
@@ -402,29 +445,33 @@ function clearMarkers() {
 
 async function initMap() {
   if (!mapContainer.value) return
+  if (hasMapInitStarted) return
+  hasMapInitStarted = true
   
   try {
+    isMapReady.value = false
+    const arcgis = await loadArcGISModules()
     mapError.value = null
     
     // Créer le VectorTileLayer avec le style SITG "Tons sombres"
-    const sitgLayer = new VectorTileLayer({
+    const sitgLayer = new arcgis.VectorTileLayer({
       portalItem: {
         id: SITG_PORTAL_ITEM_ID,
         portal: {
-          url: esriConfig.portalUrl
+          url: arcgis.esriConfig.portalUrl
         }
       }
     })
     
     // Créer la Map avec le VectorTileLayer comme basemap
-    esriMap = new EsriMap({
+    esriMap = new arcgis.EsriMap({
       basemap: {
         baseLayers: [sitgLayer]
       }
     })
     
     // Créer la vue
-    view = new MapView({
+    view = new arcgis.MapView({
       container: mapContainer.value,
       map: esriMap,
       center: props.center,
@@ -437,7 +484,7 @@ async function initMap() {
         snapToZoom: false,
         minZoom: 4,
         maxZoom: 10,
-        geometry: new Extent({
+        geometry: new arcgis.Extent({
           // Limites de navigation "ville centre" de Genève (WGS84)
           xmin: 6.11,  // ouest
           ymin: 46.18, // sud
@@ -457,7 +504,7 @@ async function initMap() {
     // Désactiver le zoom par scroll (molette/trackpad)
     // pour que le scroll continue de faire défiler la page
     // Le double-clic reste actif pour zoomer
-    view.on('mouse-wheel', (event) => {
+    view.on('mouse-wheel', (event: any) => {
       event.stopPropagation()
     })
 
@@ -476,7 +523,7 @@ async function initMap() {
     })
     
     // Pendant les animations/interactions, forcer une synchro frame par frame
-    view.watch('stationary', (isStationary) => {
+    view.watch('stationary', (isStationary: boolean) => {
       if (isStationary) {
         stopContinuousMarkersUpdate()
         scheduleMarkersUpdate()
@@ -497,10 +544,15 @@ async function initMap() {
     
     // Émettre l'événement de chargement
     emit('mapLoad', view)
+    requestAnimationFrame(() => {
+      isMapReady.value = true
+    })
     
     console.log('[MapView] ArcGIS map initialized with SITG style "Tons sombres" and HTML markers')
     
   } catch (error: unknown) {
+    hasMapInitStarted = false
+    isMapReady.value = true
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error('[MapView] Failed to initialize map:', errorMessage)
     
@@ -530,6 +582,26 @@ function handleTouchMoveOnMap(event: TouchEvent) {
   }
 }
 
+function scheduleMapInit() {
+  const start = () => {
+    if (!view) {
+      void initMap()
+    }
+  }
+
+  const browserWindow = window as Window & {
+    requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number
+    cancelIdleCallback?: (handle: number) => void
+  }
+
+  if (typeof browserWindow.requestIdleCallback === 'function') {
+    mapInitIdleId = browserWindow.requestIdleCallback(() => start(), { timeout: 1200 })
+    return
+  }
+
+  mapInitTimeoutId = window.setTimeout(start, 250)
+}
+
 // ============================================================================
 // LIFECYCLE & WATCHERS
 // ============================================================================
@@ -539,18 +611,7 @@ onMounted(async () => {
   console.log('[MapView] Container:', mapContainer.value)
   window.addEventListener('resize', handleWindowResize)
   mapContainer.value?.addEventListener('touchmove', handleTouchMoveOnMap, { passive: true })
-  initMap()
-  // Charger les durées audio
-  if (isLoaded.value) {
-    loadAllDurations()
-  }
-})
-
-// Charger les durées quand les données podcast deviennent disponibles
-watch(isLoaded, (loaded) => {
-  if (loaded) {
-    loadAllDurations()
-  }
+  scheduleMapInit()
 })
 
 onBeforeUnmount(() => {
@@ -563,6 +624,15 @@ onBeforeUnmount(() => {
   
   window.removeEventListener('resize', handleWindowResize)
   mapContainer.value?.removeEventListener('touchmove', handleTouchMoveOnMap)
+  if (mapInitTimeoutId) {
+    window.clearTimeout(mapInitTimeoutId)
+    mapInitTimeoutId = null
+  }
+  if (mapInitIdleId) {
+    const browserWindow = window as Window & { cancelIdleCallback?: (handle: number) => void }
+    browserWindow.cancelIdleCallback?.(mapInitIdleId)
+    mapInitIdleId = null
+  }
 
   clearMarkers()
   
@@ -620,9 +690,9 @@ defineExpose({
    * Ajuste la vue pour afficher des bounds
    */
   fitBounds: (bounds: [[number, number], [number, number]], padding = 50) => {
-    if (!view) return
+    if (!view || !arcgisModules?.Extent) return
     
-    const extent = new Extent({
+    const extent = new arcgisModules.Extent({
       xmin: bounds[0][0],
       ymin: bounds[0][1],
       xmax: bounds[1][0],
@@ -677,6 +747,28 @@ defineExpose({
 .map-view__container {
   width: 100%;
   height: 100%;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.map-view__container.is-ready {
+  opacity: 1;
+}
+
+.map-view__reveal {
+  position: absolute;
+  inset: 0;
+  background: var(--white);
+  z-index: 120;
+  pointer-events: none;
+}
+
+.map-reveal-fade-leave-active {
+  transition: opacity 0.45s ease;
+}
+
+.map-reveal-fade-leave-to {
+  opacity: 0;
 }
 
 /* ============================================================================
@@ -745,7 +837,11 @@ defineExpose({
   height: 100%;
   object-fit: contain;
   padding: 4px;
-  transition: filter 0.2s ease-in-out;
+  transition: transform 0.2s ease;
+}
+
+.map-view__marker-icon:hover {
+  transform: scale(1.15);
 }
 
 .map-view__marker--selected .map-view__marker-icon {

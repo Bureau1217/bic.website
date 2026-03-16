@@ -41,6 +41,16 @@ type Partenaire = {
   image: CMS_API_File[]
 }
 
+type FormattedPartenaire = {
+  logo: string
+  logoAlt: string
+  logoWidth: number
+  logoHeight: number
+  name: string
+  description: string
+  link: string | null
+}
+
 type FetchData = CMS_API_Response & {
   result: {
     apropos: {
@@ -62,7 +72,6 @@ type FetchData = CMS_API_Response & {
 }
 
 const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
-  lazy: true,
   method: 'POST',
   body: {
     query: 'site',
@@ -93,6 +102,8 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
                 select: {
                   url: true,
                   alt: true,
+                  width: true,
+                  height: true,
                 },
               },
             },
@@ -108,15 +119,26 @@ useHead(() => ({
 }))
 
 // Formater les partenaires pour le composant ListePartenaires
-const formattedPartenaires = computed(() => {
+const formattedPartenaires = computed<FormattedPartenaire[]>(() => {
   if (!data.value?.result?.apropos?.partenaires) return []
-  
-  return data.value.result.apropos.partenaires.map((partenaire) => ({
-    logo: partenaire.image?.[0]?.url || '',
-    name: partenaire.nom,
-    description: partenaire.paragraphe,
-    link: partenaire.lien,
-  }))
+
+  return data.value.result.apropos.partenaires
+    .map((partenaire) => {
+      const image = partenaire.image?.[0]
+      const logo = image?.url?.trim() || ''
+      if (!logo) return null
+
+      return {
+        logo,
+        logoAlt: image?.alt?.trim() || partenaire.nom || '',
+        logoWidth: image?.width || 300,
+        logoHeight: image?.height || 180,
+        name: partenaire.nom,
+        description: partenaire.paragraphe,
+        link: partenaire.lien,
+      }
+    })
+    .filter((partenaire): partenaire is FormattedPartenaire => !!partenaire)
 })
 
 const aproposSections = computed(() => {

@@ -30,7 +30,8 @@ import { computed } from 'vue'
 import { getImageSrc } from '~/types/image'
 
 // FETCH DONNEES PODCAST (lieux pour la carte)
-const { lieux, parseGpsCoordinates } = usePodcastData()
+const { lieux, parseGpsCoordinates, fetchPodcastData } = usePodcastData()
+await fetchPodcastData()
 
 type ParcoursChild = CMS_API_PageItem & {
   template: string

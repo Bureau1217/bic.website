@@ -6,21 +6,24 @@
       <ResponsivePicture
         v-if="cover"
         :image="cover"
-        sizes="(min-width: 2500px) 2500px, (min-width: 992px) 40vw, 100vw"
+        sizes="(max-width: 991px) 100vw, (min-width: 1800px) 720px, 40vw"
         loading="eager"
+        fetchpriority="high"
         picture-class="hero_image_picture"
       />
       <div class="hero_image_wrapper">
         <ResponsivePicture
           v-if="image1"
           :image="image1"
-          sizes="(min-width: 2500px) 1250px, (min-width: 992px) 20vw, 50vw"
+          sizes="(max-width: 991px) 50vw, 20vw"
+          fetchpriority="low"
           picture-class="hero_image-2"
         />
         <ResponsivePicture
           v-if="image2"
           :image="image2"
-          sizes="(min-width: 2500px) 1250px, (min-width: 992px) 20vw, 50vw"
+          sizes="(max-width: 991px) 50vw, 20vw"
+          fetchpriority="low"
           picture-class="hero_image-2"
         />
       </div>
