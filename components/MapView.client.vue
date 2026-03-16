@@ -745,7 +745,11 @@ defineExpose({
   height: 100%;
   object-fit: contain;
   padding: 4px;
-  transition: filter 0.2s ease-in-out;
+  transition: transform 0.2s ease;
+}
+
+.map-view__marker-icon:hover {
+  transform: scale(1.15);
 }
 
 .map-view__marker--selected .map-view__marker-icon {
