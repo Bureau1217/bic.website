@@ -50,6 +50,24 @@ type PodcastDataResponse = CMS_API_Response & {
   }
 }
 
+type RawImageLike = ResponsiveImage | CMS_API_File | null | undefined
+
+const toResponsiveImage = (image: RawImageLike): ResponsiveImage | null => {
+  if (!image) return null
+  if (typeof image === 'object' && 'fallback' in image && image.fallback?.src) {
+    return image as ResponsiveImage
+  }
+  if (typeof image === 'object' && 'url' in image && typeof image.url === 'string' && image.url) {
+    return {
+      alt: typeof image.alt === 'string' ? image.alt : undefined,
+      fallback: {
+        src: image.url,
+      },
+    }
+  }
+  return null
+}
+
 export function usePodcastData() {
   // State partagé entre tous les composants (SSR-friendly)
   const lieux = useState<LieuData[]>('podcast-lieux', () => [])
@@ -105,9 +123,15 @@ export function usePodcastData() {
                   select: {
                     nom: 'structureItem.nom.value',
                     description: 'structureItem.description.value',
-                    // Portrait image : convertir explicitement le fichier du champ structure
-                    // vers le format responsive attendu par <ResponsivePicture>.
-                    image: 'structureItem.image.toFile.historiaImage("column")',
+                    // Éviter les erreurs KQL quand le champ image est vide:
+                    // on récupère le fichier brut puis on normalise côté front.
+                    image: {
+                      query: 'structureItem.image.toFile',
+                      select: {
+                        url: true,
+                        alt: true,
+                      },
+                    },
                     link: {
                       query: 'structureItem.link.toPages.first',
                       select: {
@@ -126,8 +150,14 @@ export function usePodcastData() {
                 slug: true,
                 num: 'page.num',
                 texte: 'page.texte.value',
-                // Les épisodes stockent l'image dans un fichier template "poster".
-                imagepodcast: 'page.files.template("poster").first.historiaImage("podcast")',
+                // Éviter les erreurs KQL quand aucun poster n'est défini.
+                imagepodcast: {
+                  query: 'page.files.template("poster").first',
+                  select: {
+                    url: true,
+                    alt: true,
+                  },
+                },
                 audio: {
                   query: 'page.files.template("audio").first',
                   select: {
@@ -142,8 +172,18 @@ export function usePodcastData() {
       })
 
       if (data?.result) {
-        lieux.value = data.result.lieux || []
-        episodes.value = data.result.episodes || []
+        lieux.value = (data.result.lieux || []).map((lieu) => ({
+          ...lieu,
+          imagepodcast: toResponsiveImage(lieu.imagepodcast as RawImageLike),
+          portraitlayout: lieu.portraitlayout?.map((portrait) => ({
+            ...portrait,
+            image: toResponsiveImage(portrait.image as RawImageLike),
+          })) || null,
+        }))
+        episodes.value = (data.result.episodes || []).map((episode) => ({
+          ...episode,
+          imagepodcast: toResponsiveImage(episode.imagepodcast as RawImageLike),
+        }))
         isLoaded.value = true
       }
     } catch (e) {

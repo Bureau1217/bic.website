@@ -4,6 +4,14 @@
     <Transition name="map-reveal-fade">
       <div v-if="!isMapReady" class="map-view__reveal"></div>
     </Transition>
+
+    <button
+      v-if="specialHiddenMarker"
+      class="map-view__special-dot"
+      type="button"
+      aria-label="Afficher le lieu 12"
+      @click.stop="openSpecialHiddenMarker"
+    ></button>
     
     <!-- Conteneur des markers HTML -->
     <div ref="markersContainer" class="map-view__markers"></div>
@@ -59,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue'
 
 // Composables pour l'audio
 const { getLieuBySlug } = usePodcastData()
@@ -102,6 +110,38 @@ const props = withDefaults(defineProps<Props>(), {
   zoom: 1,
   darkMode: true
 })
+
+const SPECIAL_HIDDEN_MARKER_NUMBER = 12
+
+function extractMarkerNumber(marker: MapMarker | null | undefined): number | null {
+  if (!marker) return null
+  if (typeof marker.number === 'number' && Number.isFinite(marker.number)) return marker.number
+  if (typeof marker.number === 'string') {
+    const parsed = Number.parseFloat(marker.number)
+    if (Number.isFinite(parsed)) return parsed
+  }
+  return null
+}
+
+function resolveSpecialHiddenMarker(markers: Array<MapMarker | null | undefined>): MapMarker | null {
+  const validMarkers = markers.filter((marker): marker is MapMarker => {
+    return !!marker && Array.isArray(marker.coordinates) && marker.coordinates.length === 2
+  })
+
+  const foundByNumber = validMarkers.find((marker) => {
+    return extractMarkerNumber(marker) === SPECIAL_HIDDEN_MARKER_NUMBER
+  })
+  if (foundByNumber) return foundByNumber
+
+  return validMarkers[SPECIAL_HIDDEN_MARKER_NUMBER - 1] || null
+}
+
+const specialHiddenMarker = computed(() => resolveSpecialHiddenMarker(props.markers))
+
+function isSameMarker(a: MapMarker | null, b: MapMarker | null): boolean {
+  if (!a || !b) return false
+  return a.id === b.id
+}
 
 const emit = defineEmits<{
   markerClick: [marker: MapMarker]
@@ -271,6 +311,30 @@ function closePopup() {
   updateSelectedMarkerStyles()
 }
 
+function openSpecialHiddenMarker() {
+  if (!view || !arcgisModules?.Point || !specialHiddenMarker.value) return
+
+  const marker = specialHiddenMarker.value
+  const point = new arcgisModules.Point({
+    longitude: marker.coordinates[0],
+    latitude: marker.coordinates[1]
+  })
+
+  startContinuousMarkersUpdate()
+  view.goTo({ target: point }, { duration: 500 }).then(() => {
+    const screenPoint = view!.toScreen(point)
+    if (screenPoint && markersContainer.value) {
+      openPopup(marker, {
+        x: screenPoint.x,
+        y: screenPoint.y
+      })
+    }
+    emit('markerClick', marker)
+  }).finally(() => {
+    scheduleMarkersUpdate()
+  })
+}
+
 // ============================================================================
 // HTML MARKERS MANAGEMENT
 // ============================================================================
@@ -412,6 +476,9 @@ function addMarkers() {
   
   // Ajouter les nouveaux markers
   props.markers.forEach((markerData) => {
+    if (!markerData) return
+    if (isSameMarker(markerData, specialHiddenMarker.value)) return
+
     const el = createMarkerElement(markerData)
     
     // Stocker les données et l'élément
@@ -730,6 +797,7 @@ defineExpose({
 @media screen and (max-width: 991px) {
   .map-wrapper.map-view {
     height: 70vh;
+    
   }
 }
 
@@ -741,7 +809,6 @@ defineExpose({
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 400px;
 }
 
 .map-view__container {
@@ -761,6 +828,19 @@ defineExpose({
   background: var(--white);
   z-index: 120;
   pointer-events: none;
+}
+
+.map-view__special-dot {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--red);
+  z-index: 300;
+  cursor: pointer;
+  padding: 0;
 }
 
 .map-reveal-fade-leave-active {

@@ -70,14 +70,14 @@
             </div>
             <div class="menu_parcours_link_wrapper" v-show="lieuxOpen">
               <NuxtLink
-                v-for="lieu in lieux"
+                v-for="(lieu, lieuIndex) in lieux"
                 :key="lieu.slug"
                 :to="`/parcours/${lieu.slug}`"
                 :prefetch="false"
                 :class="['menu_parcours_link', { 'is-active': isActiveLieuPage(lieu.slug) }]"
                 @click="closeMenu"
               >
-                <div class="menu_parcours_link_title"><span>{{ lieu.num }}.</span> <span>{{ lieu.title }}</span></div>
+                <div class="menu_parcours_link_title"><span>{{ lieuIndex + 1 }}.</span> <span>{{ lieu.title }}</span></div>
               </NuxtLink>
             </div>
           </div>
@@ -133,7 +133,7 @@
           <div class="menu_catalogue_list">
             <!-- Lieux / Capsules -->
             <AudioCard
-              v-for="lieu in lieux"
+              v-for="(lieu, lieuIndex) in lieux"
               :key="lieu.slug"
               variant="menu-catalogue"
               :track-audio-url="lieu.audio?.url || ''"
@@ -144,7 +144,7 @@
                 <ResponsivePicture v-if="lieu.imagepodcast" class="audio-card_image" :image="lieu.imagepodcast" sizes="200px" :alt="lieu.title" picture-class="audio-card_image_rp" />
               </template>
               <template #info>
-                <p class="audio-card_title"><span class="audio-card_number">{{ lieu.num }}.  </span> {{ lieu.title }}</p>
+                <p class="audio-card_title"><span class="audio-card_number">{{ lieuIndex + 1 }}.  </span> {{ lieu.title }}</p>
               </template>
             </AudioCard>
           </div>
@@ -670,6 +670,13 @@ const playLieu = (lieu: any) => {
   height: 100vh;
   font-size: 18px;
   display: flex;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.menu_offset_wrapper > * {
+  flex-shrink: 0;
 }
 
 .menu_cross {

@@ -55,7 +55,7 @@
               :to="`/parcours/${previousLieu.slug}`"
               class="lieu-pagination_link"
             >
-              <span class="lieu-pagination_direction">← Lieu precedent</span>
+              <span class="lieu-pagination_direction">←</span>
               <p class="lieu-pagination_title">
                 {{ previousLieu.num ? `${previousLieu.num}. ` : '' }}{{ previousLieu.title }}
               </p>
@@ -70,7 +70,7 @@
               <p class="lieu-pagination_title">
                 {{ nextLieu.num ? `${nextLieu.num}. ` : '' }}{{ nextLieu.title }}
               </p>
-              <span class="lieu-pagination_direction">Lieu suivant →</span>
+              <span class="lieu-pagination_direction">→</span>
             </NuxtLink>
           </div>
         </div>
@@ -81,13 +81,52 @@
     <QrAudioPopup v-if="data?.result?.audio?.url" v-model="showQrPopup" :title="data?.result?.title ?? ''"
       :image="getImageSrc(data?.result?.imagepodcast)" popup-type="lieu" @play="onPlayAudio" />
 
+    <button
+      class="lieu-map-fab"
+      type="button"
+      aria-label="Ouvrir la carte"
+      @click="openMapOverlay"
+    >
+      <img src="/images/icon-map.svg" alt="" aria-hidden="true" class="lieu-map-fab_icon">
+    </button>
+
+    <Teleport to="body">
+      <div
+        v-if="isMapOverlayOpen"
+        class="lieu-map-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Carte des lieux"
+      >
+        <button
+          class="lieu-map-overlay_close"
+          type="button"
+          aria-label="Fermer la carte"
+          @click="closeMapOverlay"
+        >
+          &#10005;
+        </button>
+
+        <div class="lieu-map-overlay_map">
+          <component
+            :is="AsyncMapView"
+            v-if="hasOpenedMapOverlay"
+            :center="mapCenter"
+            :zoom="4.7"
+            :markers="mapMarkers"
+          />
+        </div>
+      </div>
+    </Teleport>
+
   </main>
 </template>
 
 <script setup lang="ts">
+import { defineAsyncComponent } from 'vue'
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
-const { lieux, fetchPodcastData } = usePodcastData()
+const { lieux, parseGpsCoordinates, fetchPodcastData } = usePodcastData()
 await fetchPodcastData()
 
 const route = useRoute()
@@ -109,6 +148,10 @@ const formatDuration = (seconds: number): string => {
 // Popup QR code : détecte ?qr=1
 const showQrPopup = ref(false)
 const hasQrParam = route.query.qr === '1'
+
+const AsyncMapView = defineAsyncComponent(() => import('~/components/MapView.client.vue'))
+const isMapOverlayOpen = ref(false)
+const hasOpenedMapOverlay = ref(false)
 
 const onPlayAudio = () => {
   const result = data.value?.result
@@ -249,12 +292,76 @@ const nextLieu = computed(() => {
   return lieux.value[index + 1] ?? null
 })
 
+const currentLieu = computed(() => {
+  const index = currentLieuIndex.value
+  if (index < 0) return null
+  return lieux.value[index] ?? null
+})
+
+const mapCenter = computed<[number, number]>(() => {
+  const currentCoordinates = parseGpsCoordinates(currentLieu.value?.gps ?? null)
+  if (currentCoordinates) {
+    return [currentCoordinates.lng, currentCoordinates.lat]
+  }
+  return [6.1432, 46.2044]
+})
+
+const mapMarkers = computed(() => {
+  if (!lieux.value?.length) return []
+
+  return lieux.value
+    .map((lieu, index) => {
+      const coords = parseGpsCoordinates(lieu.gps)
+      if (!coords) return null
+
+      return {
+        id: lieu.slug || index,
+        coordinates: [coords.lng, coords.lat] as [number, number],
+        title: lieu.title,
+        slug: lieu.slug,
+        number: lieu.num || (index + 1),
+        image: getImageSrc(lieu.imagepodcast),
+        icon: lieu.picto?.url,
+        adresse: lieu.adresse || undefined,
+      }
+    })
+    .filter(Boolean) as Array<{
+      id: string | number
+      coordinates: [number, number]
+      title: string
+      slug?: string
+      number?: string | number
+      image?: string
+      icon?: string
+      adresse?: string
+    }>
+})
+
+const openMapOverlay = () => {
+  hasOpenedMapOverlay.value = true
+  isMapOverlayOpen.value = true
+}
+
+const closeMapOverlay = () => {
+  isMapOverlayOpen.value = false
+}
+
 // Extraire tous les blocs d'une row (toutes colonnes), filtre les blocs cachés
 function getBlocksForRow(row: LayoutRow): ResolvedBlock[] {
   return (row.columns ?? [])
     .flatMap((c) => c.blocks ?? [])
     .filter(block => !block.isHidden)
 }
+
+watch(isMapOverlayOpen, (isOpen) => {
+  if (typeof document === 'undefined') return
+  document.body.style.overflow = isOpen ? 'hidden' : ''
+})
+
+onBeforeUnmount(() => {
+  if (typeof document === 'undefined') return
+  document.body.style.overflow = ''
+})
 </script>
 
 <style lang="scss">
@@ -262,13 +369,69 @@ function getBlocksForRow(row: LayoutRow): ResolvedBlock[] {
   position: relative;
 }
 
+.lieu-map-fab {
+  position: fixed;
+  right: 0;
+  bottom: 70px;
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 0;
+  background: var(--red);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  padding: 0;
+}
+
+.lieu-map-fab_icon {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.lieu-map-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--white);
+  z-index: 10000;
+}
+
+.lieu-map-overlay_map {
+  width: 100%;
+  height: 100%;
+}
+
+.lieu-map-overlay_close {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 0;
+  background: var(--red);
+  color: var(--white);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .lieu-pagination {
-  padding-top: var(--40);
+  padding: 0 !important;
 }
 
 .lieu-pagination_line {
   cursor: default;
-  padding: var(--20) var(--40);
+  padding: 0;
 }
 
 .lieu-pagination_links {
@@ -281,27 +444,36 @@ function getBlocksForRow(row: LayoutRow): ResolvedBlock[] {
 .lieu-pagination_link {
   text-decoration: none;
   color: var(--red);
-  padding: var(--15) var(--20);
   width: calc(50% - 10px);
   display: flex;
+  gap: var(--10);
+  padding: var(--10) var(--40);
   flex-direction: row;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
+  justify-content: flex-start;
   transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.lieu-pagination_link:hover {
+  background-color: var(--green);
+  color: var(--white);
 }
 
 
 .lieu-pagination_link.is-next {
   text-align: right;
+  margin-left: auto;
+  justify-content: flex-end;
+
+  p {
+    text-align: right;
+  }
 }
 
 .lieu-pagination_direction {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--10);
-  margin-bottom: var(--10);
-  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
+  line-height: 0;
+  font-size: 30px;
+  padding-top: 10px;
 }
 
 .lieu-pagination_title {
@@ -312,20 +484,27 @@ function getBlocksForRow(row: LayoutRow): ResolvedBlock[] {
 }
 
 @media screen and (max-width: 991px) {
+  .lieu-map-fab {
+    display: flex;
+  }
+
   .lieu-pagination_line {
     padding: var(--20);
   }
 
-  .lieu-pagination_links {
-    flex-direction: column;
-  }
-
-  .lieu-pagination_link {
-    width: 100%;
-  }
 
   .lieu-pagination_link.is-next {
     text-align: left;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .lieu-pagination_links {
+    display: flex;
+    flex-direction: column;
+  }
+  .lieu-pagination_link {
+    width: 100%;
   }
 }
 

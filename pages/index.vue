@@ -45,6 +45,12 @@
       :events="formattedEvents" 
     />
 
+    <ListEdito
+      v-if="formattedEdito.length"
+      title="Edito"
+      :items="formattedEdito"
+    />
+
     <!-- Popup QR code : propose de lancer l'audio d'un épisode si ?qr=1&episode=slug -->
     <QrAudioPopup
       v-if="qrEpisode"
@@ -236,6 +242,12 @@ type ReferenceEvent = {
   lieu: string | null
 }
 
+type HomeEditoItem = {
+  nom: string | null
+  titre: string | null
+  description: string | null
+}
+
 // FETCH DONNEES HOME
 type HomePageData = CMS_API_Response & {
   result: {
@@ -245,6 +257,7 @@ type HomePageData = CMS_API_Response & {
       titre: CMS_API_Block[]
       soustitre: CMS_API_Block[]
       loader_message: string | null
+      edito: HomeEditoItem[]
       /** Cover au format responsive (historiaImage('cover')) */
       cover: ResponsiveImage | null
       /** Images secondaires du hero */
@@ -272,6 +285,14 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           titre: 'page.titre.toBlocks',
           soustitre: 'page.soustitre.toBlocks',
           loader_message: true,
+          edito: {
+            query: 'page.edito.toStructure()',
+            select: {
+              nom: 'structureItem.nom.value',
+              titre: 'structureItem.titre.value',
+              description: 'structureItem.description.value',
+            },
+          },
           // Image responsive null-safe : fallback + WebP + AVIF srcset
           // au lieu de l'URL brute du fichier original (souvent 5–12 Mo)
           cover: 'page.responsiveImage("cover", "cover")',
@@ -332,6 +353,17 @@ const formattedEvents = computed(() => {
   })
 })
 
+const formattedEdito = computed(() => {
+  const edito = data.value?.result?.home?.edito
+  if (!edito?.length) return []
+
+  return edito.map((item) => ({
+    name: item.nom || '',
+    title: item.titre || '',
+    description: item.description || '',
+  }))
+})
+
 // Transformer les lieux en markers pour MapView
 // Les markers utilisent l'URL de fallback (string) pour la carte
 const mapMarkers = computed(() => {
@@ -380,17 +412,13 @@ const mapMarkers = computed(() => {
   background: linear-gradient(180deg, #f3f3f3 0%, #e9e9e9 100%);
 }
 
-.portrait-wrapper {
-  min-height: 60vh;
-}
-
 .portrait-placeholder {
   min-height: 60vh;
 }
 
 @media screen and (max-width: 991px) {
   .map-wrapper {
-    height: 70vw;
+    height: 70vh;
   }
 }
 </style>
