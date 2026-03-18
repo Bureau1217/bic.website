@@ -67,6 +67,10 @@
   padding-right: var(--40);
 }
 
+.list_label.is-bold {
+  font-weight: 700;
+}
+
 .list_case {
   width: var(--100);
 }
@@ -101,7 +105,6 @@
 .list_case.is-partenaires {
   width: calc(33.33% - 40px);
   max-width: 320px;
-  gap: var(--20);
   display: flex;
   flex-direction: column;
   text-decoration: none;
@@ -257,10 +260,6 @@
     flex-flow: column;
   }
 
-  .list_label.is-bold {
-    font-weight: 700;
-  }
-
   .list_case.is-one {
     padding-left: 0;
   }
@@ -312,6 +311,10 @@
   .list_line {
     padding-right: var(--10);
     padding-left: var(--10);
+  }
+
+  .list_line_wrapper {
+    justify-content: center;
   }
 
   .list_case.is-partenaires {

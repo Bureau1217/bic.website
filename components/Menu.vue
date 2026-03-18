@@ -44,10 +44,20 @@
               <div class="list_plus_line is-vertical is-white"></div>
             </div>
           </div>
-          <NuxtLink to="/parcours" :prefetch="false" class="menu_link" @click="closeMenu">
+          <NuxtLink
+            to="/parcours"
+            :prefetch="false"
+            :class="['menu_link', { 'is-active': isActiveStaticPage('/parcours') }]"
+            @click="closeMenu"
+          >
             <div>Parcours</div>
           </NuxtLink>
-          <NuxtLink to="/ressources" :prefetch="false" class="menu_link" @click="closeMenu">
+          <NuxtLink
+            to="/ressources"
+            :prefetch="false"
+            :class="['menu_link', { 'is-active': isActiveStaticPage('/ressources') }]"
+            @click="closeMenu"
+          >
             <div>Ressources</div>
           </NuxtLink>
           <div class="menu_parcours">
@@ -59,19 +69,24 @@
               </div>
             </div>
             <div class="menu_parcours_link_wrapper" v-show="lieuxOpen">
-              <NuxtLink 
-                v-for="lieu in lieux" 
+              <NuxtLink
+                v-for="lieu in lieux"
                 :key="lieu.slug"
-                :to="`/parcours/${lieu.slug}`" 
+                :to="`/parcours/${lieu.slug}`"
                 :prefetch="false"
-                class="menu_parcours_link" 
+                :class="['menu_parcours_link', { 'is-active': isActiveLieuPage(lieu.slug) }]"
                 @click="closeMenu"
               >
                 <div class="menu_parcours_link_title"><span>{{ lieu.num }}.</span> <span>{{ lieu.title }}</span></div>
               </NuxtLink>
             </div>
           </div>
-          <NuxtLink to="/a-propos" :prefetch="false" class="menu_link is-last" @click="closeMenu">
+          <NuxtLink
+            to="/a-propos"
+            :prefetch="false"
+            :class="['menu_link', 'is-last', { 'is-active': isActiveStaticPage('/a-propos') }]"
+            @click="closeMenu"
+          >
             <div>À propos</div>
           </NuxtLink>
           <div class="menu_offset_legals">
@@ -163,6 +178,21 @@ const isParcoursSlugPage = (path: string): boolean => {
 
 const isHomePage = (path: string): boolean => {
   return path === '/'
+}
+
+const normalizePath = (path: string): string => {
+  if (path.length > 1 && path.endsWith('/')) {
+    return path.slice(0, -1)
+  }
+  return path
+}
+
+const isActiveStaticPage = (targetPath: string): boolean => {
+  return normalizePath(route.path) === normalizePath(targetPath)
+}
+
+const isActiveLieuPage = (slug: string): boolean => {
+  return normalizePath(route.path) === normalizePath(`/parcours/${slug}`)
 }
 
 // --- Durées audio ---
@@ -465,6 +495,10 @@ const playLieu = (lieu: any) => {
     background-color: var(--green);
   }
 
+  &.is-active {
+    background-color: var(--green);
+  }
+
   &.is-parcours {
     padding-right: var(--0);
     padding-left: var(--0);
@@ -527,6 +561,10 @@ const playLieu = (lieu: any) => {
   line-height: 1.2;
 
   &:hover {
+    background-color: var(--green);
+  }
+
+  &.is-active {
     background-color: var(--green);
   }
 

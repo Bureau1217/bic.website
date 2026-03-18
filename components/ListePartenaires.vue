@@ -13,10 +13,8 @@
             :target="partner.link ? '_blank' : undefined"
             :rel="partner.link ? 'noopener noreferrer' : undefined"
           >
-            <p class="list_label is-partenaires">
-              <strong>{{ partner.name }}</strong>
-              {{ partner.description }}
-            </p>
+          <h3 class="list_label is-bold">{{ partner.name }}</h3>  
+          <p class="list_label is-partenaires">{{ partner.description }}</p>
           </component>
         </div>
       </div>

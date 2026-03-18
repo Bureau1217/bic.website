@@ -26,7 +26,10 @@
       :categories="formattedRessources" 
     />
 
-
+    <section v-if="hasRemerciementSection" class="page_header">
+      <h2 v-if="remerciementTitle">{{ remerciementTitle }}</h2>
+      <p v-if="remerciementText" class="ressources-remerciement_text">{{ remerciementText }}</p>
+    </section>
 
   </main>
 </template>
@@ -67,6 +70,8 @@ type FetchData = CMS_API_Response & {
       journal_texte: string | null
       journal_bouton_texte: string | null
       journal_bouton_url: string | null
+      remerciement_title: string | null
+      remerciement_text: string | null
     }
   }
 }
@@ -122,6 +127,8 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           journal_texte: 'page.journal_texte.value',
           journal_bouton_texte: 'page.journal_bouton_texte.value',
           journal_bouton_url: 'page.journal_bouton_url.value',
+          remerciement_title: 'page.remerciement_title.value',
+          remerciement_text: 'page.remerciement_text.value',
         },
       },
     },
@@ -183,6 +190,18 @@ const formattedEvents = computed(() => {
   })
 })
 
+const remerciementTitle = computed(() => {
+  return data.value?.result?.ressources?.remerciement_title?.trim() || ''
+})
+
+const remerciementText = computed(() => {
+  return data.value?.result?.ressources?.remerciement_text?.trim() || ''
+})
+
+const hasRemerciementSection = computed(() => {
+  return Boolean(remerciementTitle.value || remerciementText.value)
+})
+
 const goToJournal = () => {
   const url = data.value?.result.ressources.journal_bouton_url
   if (url) {
@@ -190,3 +209,9 @@ const goToJournal = () => {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+.ressources-remerciement_text {
+  white-space: pre-line;
+}
+</style>

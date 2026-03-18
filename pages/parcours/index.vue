@@ -6,6 +6,26 @@
       <AppBlocks :blocks="data?.result?.parcours?.soustitre" />
     </section>
 
+    <AudioCard
+      v-if="firstEpisode?.imagepodcast"
+      variant="parcours-home"
+      :entrance-animation="true"
+      :track-audio-url="firstEpisode?.audio?.url || ''"
+      :duration="firstEpisodeDuration || undefined"
+      :title="firstEpisode?.title ?? ''"
+      :description="firstEpisode?.texte || undefined"
+      @play="onPlayFirstEpisode"
+    >
+      <template #image>
+        <ResponsivePicture
+          :image="firstEpisode.imagepodcast"
+          sizes="240px"
+          :alt="firstEpisode.imagepodcast?.alt ?? ''"
+          picture-class="audio-card_image_rp"
+        />
+      </template>
+    </AudioCard>
+
     <!-- Carte interactive SITG avec lieux Kirby -->
     <div class="map-wrapper">
       <MapView
@@ -30,8 +50,45 @@ import { computed } from 'vue'
 import { getImageSrc } from '~/types/image'
 
 // FETCH DONNEES PODCAST (lieux pour la carte)
-const { lieux, parseGpsCoordinates, fetchPodcastData } = usePodcastData()
+const { lieux, firstEpisode, parseGpsCoordinates, fetchPodcastData } = usePodcastData()
 await fetchPodcastData()
+
+// Lecteur audio global
+const { playTrack } = useAudioPlayer()
+
+// Durée audio du premier épisode
+const firstEpisodeDuration = ref('')
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
+
+watch(firstEpisode, (ep) => {
+  if (ep?.audio?.url && !firstEpisodeDuration.value) {
+    const audio = new Audio()
+    audio.preload = 'metadata'
+    audio.addEventListener('loadedmetadata', () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        firstEpisodeDuration.value = formatDuration(audio.duration)
+      }
+    })
+    audio.src = ep.audio.url
+  }
+}, { immediate: true })
+
+const onPlayFirstEpisode = () => {
+  if (firstEpisode.value?.audio?.url) {
+    playTrack({
+      title: firstEpisode.value.title,
+      num: firstEpisode.value.num,
+      audioUrl: firstEpisode.value.audio.url,
+      slug: firstEpisode.value.slug,
+      type: 'episode',
+    })
+  }
+}
 
 type ParcoursChild = CMS_API_PageItem & {
   template: string
