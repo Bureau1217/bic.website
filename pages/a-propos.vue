@@ -38,14 +38,9 @@ type Partenaire = {
   nom: string
   paragraphe: string
   lien: string | null
-  image: CMS_API_File[]
 }
 
 type FormattedPartenaire = {
-  logo: string
-  logoAlt: string
-  logoWidth: number
-  logoHeight: number
   name: string
   description: string
   link: string | null
@@ -97,15 +92,6 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               nom: true,
               paragraphe: true,
               lien: true,
-              image: {
-                query: 'structureItem.image.toFiles',
-                select: {
-                  url: true,
-                  alt: true,
-                  width: true,
-                  height: true,
-                },
-              },
             },
           },
         },
@@ -122,23 +108,11 @@ useHead(() => ({
 const formattedPartenaires = computed<FormattedPartenaire[]>(() => {
   if (!data.value?.result?.apropos?.partenaires) return []
 
-  return data.value.result.apropos.partenaires
-    .map((partenaire) => {
-      const image = partenaire.image?.[0]
-      const logo = image?.url?.trim() || ''
-      if (!logo) return null
-
-      return {
-        logo,
-        logoAlt: image?.alt?.trim() || partenaire.nom || '',
-        logoWidth: image?.width || 300,
-        logoHeight: image?.height || 180,
-        name: partenaire.nom,
-        description: partenaire.paragraphe,
-        link: partenaire.lien,
-      }
-    })
-    .filter((partenaire): partenaire is FormattedPartenaire => !!partenaire)
+  return data.value.result.apropos.partenaires.map((partenaire) => ({
+    name: partenaire.nom,
+    description: partenaire.paragraphe,
+    link: partenaire.lien,
+  }))
 })
 
 const aproposSections = computed(() => {

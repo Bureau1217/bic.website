@@ -2,6 +2,7 @@
   <div class="footer">
     <div class="footer_info">
       <div v-if="contact?.address" class="footer_title" v-html="contact.address" />
+      <a v-if="contact?.website" :href="contact.website" class="footer_link" target="_blank" rel="noopener noreferrer">{{ contact.website }}</a>
       <a v-if="contact?.email" :href="'mailto:' + contact.email" class="footer_link">{{ contact.email }}</a>
       <a v-if="contact?.phone" :href="'tel:' + contact.phone" class="footer_link">{{ contact.phone }}</a>
     </div>
@@ -26,6 +27,7 @@ type FooterFetchData = CMS_API_Response & {
   result: {
     contact: {
       address: string | null
+      website: string | null
       email: string | null
       phone: string | null
       logos: CMS_API_File[]
@@ -42,6 +44,7 @@ const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
         query: "site.find('a-propos')",
         select: {
           address: true,
+          website: true,
           email: true,
           phone: true,
           logos: {

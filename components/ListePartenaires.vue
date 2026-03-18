@@ -5,25 +5,14 @@
       <div class="list_line is-partenaires">
         <div class="list_line_wrapper is-partenaires">
           <component
-            v-for="(partner, index) in partners" 
-            :key="index" 
+            v-for="(partner, index) in partners"
+            :key="index"
             :is="partner.link ? 'a' : 'div'"
             :href="partner.link || undefined"
             class="list_case is-partenaires"
             :target="partner.link ? '_blank' : undefined"
             :rel="partner.link ? 'noopener noreferrer' : undefined"
           >
-            <span class="list_image_wrapper">
-              <img
-                :src="partner.logo"
-                loading="lazy"
-                decoding="async"
-                :alt="partner.logoAlt || partner.name"
-                class="list_image list_image--partner"
-                :width="partner.logoWidth"
-                :height="partner.logoHeight"
-              >
-            </span>
             <p class="list_label is-partenaires">
               <strong>{{ partner.name }}</strong>
               {{ partner.description }}
@@ -37,10 +26,6 @@
 
 <script setup lang="ts">
 type PartnerItem = {
-  logo: string
-  logoAlt?: string
-  logoWidth?: number
-  logoHeight?: number
   name: string
   description: string
   link: string | null
@@ -58,22 +43,5 @@ withDefaults(defineProps<{
 <style lang="scss">
 .list_case.is-partenaires {
   display: flex;
-}
-
-.list_image_wrapper {
-  width: 100%;
-  max-width: 150px;
-  aspect-ratio: 5 / 3;
-  display: inline-flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.list_image--partner {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-  margin-bottom: 0;
 }
 </style>
