@@ -4,6 +4,24 @@
       <div v-if="contact?.address" class="footer_title" v-html="contact.address" />
       <a v-if="contact?.email" :href="'mailto:' + contact.email" class="footer_link">{{ contact.email }}</a>
       <a v-if="contact?.phone" :href="'tel:' + contact.phone" class="footer_link">{{ contact.phone }}</a>
+      <a
+        v-if="siteUrl"
+        :href="siteUrl"
+        class="footer_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ siteUrlLabel }}
+      </a>
+      <a
+        v-if="instagramUrl"
+        :href="instagramUrl"
+        class="footer_link"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {{ instagramLabel }}
+      </a>
     </div>
     <div class="footer_logo_wrapper">
       <img 
@@ -28,6 +46,8 @@ type FooterFetchData = CMS_API_Response & {
       address: string | null
       email: string | null
       phone: string | null
+      site_url: string | null
+      instagram: string | null
       logos: CMS_API_File[]
     }
   }
@@ -39,11 +59,13 @@ const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
     query: 'site',
     select: {
       contact: {
-        query: "site.find('a-propos')",
+        query: "site.find('home')",
         select: {
           address: true,
           email: true,
           phone: true,
+          site_url: true,
+          instagram: true,
           logos: {
             query: 'page.logos.toFiles',
             select: {
@@ -61,6 +83,24 @@ const { data } = await useFetch<FooterFetchData>('/api/CMS_KQLRequest', {
 
 const contact = computed(() => data.value?.result?.contact)
 const validLogos = computed(() => (contact.value?.logos || []).filter((logo) => !!logo?.url))
+const siteUrl = computed(() => contact.value?.site_url?.trim() || null)
+const instagramUrl = computed(() => contact.value?.instagram?.trim() || null)
+const siteUrlLabel = computed(() => {
+  if (!siteUrl.value) return ''
+  return siteUrl.value.replace(/^https?:\/\//, '').replace(/\/$/, '')
+})
+
+const instagramLabel = computed(() => {
+  if (!instagramUrl.value) return ''
+  try {
+    const url = new URL(instagramUrl.value)
+    const username = url.pathname.replace(/\//g, '')
+    if (username) return `Instagram @${username}`
+  } catch {
+    // URL invalide: fallback sur la valeur brute nettoyee
+  }
+  return instagramUrl.value.replace(/^https?:\/\//, '').replace(/\/$/, '')
+})
 
 </script>
 

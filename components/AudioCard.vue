@@ -50,7 +50,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { CSSProperties } from 'vue'
 
-type AudioCardVariant = 'default' | 'home' | 'menu-episode' | 'menu-catalogue' | 'map-popup'
+type AudioCardVariant = 'default' | 'home' | 'parcours-home' | 'menu-episode' | 'menu-catalogue' | 'map-popup'
 const props = withDefaults(defineProps<{
   /** Variante visuelle de la carte */
   variant?: AudioCardVariant
@@ -109,7 +109,7 @@ const rootClass = computed(() => [
 ])
 
 const isVisible = ref(true)
-const showDismissButton = computed(() => props.variant === 'home' || props.variant === 'default')
+const showDismissButton = computed(() => props.variant === 'home' || props.variant === 'default' || props.variant === 'parcours-home')
 const cardRef = ref<HTMLElement | null>(null)
 const isCurrentTrack = computed(() => !!props.trackAudioUrl && currentTrack.value?.audioUrl === props.trackAudioUrl)
 const playButtonIcon = computed(() => {
@@ -125,7 +125,7 @@ const dragStartPosition = ref({ left: 0, top: 0 })
 const hasEntered = ref(!props.entranceAnimation)
 let entranceTimer: ReturnType<typeof setTimeout> | null = null
 
-const isDragEnabledVariant = computed(() => props.variant === 'home' || props.variant === 'default')
+const isDragEnabledVariant = computed(() => props.variant === 'home' || props.variant === 'default' || props.variant === 'parcours-home')
 const isCardDraggable = computed(() => isDragEnabledVariant.value && isDesktop.value)
 
 const cardStyle = computed<CSSProperties | undefined>(() => {
@@ -138,8 +138,6 @@ const cardStyle = computed<CSSProperties | undefined>(() => {
     bottom: 'auto',
   }
 })
-
-const storageKey = computed(() => `audio-card-position-${props.variant}`)
 
 const clampPosition = (left: number, top: number) => {
   if (!cardRef.value) {
@@ -156,25 +154,6 @@ const clampPosition = (left: number, top: number) => {
     left: Math.min(Math.max(left, 0), maxLeft),
     top: Math.min(Math.max(top, 0), maxTop),
   }
-}
-
-const readSavedPosition = (): { left: number; top: number } | null => {
-  if (import.meta.server || !isDragEnabledVariant.value) return null
-  const raw = window.localStorage.getItem(storageKey.value)
-  if (!raw) return null
-
-  try {
-    const parsed = JSON.parse(raw) as { left?: number; top?: number }
-    if (typeof parsed.left !== 'number' || typeof parsed.top !== 'number') return null
-    return { left: parsed.left, top: parsed.top }
-  } catch {
-    return null
-  }
-}
-
-const savePosition = () => {
-  if (import.meta.server || !isDragEnabledVariant.value || !dragPosition.value) return
-  window.localStorage.setItem(storageKey.value, JSON.stringify(dragPosition.value))
 }
 
 const setPositionFromCurrentRect = () => {
@@ -214,9 +193,6 @@ const onDragMove = (event: MouseEvent) => {
 }
 
 const stopDrag = () => {
-  if (isDragging.value) {
-    savePosition()
-  }
   isDragging.value = false
   window.removeEventListener('mousemove', onDragMove)
   window.removeEventListener('mouseup', stopDrag)
@@ -268,12 +244,8 @@ onMounted(async () => {
   await nextTick()
   if (!isDragEnabledVariant.value) return
 
-  const savedPosition = readSavedPosition()
-  if (savedPosition) {
-    dragPosition.value = clampPosition(savedPosition.left, savedPosition.top)
-  } else {
-    setPositionFromCurrentRect()
-  }
+  // Toujours repartir de la position initiale à chaque montage de la page.
+  setPositionFromCurrentRect()
 })
 
 onBeforeUnmount(() => {

@@ -13,21 +13,8 @@
             :target="partner.link ? '_blank' : undefined"
             :rel="partner.link ? 'noopener noreferrer' : undefined"
           >
-            <span class="list_image_wrapper">
-              <img
-                :src="partner.logo"
-                loading="lazy"
-                decoding="async"
-                :alt="partner.logoAlt || partner.name"
-                class="list_image list_image--partner"
-                :width="partner.logoWidth"
-                :height="partner.logoHeight"
-              >
-            </span>
-            <p class="list_label is-partenaires">
-              <strong>{{ partner.name }}</strong>
-              {{ partner.description }}
-            </p>
+          <h3 class="list_label is-bold">{{ partner.name }}</h3>  
+          <p class="list_label is-partenaires">{{ partner.description }}</p>
           </component>
         </div>
       </div>

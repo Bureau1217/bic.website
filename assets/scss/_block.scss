@@ -21,10 +21,14 @@
       margin-left: auto;
     }
     
+    h3 {
+      font-family: Gt Sectra, Arial, sans-serif;
+    font-size: 40px;
+    }
+
     .block_p {
       max-width: 800px;
       margin-bottom: var(--40);
-
     }
   }
   
@@ -104,5 +108,9 @@
   @media screen and (max-width: 479px) {
     .block-text {
       padding: var(--40) var(--10);
+
+      h3 {
+        font-size: 28px;
+      }
     }
   }

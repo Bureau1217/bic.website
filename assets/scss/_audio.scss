@@ -1,5 +1,5 @@
 // Styles Audio - Notre Historia
-// Utilisé par: AudioCard (variants: default, home, menu, map-popup), AudioPlayer
+// Utilisé par: AudioCard (variants: default, home, parcours-home, menu, map-popup), AudioPlayer
 
 // ============================================================================
 // AUDIO CARD — Base partagée
@@ -44,6 +44,22 @@
   top: 80px;
   left: 20px;
   right: auto;
+  background-color: var(--red);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 1);
+}
+
+// ============================================================================
+// AUDIO CARD — Variant: parcours-home (parcours index, fixed top-right)
+// ============================================================================
+
+.audio-card--parcours-home {
+  z-index: 800;
+  width: 240px;
+  height: 240px;
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  left: auto;
   background-color: var(--red);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 1);
 }
@@ -397,6 +413,40 @@
     color: var(--yellow);
   }
 
+  .audio-card--parcours-home {
+    flex-flow: row;
+    width: 100%;
+    height: 30vw;
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0);
+  }
+
+  .audio-card--parcours-home .audio-card_close {
+    display: none;
+  }
+
+  .audio-card--parcours-home .audio-card_image_wrapper {
+    height: 100%;
+    width: 30vw;
+    position: static;
+  }
+
+  .audio-card--parcours-home .audio-card_button {
+    inset: auto auto 10px calc(30vw + 20px);
+  }
+
+  .audio-card--parcours-home .audio-card_info {
+    width: 70%;
+    padding: var(--20);
+  }
+
+  .audio-card--parcours-home .audio-card_title {
+    color: var(--yellow);
+  }
+
   // Menu variant : full width
   .audio-card--menu-episode {
     width: 100%;
@@ -455,6 +505,23 @@
     inset: auto auto 10px calc(40vw + 10px);
   }
 
+  .audio-card--parcours-home {
+    height: 40vw;
+  }
+
+  .audio-card--parcours-home .audio-card_image_wrapper {
+    height: 40vw;
+    width: 40vw;
+  }
+
+  .audio-card--parcours-home .audio-card_info {
+    padding: var(--10);
+  }
+
+  .audio-card--parcours-home .audio-card_button {
+    inset: auto auto 10px calc(40vw + 10px);
+  }
+
   .audio-card--default {
     height: 40vw;
   }
@@ -494,10 +561,11 @@
   }
 
   .audio-card_button {
-    inset: auto auto 10px 40vw;
+    inset: auto auto 10px calc(40vw + 10px);
 
     .image {
       width: 22px;
+      height: 22px;
     }
   }
 

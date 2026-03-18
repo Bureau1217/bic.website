@@ -68,7 +68,14 @@ export function useAudioPlayer() {
     })
 
     audio.addEventListener('ended', () => {
-      playNext()
+      // Enchaînement auto uniquement pour les épisodes.
+      // Les audios de lieux s'arrêtent à la fin.
+      if (currentTrack.value?.type === 'episode') {
+        playNext()
+        return
+      }
+
+      isPlaying.value = false
     })
 
     audio.addEventListener('play', () => {
@@ -81,9 +88,9 @@ export function useAudioPlayer() {
   }
 
   /**
-   * Jouer la piste suivante automatiquement
-   * Épisode -> épisode suivant, Lieu -> lieu suivant
-   * Si c'est le dernier, on arrête la lecture
+   * Jouer la piste suivante dans la liste courante
+   * (épisode -> épisode suivant, lieu -> lieu suivant).
+   * L'auto-enchaînement en fin de piste est réservé aux épisodes.
    */
   const playNext = () => {
     if (!currentTrack.value) {

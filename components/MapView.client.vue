@@ -729,7 +729,7 @@ defineExpose({
 
 @media screen and (max-width: 991px) {
   .map-wrapper.map-view {
-    height: 70vw;
+    height: 70vh;
   }
 }
 

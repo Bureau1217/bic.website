@@ -1,5 +1,6 @@
 <template>
   <main class="v-home">
+    <HomeLoader :visible="isLoading" :message="homeLoaderMessage" />
 
     <HomeHero
       v-if="data?.result"
@@ -62,6 +63,36 @@ import { computed, defineAsyncComponent, onBeforeUnmount, onMounted } from 'vue'
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
 
+const isLoading = ref(false)
+const nuxtApp = useNuxtApp()
+const isInitialHydration = nuxtApp.isHydrating
+let loaderTimer: ReturnType<typeof setTimeout> | null = null
+let previousBodyOverflow: string | null = null
+
+const lockBodyScroll = () => {
+  if (typeof document === 'undefined' || previousBodyOverflow !== null) return
+  previousBodyOverflow = document.body.style.overflow
+  document.body.style.overflow = 'hidden'
+}
+
+const unlockBodyScroll = () => {
+  if (typeof document === 'undefined' || previousBodyOverflow === null) return
+  document.body.style.overflow = previousBodyOverflow
+  previousBodyOverflow = null
+}
+
+const shouldShowHomeLoader = (): boolean => {
+  if (typeof window === 'undefined') return false
+  if (!isInitialHydration) return false
+
+  const referrer = document.referrer
+  const isExternalReferrer = !referrer || !referrer.startsWith(window.location.origin)
+  const navigationEntry = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined
+  const isReload = navigationEntry?.type === 'reload'
+
+  return isReload || isExternalReferrer
+}
+
 // FETCH DONNEES PODCAST
 const { lieux, episodes, firstEpisode, parseGpsCoordinates, getEpisodeBySlug, fetchPodcastData } = usePodcastData()
 void fetchPodcastData()
@@ -99,6 +130,16 @@ watch(firstEpisode, (ep) => {
 }, { immediate: true })
 
 onMounted(() => {
+  if (shouldShowHomeLoader()) {
+    isLoading.value = true
+    lockBodyScroll()
+    loaderTimer = window.setTimeout(() => {
+      isLoading.value = false
+      unlockBodyScroll()
+      loaderTimer = null
+    }, 3000)
+  }
+
   sectionsObserver = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
@@ -133,6 +174,12 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  if (loaderTimer) {
+    clearTimeout(loaderTimer)
+    loaderTimer = null
+  }
+  unlockBodyScroll()
+
   sectionsObserver?.disconnect()
   sectionsObserver = null
 })
@@ -197,6 +244,7 @@ type HomePageData = CMS_API_Response & {
       slug: string
       titre: CMS_API_Block[]
       soustitre: CMS_API_Block[]
+      loader_message: string | null
       /** Cover au format responsive (historiaImage('cover')) */
       cover: ResponsiveImage | null
       /** Images secondaires du hero */
@@ -223,6 +271,7 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           slug: true,
           titre: 'page.titre.toBlocks',
           soustitre: 'page.soustitre.toBlocks',
+          loader_message: true,
           // Image responsive null-safe : fallback + WebP + AVIF srcset
           // au lieu de l'URL brute du fichier original (souvent 5–12 Mo)
           cover: 'page.responsiveImage("cover", "cover")',
@@ -252,6 +301,11 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
 
 useHead({
   title: 'Accueil',
+})
+
+const homeLoaderMessage = computed(() => {
+  const message = data.value?.result?.home?.loader_message?.trim()
+  return message || "Chargement de l'experience immersive..."
 })
 
 // Transformer les événements du CMS pour le composant ListeAgenda

@@ -46,6 +46,37 @@
         :is-auto="rowIndex % 2 === 1" />
     </div>
 
+    <section v-if="previousLieu || nextLieu" class="list lieu-pagination">
+      <div class="list_wrapper">
+        <div class="list_line lieu-pagination_line">
+          <div class="lieu-pagination_links">
+            <NuxtLink
+              v-if="previousLieu"
+              :to="`/parcours/${previousLieu.slug}`"
+              class="lieu-pagination_link"
+            >
+              <span class="lieu-pagination_direction">← Lieu precedent</span>
+              <p class="lieu-pagination_title">
+                {{ previousLieu.num ? `${previousLieu.num}. ` : '' }}{{ previousLieu.title }}
+              </p>
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="nextLieu"
+              :to="`/parcours/${nextLieu.slug}`"
+              class="lieu-pagination_link is-next"
+            >
+              
+              <p class="lieu-pagination_title">
+                {{ nextLieu.num ? `${nextLieu.num}. ` : '' }}{{ nextLieu.title }}
+              </p>
+              <span class="lieu-pagination_direction">Lieu suivant →</span>
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Popup QR code : propose de lancer l'audio si ?qr=1 -->
     <QrAudioPopup v-if="data?.result?.audio?.url" v-model="showQrPopup" :title="data?.result?.title ?? ''"
       :image="getImageSrc(data?.result?.imagepodcast)" popup-type="lieu" @play="onPlayAudio" />
@@ -56,7 +87,7 @@
 <script setup lang="ts">
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
-const { fetchPodcastData } = usePodcastData()
+const { lieux, fetchPodcastData } = usePodcastData()
 await fetchPodcastData()
 
 const route = useRoute()
@@ -202,6 +233,22 @@ const layoutRows = computed((): LayoutRow[] => {
   return Array.isArray(layout) ? layout : []
 })
 
+const currentLieuIndex = computed(() => {
+  return lieux.value.findIndex(lieu => lieu.slug === slug)
+})
+
+const previousLieu = computed(() => {
+  const index = currentLieuIndex.value
+  if (index <= 0) return null
+  return lieux.value[index - 1] ?? null
+})
+
+const nextLieu = computed(() => {
+  const index = currentLieuIndex.value
+  if (index < 0 || index >= lieux.value.length - 1) return null
+  return lieux.value[index + 1] ?? null
+})
+
 // Extraire tous les blocs d'une row (toutes colonnes), filtre les blocs cachés
 function getBlocksForRow(row: LayoutRow): ResolvedBlock[] {
   return (row.columns ?? [])
@@ -213,5 +260,78 @@ function getBlocksForRow(row: LayoutRow): ResolvedBlock[] {
 <style lang="scss">
 .v-parcours-slug {
   position: relative;
+}
+
+.lieu-pagination {
+  padding-top: var(--40);
+}
+
+.lieu-pagination_line {
+  cursor: default;
+  padding: var(--20) var(--40);
+}
+
+.lieu-pagination_links {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: var(--20);
+}
+
+.lieu-pagination_link {
+  text-decoration: none;
+  color: var(--red);
+  padding: var(--15) var(--20);
+  width: calc(50% - 10px);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+
+.lieu-pagination_link.is-next {
+  text-align: right;
+}
+
+.lieu-pagination_direction {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--10);
+  margin-bottom: var(--10);
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 16px;
+}
+
+.lieu-pagination_title {
+  font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+@media screen and (max-width: 991px) {
+  .lieu-pagination_line {
+    padding: var(--20);
+  }
+
+  .lieu-pagination_links {
+    flex-direction: column;
+  }
+
+  .lieu-pagination_link {
+    width: 100%;
+  }
+
+  .lieu-pagination_link.is-next {
+    text-align: left;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .lieu-pagination_line {
+    padding: var(--10);
+  }
 }
 </style>
