@@ -26,6 +26,11 @@
 
     <ListePartenaires :partners="formattedPartenaires" />
 
+    <ListeRemerciements
+      v-if="data?.result?.apropos?.remerciements?.length"
+      title="Remerciements"
+      :items="data.result.apropos.remerciements"
+    />
 
   </main>
 </template>
@@ -38,6 +43,11 @@ type Partenaire = {
   nom: string
   paragraphe: string
   lien: string | null
+}
+
+type Remerciement = {
+  nom: string
+  paragraphe: string
 }
 
 type FormattedPartenaire = {
@@ -55,13 +65,12 @@ type FetchData = CMS_API_Response & {
       soustitre: CMS_API_Block[]
       bloc1_titre: CMS_API_Block[]
       bloc1_texte: CMS_API_Block[]
-      bloc2_titre: CMS_API_Block[]
-      bloc2_texte: CMS_API_Block[]
       layout: string | null
       address: string | null
       email: string | null
       phone: string | null
       partenaires: Partenaire[]
+      remerciements: Remerciement[]
     }
   }
 }
@@ -80,8 +89,6 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           soustitre: 'page.soustitre.toBlocks',
           bloc1_titre: 'page.bloc1_titre.toBlocks',
           bloc1_texte: 'page.bloc1_texte.toBlocks',
-          bloc2_titre: 'page.bloc2_titre.toBlocks',
-          bloc2_texte: 'page.bloc2_texte.toBlocks',
           layout: 'page.layout.toBlocks.toHtml',
           address: true,
           email: true,
@@ -92,6 +99,13 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               nom: true,
               paragraphe: true,
               lien: true,
+            },
+          },
+          remerciements: {
+            query: 'page.remerciements.toStructure',
+            select: {
+              nom: true,
+              paragraphe: true,
             },
           },
         },
@@ -124,11 +138,6 @@ const aproposSections = computed(() => {
       id: 'bloc1',
       titre: apropos.bloc1_titre || [],
       texte: apropos.bloc1_texte || [],
-    },
-    {
-      id: 'bloc2',
-      titre: apropos.bloc2_titre || [],
-      texte: apropos.bloc2_texte || [],
     },
   ].filter((section) => section.titre.length > 0 || section.texte.length > 0)
 })
