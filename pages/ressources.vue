@@ -17,7 +17,27 @@
       :title="data?.result?.ressources?.journal_titre || 'Notre journal'"
       :text="data?.result?.ressources?.journal_texte || ''"
       :button-text="data?.result?.ressources?.journal_bouton_texte || ''"
-      :button-url="data?.result?.ressources?.journal_bouton_url || '#'"
+      :button-url="data?.result?.ressources?.journal_bouton_fichier?.url || ''"
+      :button2-text="data?.result?.ressources?.journal_bouton2_texte || ''"
+      :button2-url="data?.result?.ressources?.journal_bouton2_url || ''"
+    />
+
+    <Journal
+      :title="data?.result?.ressources?.cartepostale_titre || 'Carte postale'"
+      :text="data?.result?.ressources?.cartepostale_texte || ''"
+      :button-text="data?.result?.ressources?.cartepostale_bouton_texte || ''"
+      :button-url="data?.result?.ressources?.cartepostale_bouton_fichier?.url || ''"
+      :button2-text="data?.result?.ressources?.cartepostale_bouton2_texte || ''"
+      :button2-url="data?.result?.ressources?.cartepostale_bouton2_url || ''"
+    />
+
+    <Journal
+      :title="data?.result?.ressources?.affiches_titre || 'Affiches'"
+      :text="data?.result?.ressources?.affiches_texte || ''"
+      :button-text="data?.result?.ressources?.affiches_bouton_texte || ''"
+      :button-url="data?.result?.ressources?.affiches_bouton_fichier?.url || ''"
+      :button2-text="data?.result?.ressources?.affiches_bouton2_texte || ''"
+      :button2-url="data?.result?.ressources?.affiches_bouton2_url || ''"
     />
 
     <ListeRessource 
@@ -69,7 +89,21 @@ type FetchData = CMS_API_Response & {
       journal_titre: string | null
       journal_texte: string | null
       journal_bouton_texte: string | null
-      journal_bouton_url: string | null
+      journal_bouton_fichier: CMS_API_File | null
+      journal_bouton2_texte: string | null
+      journal_bouton2_url: string | null
+      cartepostale_titre: string | null
+      cartepostale_texte: string | null
+      cartepostale_bouton_texte: string | null
+      cartepostale_bouton_fichier: CMS_API_File | null
+      cartepostale_bouton2_texte: string | null
+      cartepostale_bouton2_url: string | null
+      affiches_titre: string | null
+      affiches_texte: string | null
+      affiches_bouton_texte: string | null
+      affiches_bouton_fichier: CMS_API_File | null
+      affiches_bouton2_texte: string | null
+      affiches_bouton2_url: string | null
       remerciement_title: string | null
       remerciement_text: string | null
     }
@@ -126,7 +160,30 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           journal_titre: 'page.journal_titre.value',
           journal_texte: 'page.journal_texte.value',
           journal_bouton_texte: 'page.journal_bouton_texte.value',
-          journal_bouton_url: 'page.journal_bouton_url.value',
+          journal_bouton_fichier: {
+            query: 'page.journal_bouton_fichier.toFile',
+            select: { url: true },
+          },
+          journal_bouton2_texte: 'page.journal_bouton2_texte.value',
+          journal_bouton2_url: 'page.journal_bouton2_url.value',
+          cartepostale_titre: 'page.cartepostale_titre.value',
+          cartepostale_texte: 'page.cartepostale_texte.value',
+          cartepostale_bouton_texte: 'page.cartepostale_bouton_texte.value',
+          cartepostale_bouton_fichier: {
+            query: 'page.cartepostale_bouton_fichier.toFile',
+            select: { url: true },
+          },
+          cartepostale_bouton2_texte: 'page.cartepostale_bouton2_texte.value',
+          cartepostale_bouton2_url: 'page.cartepostale_bouton2_url.value',
+          affiches_titre: 'page.affiches_titre.value',
+          affiches_texte: 'page.affiches_texte.value',
+          affiches_bouton_texte: 'page.affiches_bouton_texte.value',
+          affiches_bouton_fichier: {
+            query: 'page.affiches_bouton_fichier.toFile',
+            select: { url: true },
+          },
+          affiches_bouton2_texte: 'page.affiches_bouton2_texte.value',
+          affiches_bouton2_url: 'page.affiches_bouton2_url.value',
           remerciement_title: 'page.remerciement_title.value',
           remerciement_text: 'page.remerciement_text.value',
         },
@@ -201,13 +258,6 @@ const remerciementText = computed(() => {
 const hasRemerciementSection = computed(() => {
   return Boolean(remerciementTitle.value || remerciementText.value)
 })
-
-const goToJournal = () => {
-  const url = data.value?.result.ressources.journal_bouton_url
-  if (url) {
-    window.open(url, '_blank', 'noopener')
-  }
-}
 </script>
 
 <style lang="scss" scoped>

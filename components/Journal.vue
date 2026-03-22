@@ -5,7 +5,10 @@
         <div class="journal_content">
             <div class="journal_content_wrapper">
                 <p class="journal_text">{{ text }}</p>
-                <NuxtLink :to="buttonUrl" class="journal_button">{{ buttonText }}</NuxtLink>
+                <div class="journal_buttons">
+                    <a v-if="buttonText && buttonUrl" :href="buttonUrl" target="_blank" rel="noopener noreferrer" class="journal_button" download>{{ buttonText }}</a>
+                    <NuxtLink v-if="button2Text && button2Url" :to="button2Url" class="journal_button">{{ button2Text }}</NuxtLink>
+                </div>
             </div>
         </div>
     </div>
@@ -25,11 +28,19 @@ defineProps({
     },
     buttonText: {
         type: String,
-        required: true,
+        default: '',
     },
     buttonUrl: {
         type: String,
-        default: '#',
+        default: '',
+    },
+    button2Text: {
+        type: String,
+        default: '',
+    },
+    button2Url: {
+        type: String,
+        default: '',
     },
 });
 </script>
@@ -59,7 +70,13 @@ defineProps({
 }
 
 .journal_text {
-   
+
+}
+
+.journal_buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--10);
 }
 
 .journal_button {

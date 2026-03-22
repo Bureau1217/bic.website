@@ -1,21 +1,30 @@
 <template>
-  <div class="list is-last" id="partenaires">
+  <div class="list" id="partenaires">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_wrapper">
-      <div class="list_line is-partenaires">
-        <div class="list_line_wrapper is-partenaires">
-          <component
-            v-for="(partner, index) in partners"
-            :key="index"
-            :is="partner.link ? 'a' : 'div'"
-            :href="partner.link || undefined"
-            class="list_case is-partenaires"
-            :target="partner.link ? '_blank' : undefined"
-            :rel="partner.link ? 'noopener noreferrer' : undefined"
-          >
-          <h3 class="list_label is-bold">{{ partner.name }}</h3>  
-          <p class="list_label is-partenaires">{{ partner.description }}</p>
-          </component>
+      <div
+        v-for="(partner, index) in partners"
+        :key="index"
+        class="list_line"
+      >
+        <div class="list_line_wrapper">
+          <div class="list_case partenaire-nom">
+            <p class="list_label is-bold">{{ partner.name }}</p>
+          </div>
+          <div class="list_case partenaire-paragraphe">
+            <p class="list_label">{{ partner.description }}</p>
+          </div>
+          <div class="list_case partenaire-lien">
+            <a
+              v-if="partner.link"
+              :href="partner.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="list_label"
+            >
+              Lien
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -39,7 +48,15 @@ withDefaults(defineProps<{
 </script>
 
 <style lang="scss">
-.list_case.is-partenaires {
-  display: flex;
+.partenaire-nom {
+  flex: 1;
+}
+
+.partenaire-paragraphe {
+  flex: 2;
+}
+
+.partenaire-lien {
+  flex: 1;
 }
 </style>
