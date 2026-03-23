@@ -68,6 +68,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from 'vue'
+import { loadArcGISModules } from '~/composables/useArcgisModules.client'
 
 // Composables pour l'audio
 const { getLieuBySlug } = usePodcastData()
@@ -243,52 +244,8 @@ let mapInitTimeoutId: number | null = null
 let mapInitIdleId: number | null = null
 let hasMapInitStarted = false
 
-type ArcGISModules = {
-  esriConfig: any
-  EsriMap: any
-  MapView: any
-  VectorTileLayer: any
-  Point: any
-  Extent: any
-}
-
+type ArcGISModules = Awaited<ReturnType<typeof loadArcGISModules>>
 let arcgisModules: ArcGISModules | null = null
-
-async function loadArcGISModules(): Promise<ArcGISModules> {
-  if (arcgisModules) return arcgisModules
-
-  // Charger ArcGIS à la demande pour ne pas pénaliser le FCP/LCP du shell.
-  await import('@arcgis/core/assets/esri/themes/dark/main.css')
-
-  const [
-    { default: esriConfig },
-    { default: EsriMap },
-    { default: MapView },
-    { default: VectorTileLayer },
-    { default: Point },
-    { default: Extent },
-  ] = await Promise.all([
-    import('@arcgis/core/config'),
-    import('@arcgis/core/Map'),
-    import('@arcgis/core/views/MapView'),
-    import('@arcgis/core/layers/VectorTileLayer'),
-    import('@arcgis/core/geometry/Point'),
-    import('@arcgis/core/geometry/Extent'),
-  ])
-
-  esriConfig.portalUrl = 'https://app2.ge.ch/tergeoportal'
-
-  arcgisModules = {
-    esriConfig,
-    EsriMap,
-    MapView,
-    VectorTileLayer,
-    Point,
-    Extent,
-  }
-
-  return arcgisModules
-}
 
 // ============================================================================
 // POPUP MANAGEMENT
@@ -531,6 +488,7 @@ async function initMap() {
   try {
     isMapReady.value = false
     const arcgis = await loadArcGISModules()
+    arcgisModules = arcgis
     mapError.value = null
     
     // Créer le VectorTileLayer avec le style SITG "Tons sombres"

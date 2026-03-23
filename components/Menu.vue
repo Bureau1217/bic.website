@@ -174,10 +174,6 @@ const SCROLL_DIRECTION_THRESHOLD = 6
 const TABLET_MAX_WIDTH = 991
 const TOP_SCROLL_TOLERANCE_PX = 8
 
-const isParcoursSlugPage = (path: string): boolean => {
-  return /^\/parcours\/[^/]+\/?$/.test(path)
-}
-
 const isHomePage = (path: string): boolean => {
   return path === '/'
 }
@@ -186,8 +182,21 @@ const isTabletAndDown = (): boolean => {
   return window.matchMedia(`(max-width: ${TABLET_MAX_WIDTH}px)`).matches
 }
 
+const isParcoursPage = (path: string): boolean => {
+  const normalizedPath = normalizePath(path)
+  return normalizedPath === '/parcours' || normalizedPath.startsWith('/parcours/')
+}
+
+const isTopVisibleLogoPage = (path: string): boolean => {
+  const normalizedPath = normalizePath(path)
+  return normalizedPath === '/a-propos'
+    || normalizedPath === '/ressources'
+    || normalizedPath === '/ressource'
+    || isParcoursPage(normalizedPath)
+}
+
 const shouldKeepLogoVisible = (path: string): boolean => {
-  return isParcoursSlugPage(path) && isTabletAndDown()
+  return isParcoursPage(path) && isTabletAndDown()
 }
 
 const normalizePath = (path: string): string => {
@@ -251,11 +260,12 @@ const ensurePodcastDataLoaded = async () => {
 
 const handleWindowScroll = () => {
   const currentScrollY = Math.max(0, window.scrollY || 0)
+  const currentPath = route.path
 
   // Sécurité: si on arrive tout en haut, on évite les micro-bugs de scroll
   // (bounce/scroll très chaotique) qui peuvent laisser le logo en "hidden".
   if (currentScrollY <= TOP_SCROLL_TOLERANCE_PX) {
-    isLogoVisible.value = shouldKeepLogoVisible(route.path) || isParcoursSlugPage(route.path)
+    isLogoVisible.value = isTopVisibleLogoPage(currentPath) || shouldKeepLogoVisible(currentPath)
     lastScrollY.value = currentScrollY
     return
   }
@@ -263,7 +273,7 @@ const handleWindowScroll = () => {
   const delta = currentScrollY - lastScrollY.value
 
   // Sur la home uniquement, le logo doit se cacher au retour en haut de page.
-  if (isHomePage(route.path) && currentScrollY <= 0) {
+  if (isHomePage(currentPath) && currentScrollY <= 0) {
     isLogoVisible.value = false
     lastScrollY.value = currentScrollY
     return
@@ -277,7 +287,7 @@ const handleWindowScroll = () => {
 }
 
 const syncLogoVisibility = (path: string) => {
-  isLogoVisible.value = isParcoursSlugPage(path)
+  isLogoVisible.value = isTopVisibleLogoPage(path)
 }
 
 const handleWindowResize = () => {

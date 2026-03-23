@@ -518,13 +518,23 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 768px) and (max-width: 991px) {
   .lieu-pagination--top {
     display: block;
   }
 
   .lieu-pagination--bottom {
     display: none;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  .lieu-pagination--top {
+    display: none;
+  }
+
+  .lieu-pagination--bottom {
+    display: block;
   }
 }
 
