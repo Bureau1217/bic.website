@@ -147,6 +147,7 @@
             :zoom="mapZoom"
             :markers="mapMarkers"
             :highlighted-marker-id="slug"
+            @request-close="closeMapOverlay"
           />
         </div>
       </div>

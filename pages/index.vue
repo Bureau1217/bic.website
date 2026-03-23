@@ -115,7 +115,7 @@ const updateMapZoom = () => {
   if (typeof window === 'undefined') return
 
   if (window.matchMedia('(max-width: 767px)').matches) {
-    mapZoom.value = 4.3
+    mapZoom.value = 3
     return
   }
 

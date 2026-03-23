@@ -156,6 +156,7 @@ function isSameMarker(a: MapMarker | null, b: MapMarker | null): boolean {
 const emit = defineEmits<{
   markerClick: [marker: MapMarker]
   mapLoad: [view: unknown]
+  requestClose: []
 }>()
 
 // ============================================================================
@@ -234,6 +235,7 @@ function playFromPopup(marker: MapMarker) {
     })
   }
   closePopup()
+  emit('requestClose')
 }
 
 let view: any | null = null

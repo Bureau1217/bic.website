@@ -191,6 +191,8 @@ const isTopVisibleLogoPage = (path: string): boolean => {
   return normalizedPath === '/a-propos'
     || normalizedPath === '/ressources'
     || normalizedPath === '/ressource'
+    || normalizedPath === '/mentions-legales'
+    || normalizedPath === '/protection-des-donnees'
     || isParcoursPage(normalizedPath)
 }
 
