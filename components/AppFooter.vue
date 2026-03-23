@@ -20,7 +20,7 @@
         target="_blank"
         rel="noopener noreferrer"
       >
-        {{ instagramLabel }}
+        instagram
       </a>
     </div>
     <div class="footer_logo_wrapper">
@@ -111,7 +111,6 @@ const instagramLabel = computed(() => {
   background-color: var(--red);
   justify-content: space-between;
   align-items: center;
-  max-width: 2400px;
   margin-left: auto;
   margin-right: auto;
   padding-top: 80px;
@@ -154,6 +153,7 @@ const instagramLabel = computed(() => {
 .footer_title {
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 18px;
+  line-height: 1.3;
 }
 
 .footer_logo {
@@ -164,7 +164,7 @@ const instagramLabel = computed(() => {
 // Media queries
 @media screen and (max-width: 991px) {
   .footer_logo_wrapper {
-    height: 90px;
+    height: 120px;
   }
 }
 

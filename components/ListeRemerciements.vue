@@ -1,13 +1,14 @@
 <template>
-  <div class="list" id="remerciements">
+  <div class="list is-last" id="remerciements">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_wrapper">
       <div
         v-for="(item, index) in items"
         :key="index"
         class="list_line"
+        @click="toggleItem(index)"
       >
-        <div class="list_plus" @click="toggleItem(index)">
+        <div class="list_plus" >
           <div class="list_plus_line"></div>
           <div class="list_plus_line is-vertical" v-show="!openItems[index]"></div>
         </div>

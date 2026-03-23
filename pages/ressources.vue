@@ -6,6 +6,26 @@
       <AppBlocks :blocks="data?.result?.ressources?.soustitre" />
     </section>
 
+    <AudioCard
+      v-if="firstEpisode?.imagepodcast"
+      variant="parcours-home"
+      :entrance-animation="true"
+      :track-audio-url="firstEpisode?.audio?.url || ''"
+      :duration="firstEpisodeDuration || undefined"
+      :title="firstEpisode?.title ?? ''"
+      :description="firstEpisode?.texte || undefined"
+      @play="onPlayFirstEpisode"
+    >
+      <template #image>
+        <ResponsivePicture
+          :image="firstEpisode.imagepodcast"
+          sizes="240px"
+          :alt="firstEpisode.imagepodcast?.alt ?? ''"
+          picture-class="audio-card_image_rp"
+        />
+      </template>
+    </AudioCard>
+
 
     <ListeAgenda 
       v-if="data?.result?.ressources?.evenements" 
@@ -46,17 +66,54 @@
       :categories="formattedRessources" 
     />
 
-    <section v-if="hasRemerciementSection" class="page_header">
-      <h2 v-if="remerciementTitle">{{ remerciementTitle }}</h2>
-      <p v-if="remerciementText" class="ressources-remerciement_text">{{ remerciementText }}</p>
-    </section>
-
   </main>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import Journal from '~/components/Journal.vue'
+
+// FETCH DONNEES PODCAST (épisode 1)
+const { firstEpisode, fetchPodcastData } = usePodcastData()
+await fetchPodcastData()
+
+// Lecteur audio global
+const { playTrack } = useAudioPlayer()
+
+// Durée audio du premier épisode
+const firstEpisodeDuration = ref('')
+
+const formatDuration = (seconds: number): string => {
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}'${secs.toString().padStart(2, '0')}`
+}
+
+watch(firstEpisode, (ep) => {
+  if (ep?.audio?.url && !firstEpisodeDuration.value) {
+    const audio = new Audio()
+    audio.preload = 'metadata'
+    audio.addEventListener('loadedmetadata', () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        firstEpisodeDuration.value = formatDuration(audio.duration)
+      }
+    })
+    audio.src = ep.audio.url
+  }
+}, { immediate: true })
+
+const onPlayFirstEpisode = () => {
+  if (firstEpisode.value?.audio?.url) {
+    playTrack({
+      title: firstEpisode.value.title,
+      subtitle: firstEpisode.value.texte,
+      num: firstEpisode.value.num,
+      audioUrl: firstEpisode.value.audio.url,
+      slug: firstEpisode.value.slug,
+      type: 'episode',
+    })
+  }
+}
 
 // TYPES
 type ReferenceRessource = {

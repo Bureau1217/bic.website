@@ -11,7 +11,14 @@
       type="button"
       aria-label="Afficher le lieu 12"
       @click.stop="openSpecialHiddenMarker"
-    ></button>
+    >
+      <img
+        src="/images/lisbon_001.png"
+        alt=""
+        class="map-view__special-dot-image"
+        aria-hidden="true"
+      />
+    </button>
     
     <!-- Conteneur des markers HTML -->
     <div ref="markersContainer" class="map-view__markers"></div>
@@ -809,13 +816,22 @@ defineExpose({
   position: absolute;
   top: 16px;
   left: 16px;
-  width: 40px;
-  height: 40px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
-  background: var(--red);
+  border: 1px solid var(--red);
+  background: transparent;
+  overflow: hidden;
   z-index: 300;
   cursor: pointer;
   padding: 0;
+}
+
+.map-view__special-dot-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .map-reveal-fade-leave-active {

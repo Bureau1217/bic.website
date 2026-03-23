@@ -264,6 +264,10 @@
     flex-flow: column;
   }
 
+  .list_line:hover .list_plus {
+    transform: scale(1);
+  }
+
   .list_case.is-one {
     padding-left: 0;
   }

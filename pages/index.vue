@@ -47,7 +47,7 @@
 
     <ListEdito
       v-if="formattedEdito.length"
-      title="Edito"
+      title="Édito"
       :items="formattedEdito"
     />
 

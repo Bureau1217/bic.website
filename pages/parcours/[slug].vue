@@ -50,7 +50,7 @@
             >
               <span class="lieu-pagination_direction">←</span>
               <p class="lieu-pagination_title">
-                Épisode précédent
+                Lieu précédent
               </p>
             </NuxtLink>
 
@@ -60,7 +60,7 @@
               class="lieu-pagination_link is-next"
             >
               <p class="lieu-pagination_title">
-                Épisode suivant
+                Lieu suivant
               </p>
               <span class="lieu-pagination_direction">→</span>
             </NuxtLink>
@@ -87,7 +87,7 @@
             >
               <span class="lieu-pagination_direction">←</span>
               <p class="lieu-pagination_title">
-                Épisode précédent
+                Lieu précédent
               </p>
             </NuxtLink>
 
@@ -98,7 +98,7 @@
             >
               
               <p class="lieu-pagination_title">
-                Épisode suivant
+                Lieu suivant
               </p>
               <span class="lieu-pagination_direction">→</span>
             </NuxtLink>
@@ -468,6 +468,10 @@ onBeforeUnmount(() => {
   margin: 0 !important;
 }
 
+.lieu-pagination--top {
+  display: none;
+}
+
 .lieu-pagination_line {
   cursor: default;
   padding: 0;
@@ -484,7 +488,7 @@ onBeforeUnmount(() => {
 .lieu-pagination_link {
   text-decoration: none;
   color: var(--red);
-  width: calc(50% - 10px);
+  width: 50%;
   display: flex;
   gap: var(--10);
   padding: var(--10) var(--40);
@@ -525,29 +529,16 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
-@media screen and (min-width: 768px) and (max-width: 991px) {
-  .lieu-pagination--top {
-    display: block;
-  }
 
-  .lieu-pagination--bottom {
-    display: none;
-  }
-}
 
-@media screen and (min-width: 992px) {
-  .lieu-pagination--top {
-    display: none;
-  }
-
-  .lieu-pagination--bottom {
-    display: block;
-  }
-}
 
 @media screen and (max-width: 991px) {
   .lieu-map-fab {
     display: flex;
+  }
+
+  .lieu-pagination--top {
+    display: block;
   }
 
 
@@ -566,6 +557,14 @@ onBeforeUnmount(() => {
     padding-right: 0;
     width: 50%;
   }
+
+  .lieu-pagination_title {
+      font-size: 16px;
+}
+
+.lieu-pagination_direction {
+  padding-top: 7px;
+}
 
   .lieu-pagination_link.is-next {
     padding-left: 0;

@@ -7,7 +7,7 @@
                 <p class="journal_text">{{ text }}</p>
                 <div class="journal_buttons">
                     <a v-if="buttonText && buttonUrl" :href="buttonUrl" target="_blank" rel="noopener noreferrer" class="journal_button" download>{{ buttonText }}</a>
-                    <NuxtLink v-if="button2Text && button2Url" :to="button2Url" class="journal_button">{{ button2Text }}</NuxtLink>
+                    <NuxtLink target="_blank" v-if="button2Text && button2Url" :to="button2Url" class="journal_button">{{ button2Text }}</NuxtLink>
                 </div>
             </div>
         </div>

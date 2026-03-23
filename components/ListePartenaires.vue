@@ -7,7 +7,13 @@
         :key="index"
         class="list_line"
       >
-        <div class="list_line_wrapper">
+        <component
+          :is="partner.link ? 'a' : 'div'"
+          class="list_line_wrapper"
+          :href="partner.link || undefined"
+          :target="partner.link ? '_blank' : undefined"
+          :rel="partner.link ? 'noopener noreferrer' : undefined"
+        >
           <div class="list_case partenaire-nom">
             <p class="list_label is-bold">{{ partner.name }}</p>
           </div>
@@ -15,17 +21,9 @@
             <p class="list_label">{{ partner.description }}</p>
           </div>
           <div class="list_case partenaire-lien">
-            <a
-              v-if="partner.link"
-              :href="partner.link"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="list_label"
-            >
-              Lien
-            </a>
+
           </div>
-        </div>
+        </component>
       </div>
     </div>
   </div>
@@ -48,6 +46,11 @@ withDefaults(defineProps<{
 </script>
 
 <style lang="scss">
+.list_line_wrapper {
+  text-decoration: none;
+  color: inherit;
+}
+
 .partenaire-nom {
   flex: 1;
 }

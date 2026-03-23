@@ -90,9 +90,8 @@
             <div>À propos</div>
           </NuxtLink>
           <div class="menu_offset_legals">
-            <NuxtLink to="/mentions-legales" :prefetch="false" target="_blank" class="menu_link--legals" @click="closeMenu">Mentions légales</NuxtLink>
-            <NuxtLink to="/protection-des-donnees" :prefetch="false" target="_blank" class="menu_link--legals" @click="closeMenu">Protection des données</NuxtLink>
-            <NuxtLink to="/engagement" :prefetch="false" target="_blank" class="menu_link--legals" @click="closeMenu">Engagement</NuxtLink>
+            <NuxtLink to="/mentions-legales" :prefetch="false" class="menu_link--legals" @click="closeMenu">Mentions légales</NuxtLink>
+            <NuxtLink to="/protection-des-donnees" :prefetch="false" class="menu_link--legals" @click="closeMenu">Protection des données</NuxtLink>
           </div>
 
         </div>
@@ -387,7 +386,6 @@ const playLieu = (lieu: any) => {
 .menu {
   z-index: 900;
   width: var(--100);
-  max-width: 2400px;
   display: flex;
   position: fixed;
   inset: 0% auto auto;
@@ -573,7 +571,7 @@ const playLieu = (lieu: any) => {
   background-color: #00000080;
   justify-content: flex-end;
   align-items: center;
-  width: 60%;
+  width: 100%;
   height: 100vh;
   display: flex;
   opacity: 0;
@@ -810,7 +808,7 @@ const playLieu = (lieu: any) => {
   }
 
   .menu_offset_legals {
-    padding: var(--20) var(--20) 80px;
+    padding: var(--20) var(--20) 200px;
   }
 }
 
