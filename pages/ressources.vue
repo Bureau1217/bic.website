@@ -73,6 +73,7 @@ type ReferenceEvent = {
   nom: string | null
   description: string | null
   lieu: string | null
+  lien: string | null
 }
 
 
@@ -155,6 +156,7 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               nom: 'structureItem.nom.value',
               description: 'structureItem.description.value',
               lieu: 'structureItem.lieu.value',
+              lien: 'structureItem.lien.value',
             },
           },
           journal_titre: 'page.journal_titre.value',
@@ -242,6 +244,7 @@ const formattedEvents = computed(() => {
       date: dateStr,
       title: event.nom || '',
       venue: event.lieu || '',
+      link: event.lien || '',
       description: event.description || ''
     }
   })

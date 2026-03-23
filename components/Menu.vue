@@ -171,6 +171,8 @@ const lastScrollY = ref(0)
 const audioDurationsLoaded = ref(false)
 
 const SCROLL_DIRECTION_THRESHOLD = 6
+const TABLET_MAX_WIDTH = 991
+const TOP_SCROLL_TOLERANCE_PX = 8
 
 const isParcoursSlugPage = (path: string): boolean => {
   return /^\/parcours\/[^/]+\/?$/.test(path)
@@ -178,6 +180,14 @@ const isParcoursSlugPage = (path: string): boolean => {
 
 const isHomePage = (path: string): boolean => {
   return path === '/'
+}
+
+const isTabletAndDown = (): boolean => {
+  return window.matchMedia(`(max-width: ${TABLET_MAX_WIDTH}px)`).matches
+}
+
+const shouldKeepLogoVisible = (path: string): boolean => {
+  return isParcoursSlugPage(path) && isTabletAndDown()
 }
 
 const normalizePath = (path: string): string => {
@@ -240,7 +250,16 @@ const ensurePodcastDataLoaded = async () => {
 }
 
 const handleWindowScroll = () => {
-  const currentScrollY = window.scrollY || 0
+  const currentScrollY = Math.max(0, window.scrollY || 0)
+
+  // Sécurité: si on arrive tout en haut, on évite les micro-bugs de scroll
+  // (bounce/scroll très chaotique) qui peuvent laisser le logo en "hidden".
+  if (currentScrollY <= TOP_SCROLL_TOLERANCE_PX) {
+    isLogoVisible.value = shouldKeepLogoVisible(route.path) || isParcoursSlugPage(route.path)
+    lastScrollY.value = currentScrollY
+    return
+  }
+
   const delta = currentScrollY - lastScrollY.value
 
   // Sur la home uniquement, le logo doit se cacher au retour en haut de page.
@@ -257,16 +276,26 @@ const handleWindowScroll = () => {
   lastScrollY.value = currentScrollY
 }
 
+const syncLogoVisibility = (path: string) => {
+  isLogoVisible.value = isParcoursSlugPage(path)
+}
+
+const handleWindowResize = () => {
+  syncLogoVisibility(route.path)
+  lastScrollY.value = Math.max(0, window.scrollY || 0)
+}
+
 // Charger les durées quand les données sont prêtes
 onMounted(() => {
-  // Sur les pages /parcours/[slug], le logo doit être visible dès le chargement.
-  isLogoVisible.value = isParcoursSlugPage(route.path)
-  lastScrollY.value = window.scrollY || 0
+  syncLogoVisibility(route.path)
+  lastScrollY.value = Math.max(0, window.scrollY || 0)
   window.addEventListener('scroll', handleWindowScroll, { passive: true })
+  window.addEventListener('resize', handleWindowResize, { passive: true })
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleWindowScroll)
+  window.removeEventListener('resize', handleWindowResize)
 })
 
 watch([catalogueOpen, isLoaded], ([isCatalogueOpen, loaded]) => {
@@ -276,7 +305,8 @@ watch([catalogueOpen, isLoaded], ([isCatalogueOpen, loaded]) => {
 }, { immediate: true })
 
 watch(() => route.path, (path) => {
-  isLogoVisible.value = isParcoursSlugPage(path)
+  syncLogoVisibility(path)
+  lastScrollY.value = Math.max(0, window.scrollY || 0)
 })
 
 const toggleMenu = () => {
@@ -313,6 +343,7 @@ const playEpisode = (episode: any) => {
   if (episode.audio?.url) {
     playTrack({
       title: episode.title,
+      subtitle: episode.texte,
       num: episode.num,
       audioUrl: episode.audio.url,
       slug: episode.slug,
@@ -733,6 +764,10 @@ const playLieu = (lieu: any) => {
     height: 60px;
   }
 
+  .menu_parcours_link:hover {
+    background-color: transparent;
+}
+
   .menu_logo {
     height: var(--100);
     width: var(--100);
@@ -765,7 +800,7 @@ const playLieu = (lieu: any) => {
   }
 
   .menu_offset_legals {
-    padding: var(--20) var(--20) var(--40);
+    padding: var(--20) var(--20) 80px;
   }
 }
 

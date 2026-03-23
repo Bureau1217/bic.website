@@ -39,14 +39,7 @@
       </template>
     </AudioCard>
 
-
-    <!-- Layout: chaque row = une section .block-text -->
-    <div class="blocks-container">
-      <ContentBlockText v-for="(row, rowIndex) in layoutRows" :key="row.id ?? rowIndex" :blocks="getBlocksForRow(row)"
-        :is-auto="rowIndex % 2 === 1" />
-    </div>
-
-    <section v-if="previousLieu || nextLieu" class="list lieu-pagination">
+    <section v-if="previousLieu || nextLieu" class="list lieu-pagination lieu-pagination--top">
       <div class="list_wrapper">
         <div class="list_line lieu-pagination_line">
           <div class="lieu-pagination_links">
@@ -57,7 +50,44 @@
             >
               <span class="lieu-pagination_direction">←</span>
               <p class="lieu-pagination_title">
-                {{ previousLieu.num ? `${previousLieu.num}. ` : '' }}{{ previousLieu.title }}
+                Épisode précédent
+              </p>
+            </NuxtLink>
+
+            <NuxtLink
+              v-if="nextLieu"
+              :to="`/parcours/${nextLieu.slug}`"
+              class="lieu-pagination_link is-next"
+            >
+              <p class="lieu-pagination_title">
+                Épisode suivant
+              </p>
+              <span class="lieu-pagination_direction">→</span>
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Layout: chaque row = une section .block-text -->
+    <div class="blocks-container">
+      <ContentBlockText v-for="(row, rowIndex) in layoutRows" :key="row.id ?? rowIndex" :blocks="getBlocksForRow(row)"
+        :is-auto="rowIndex % 2 === 1" />
+    </div>
+
+    <section v-if="previousLieu || nextLieu" class="list lieu-pagination lieu-pagination--bottom">
+      <div class="list_wrapper">
+        <div class="list_line lieu-pagination_line">
+          <div class="lieu-pagination_links">
+            <NuxtLink
+              v-if="previousLieu"
+              :to="`/parcours/${previousLieu.slug}`"
+              class="lieu-pagination_link"
+            >
+              <span class="lieu-pagination_direction">←</span>
+              <p class="lieu-pagination_title">
+                Épisode précédent
               </p>
             </NuxtLink>
 
@@ -68,7 +98,7 @@
             >
               
               <p class="lieu-pagination_title">
-                {{ nextLieu.num ? `${nextLieu.num}. ` : '' }}{{ nextLieu.title }}
+                Épisode suivant
               </p>
               <span class="lieu-pagination_direction">→</span>
             </NuxtLink>
@@ -114,6 +144,7 @@
             :center="mapCenter"
             :zoom="4.7"
             :markers="mapMarkers"
+            :highlighted-marker-id="slug"
           />
         </div>
       </div>
@@ -427,18 +458,20 @@ onBeforeUnmount(() => {
 
 .lieu-pagination {
   padding: 0 !important;
+  margin: 0 !important;
 }
 
 .lieu-pagination_line {
   cursor: default;
   padding: 0;
+  margin: 0;
 }
 
 .lieu-pagination_links {
   width: 100%;
   display: flex;
   justify-content: space-between;
-  gap: var(--20);
+  margin: 0;
 }
 
 .lieu-pagination_link {
@@ -448,6 +481,7 @@ onBeforeUnmount(() => {
   display: flex;
   gap: var(--10);
   padding: var(--10) var(--40);
+  margin: 0;
   flex-direction: row;
   align-items: flex-start;
   justify-content: flex-start;
@@ -481,15 +515,22 @@ onBeforeUnmount(() => {
   font-size: 20px;
   font-weight: 700;
   line-height: 1.2;
+  margin: 0;
+}
+
+@media screen and (min-width: 768px) {
+  .lieu-pagination--top {
+    display: block;
+  }
+
+  .lieu-pagination--bottom {
+    display: none;
+  }
 }
 
 @media screen and (max-width: 991px) {
   .lieu-map-fab {
     display: flex;
-  }
-
-  .lieu-pagination_line {
-    padding: var(--20);
   }
 
 
@@ -499,18 +540,45 @@ onBeforeUnmount(() => {
 }
 
 @media screen and (max-width: 767px) {
-  .lieu-pagination_links {
-    display: flex;
-    flex-direction: column;
+
+  .lieu-pagination_line {
+     gap: 0;
   }
+
   .lieu-pagination_link {
-    width: 100%;
+    padding-right: 0;
+    width: 50%;
   }
+
+  .lieu-pagination_link.is-next {
+    padding-left: 0;
+    padding-right: 40px;
+  }
+
 }
 
 @media screen and (max-width: 479px) {
-  .lieu-pagination_line {
-    padding: var(--10);
+
+  .lieu-pagination_link {
+    width: 100%;
+    align-items: flex-start;
+    text-align: left;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 10px 10px;
+    gap: 20px;
   }
+
+  .lieu-pagination_link.is-next {
+    align-items: flex-end;
+    text-align: left;
+    flex-direction: column;
+    padding-right: 10px;
+
+    .lieu-pagination_direction {
+      order: -1;
+    }
+  }
+
 }
 </style>

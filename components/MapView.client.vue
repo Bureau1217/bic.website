@@ -98,6 +98,7 @@ export interface Props {
   center?: [number, number]
   zoom?: number
   darkMode?: boolean
+  highlightedMarkerId?: string | number | null
 }
 
 // ============================================================================
@@ -108,7 +109,8 @@ const props = withDefaults(defineProps<Props>(), {
   markers: () => [],
   center: () => [6.1432, 46.2044], // Genève
   zoom: 1,
-  darkMode: true
+  darkMode: true,
+  highlightedMarkerId: null
 })
 
 const SPECIAL_HIDDEN_MARKER_NUMBER = 12
@@ -398,6 +400,11 @@ function updateSelectedMarkerStyles() {
   })
 }
 
+function isHighlightedMarker(id: string | number, markerData: MapMarker): boolean {
+  if (props.highlightedMarkerId === null || props.highlightedMarkerId === undefined) return false
+  return id === props.highlightedMarkerId || markerData.slug === String(props.highlightedMarkerId)
+}
+
 /**
  * Met à jour la position de tous les markers HTML sur l'écran
  * Utilise requestAnimationFrame pour la performance
@@ -420,8 +427,14 @@ function updateMarkersPosition() {
     
     if (screenPoint) {
       // Utiliser transform pour de meilleures performances
-      const scale = selectedMarkerId.value !== null && id === selectedMarkerId.value ? 1.15 : 1
-      el.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px) scale(${scale})`
+      const isSelected = selectedMarkerId.value !== null && id === selectedMarkerId.value
+      const isHighlighted = isHighlightedMarker(id, markerData)
+      const shouldScaleIcon = isSelected || isHighlighted
+      const markerIcon = el.querySelector('.map-view__marker-icon')
+      if (markerIcon) {
+        markerIcon.classList.toggle('map-view__marker-icon--scaled', shouldScaleIcon)
+      }
+      el.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px)`
       el.style.display = 'flex'
     } else {
       // Point hors de l'écran
@@ -730,6 +743,10 @@ watch([() => props.center, () => props.zoom], ([newCenter, newZoom]) => {
   }
 })
 
+watch(() => props.highlightedMarkerId, () => {
+  scheduleMarkersUpdate()
+})
+
 // ============================================================================
 // EXPOSE
 // ============================================================================
@@ -921,6 +938,10 @@ defineExpose({
 }
 
 .map-view__marker-icon:hover {
+  transform: scale(1.15);
+}
+
+.map-view__marker-icon--scaled {
   transform: scale(1.15);
 }
 

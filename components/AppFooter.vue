@@ -114,8 +114,8 @@ const instagramLabel = computed(() => {
   max-width: 2400px;
   margin-left: auto;
   margin-right: auto;
-  padding-top: 40px;
-  padding-bottom: 20px;
+  padding-top: 80px;
+  padding-bottom: 40px;
   display: flex;
 }
 
@@ -123,7 +123,7 @@ const instagramLabel = computed(() => {
   padding-right: var(--40);
   padding-left: var(--40);
   grid-column-gap: 5px;
-  grid-row-gap: 5px;
+  grid-row-gap: 10px;
   color: var(--white);
   flex-flow: column;
   justify-content: flex-start;
@@ -134,8 +134,6 @@ const instagramLabel = computed(() => {
 
 .footer_logo_wrapper {
   padding-right: var(--40);
-  grid-column-gap: var(--15);
-  grid-row-gap: var(--15);
   grid-template-rows: auto;
   grid-template-columns: 1fr 1fr 1fr;
   grid-auto-columns: 1fr;
@@ -159,14 +157,14 @@ const instagramLabel = computed(() => {
 }
 
 .footer_logo {
-  width: var(--100);
+  width: 33.33333%;
   height: var(--100);
 }
 
 // Media queries
 @media screen and (max-width: 991px) {
   .footer_logo_wrapper {
-    height: 60px;
+    height: 90px;
   }
 }
 

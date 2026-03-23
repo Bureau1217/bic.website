@@ -315,13 +315,19 @@
   .list_line {
     padding-right: var(--10);
     padding-left: var(--10);
+    align-items: flex-start;
   }
 
   .list_line_wrapper {
     justify-content: center;
+    width: calc(100% - 30px);
   }
 
   .list_case.is-partenaires {
     width: 100%;
+  }
+
+  .list_desc {
+    width: calc(100% - 30px);
   }
 }

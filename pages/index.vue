@@ -223,6 +223,7 @@ const onPlayQrEpisode = () => {
   if (qrEpisode.value?.audio?.url) {
     playTrack({
       title: qrEpisode.value.title,
+      subtitle: qrEpisode.value.texte,
       num: qrEpisode.value.num,
       audioUrl: qrEpisode.value.audio.url,
       slug: qrEpisode.value.slug,
@@ -240,6 +241,7 @@ type ReferenceEvent = {
   nom: string | null
   description: string | null
   lieu: string | null
+  lien: string | null
 }
 
 type HomeEditoItem = {
@@ -312,6 +314,7 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
               nom: 'structureItem.nom.value',
               description: 'structureItem.description.value',
               lieu: 'structureItem.lieu.value',
+              lien: 'structureItem.lien.value',
             },
           },
         },
@@ -348,6 +351,7 @@ const formattedEvents = computed(() => {
       date: dateStr,
       title: event.nom || '',
       venue: event.lieu || '',
+      link: event.lien || '',
       description: event.description || ''
     }
   })

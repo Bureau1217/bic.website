@@ -82,6 +82,7 @@ const onPlayFirstEpisode = () => {
   if (firstEpisode.value?.audio?.url) {
     playTrack({
       title: firstEpisode.value.title,
+      subtitle: firstEpisode.value.texte,
       num: firstEpisode.value.num,
       audioUrl: firstEpisode.value.audio.url,
       slug: firstEpisode.value.slug,
@@ -203,7 +204,7 @@ const mapMarkers = computed(() => {
 
 @media screen and (max-width: 991px) {
   .map-wrapper {
-    height: 70vw;
+    height: 70vh;
   }
 }
 </style>

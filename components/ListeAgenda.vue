@@ -33,7 +33,17 @@
             <p class="list_label is-bold">{{ event.title }}</p>
           </div>
           <div class="list_case">
-            <p class="list_label">{{ event.venue }}</p>
+            <a
+              v-if="event.link"
+              class="list_label"
+              :href="event.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              @click.stop
+            >
+              {{ event.venue }}
+            </a>
+            <p v-else class="list_label">{{ event.venue }}</p>
           </div>
         </div>
         <Transition
@@ -68,6 +78,7 @@ const props = defineProps({
         date: 'ex. 17 mars 2025 - 17h',
         title: 'ex. INAUGURATION DE "NOTRE HISTORIA"',
         venue: 'ex. Consulat général du portugal',
+        link: '',
         address: 'ex.  Rue du Conseil Général<br>1204 Genève',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
       }

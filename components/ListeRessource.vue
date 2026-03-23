@@ -6,8 +6,9 @@
         v-for="(category, categoryIndex) in categories" 
         :key="categoryIndex" 
         class="list_line"
+        @click="toggleCategory(categoryIndex)"
       >
-        <div class="list_plus" @click="toggleCategory(categoryIndex)">
+        <div class="list_plus">
           <div class="list_plus_line"></div>
           <div class="list_plus_line is-vertical" v-show="!openCategories[categoryIndex]"></div>
         </div>

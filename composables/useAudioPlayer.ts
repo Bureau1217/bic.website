@@ -6,6 +6,7 @@
 
 export type AudioTrack = {
   title: string
+  subtitle?: string | null
   num: string | number | null
   audioUrl: string
   slug: string
@@ -107,6 +108,7 @@ export function useAudioPlayer() {
       if (nextEpisode?.audio?.url) {
         playTrack({
           title: nextEpisode.title,
+          subtitle: nextEpisode.texte,
           num: nextEpisode.num,
           audioUrl: nextEpisode.audio.url,
           slug: nextEpisode.slug,
@@ -150,6 +152,7 @@ export function useAudioPlayer() {
       if (previousEpisode?.audio?.url) {
         playTrack({
           title: previousEpisode.title,
+          subtitle: previousEpisode.texte,
           num: previousEpisode.num,
           audioUrl: previousEpisode.audio.url,
           slug: previousEpisode.slug,

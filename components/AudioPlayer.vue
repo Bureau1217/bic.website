@@ -65,7 +65,7 @@
             :style="nameMarqueeStyle"
           >
             <p class="audioplayer_name">
-              {{ currentTrack?.type === 'lieu' && currentTrack?.num != null ? `${currentTrack.num}. ` : '' }}{{ currentTrack?.title }}
+              {{ currentTrackLabel }}
             </p>
           </div>
         </div>
@@ -123,8 +123,16 @@ const isTabletViewport = ref(false)
 let mediaQueryList = null
 let resizeObserver = null
 
-const getCurrentTrackTitle = () =>
-  currentTrack?.value?.title ?? currentTrack?.title ?? ''
+const getCurrentTrackLabel = () => {
+  const track = currentTrack?.value ?? currentTrack
+  const titlePrefix = track?.type === 'lieu' && track?.num != null ? `${track.num}. ` : ''
+  const title = track?.title ?? ''
+  const subtitle = track?.subtitle?.trim() ?? ''
+
+  return subtitle ? `${titlePrefix}${title} - ${subtitle}` : `${titlePrefix}${title}`
+}
+
+const currentTrackLabel = computed(() => getCurrentTrackLabel())
 
 const refreshNameAnimation = () => {
   if (!process.client) return
@@ -201,7 +209,7 @@ onBeforeUnmount(() => {
   }
 })
 
-watch(getCurrentTrackTitle, () => {
+watch(getCurrentTrackLabel, () => {
   nextTick(() => {
     refreshNameAnimation()
   })

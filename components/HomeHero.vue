@@ -93,6 +93,7 @@ const onPlayAudio = () => {
   if (props.audioCard?.audioUrl) {
     playTrack({
       title: props.audioCard.title,
+      subtitle: props.audioCard.description,
       num: props.audioCard.num ?? null,
       audioUrl: props.audioCard.audioUrl,
       slug: props.audioCard.slug ?? '',
