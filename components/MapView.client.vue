@@ -400,7 +400,11 @@ function updateMarkersPosition() {
       if (markerIcon) {
         markerIcon.classList.toggle('map-view__marker-icon--scaled', shouldScaleIcon)
       }
-      el.style.transform = `translate(${screenPoint.x}px, ${screenPoint.y}px)`
+      // Sur mobile, des coordonnées fractionnaires peuvent rendre les icônes floues/pixellisées.
+      // On aligne la position sur des pixels entiers et on passe en translate3d.
+      const pixelAlignedX = Math.round(screenPoint.x)
+      const pixelAlignedY = Math.round(screenPoint.y)
+      el.style.transform = `translate3d(${pixelAlignedX}px, ${pixelAlignedY}px, 0)`
       el.style.display = 'flex'
     } else {
       // Point hors de l'écran
@@ -929,6 +933,8 @@ defineExpose({
   height: 100%;
   object-fit: contain;
   padding: 4px;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
   transition: transform 0.2s ease;
 }
 

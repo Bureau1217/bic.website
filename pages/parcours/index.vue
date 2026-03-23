@@ -30,7 +30,7 @@
     <div class="map-wrapper">
       <MapView
         :center="[6.1432, 46.2044]"
-        :zoom="4.7"
+        :zoom="mapZoom"
         :markers="mapMarkers"
       />
     </div>
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted } from 'vue'
 import { getImageSrc } from '~/types/image'
 
 // FETCH DONNEES PODCAST (lieux pour la carte)
@@ -75,6 +75,23 @@ await fetchPodcastData()
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
+const mapZoom = ref(4.7)
+
+const updateMapZoom = () => {
+  if (typeof window === 'undefined') return
+
+  if (window.matchMedia('(max-width: 767px)').matches) {
+    mapZoom.value = 4.3
+    return
+  }
+
+  if (window.matchMedia('(max-width: 991px)').matches) {
+    mapZoom.value = 4.5
+    return
+  }
+
+  mapZoom.value = 4.7
+}
 
 // Durée audio du premier épisode
 const firstEpisodeDuration = ref('')
@@ -97,6 +114,15 @@ watch(firstEpisode, (ep) => {
     audio.src = ep.audio.url
   }
 }, { immediate: true })
+
+onMounted(() => {
+  updateMapZoom()
+  window.addEventListener('resize', updateMapZoom)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateMapZoom)
+})
 
 const onPlayFirstEpisode = () => {
   if (firstEpisode.value?.audio?.url) {

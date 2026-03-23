@@ -17,7 +17,7 @@
         />
       </SwiperSlide>
     </Swiper>
-    <p v-if="caption" class="block-image_legende">{{ caption }}</p>
+    <p v-if="caption" class="block-image_legende" v-html="caption" />
   </div>
 </template>
 

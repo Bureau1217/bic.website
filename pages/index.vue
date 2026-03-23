@@ -27,7 +27,7 @@
         :is="AsyncMapView"
         v-if="shouldMountMap"
         :center="[6.1432, 46.2044]"
-        :zoom="4.7"
+        :zoom="mapZoom"
         :markers="mapMarkers"
         id="map-home"
       />
@@ -108,7 +108,24 @@ const mapSectionRef = ref<HTMLElement | null>(null)
 const portraitSectionRef = ref<HTMLElement | null>(null)
 const shouldMountMap = ref(false)
 const shouldMountPortraitSlider = ref(false)
+const mapZoom = ref(4.7)
 let sectionsObserver: IntersectionObserver | null = null
+
+const updateMapZoom = () => {
+  if (typeof window === 'undefined') return
+
+  if (window.matchMedia('(max-width: 767px)').matches) {
+    mapZoom.value = 4.3
+    return
+  }
+
+  if (window.matchMedia('(max-width: 991px)').matches) {
+    mapZoom.value = 4.5
+    return
+  }
+
+  mapZoom.value = 4.7
+}
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
@@ -136,6 +153,9 @@ watch(firstEpisode, (ep) => {
 }, { immediate: true })
 
 onMounted(() => {
+  updateMapZoom()
+  window.addEventListener('resize', updateMapZoom)
+
   if (shouldShowHomeLoader()) {
     isLoading.value = true
     lockBodyScroll()
@@ -180,6 +200,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateMapZoom)
+
   if (loaderTimer) {
     clearTimeout(loaderTimer)
     loaderTimer = null

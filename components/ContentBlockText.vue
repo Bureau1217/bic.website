@@ -25,7 +25,7 @@
           :alt="block.content?.alt || undefined"
           picture-class="block-image_picture"
         />
-        <p v-if="block.content?.caption" class="block-image_legende">{{ block.content.caption }}</p>
+        <p v-if="block.content?.caption" class="block-image_legende" v-html="block.content.caption" />
       </div>
       
       <!-- Citation -->

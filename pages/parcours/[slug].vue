@@ -144,7 +144,7 @@
             :is="AsyncMapView"
             v-if="hasOpenedMapOverlay"
             :center="mapCenter"
-            :zoom="4.7"
+            :zoom="mapZoom"
             :markers="mapMarkers"
             :highlighted-marker-id="slug"
           />
@@ -185,6 +185,23 @@ const hasQrParam = route.query.qr === '1'
 const AsyncMapView = defineAsyncComponent(() => import('~/components/MapView.client.vue'))
 const isMapOverlayOpen = ref(false)
 const hasOpenedMapOverlay = ref(false)
+const mapZoom = ref(4.7)
+
+const updateMapZoom = () => {
+  if (typeof window === 'undefined') return
+
+  if (window.matchMedia('(max-width: 767px)').matches) {
+    mapZoom.value = 4.3
+    return
+  }
+
+  if (window.matchMedia('(max-width: 991px)').matches) {
+    mapZoom.value = 4.5
+    return
+  }
+
+  mapZoom.value = 4.7
+}
 
 const onPlayAudio = () => {
   const result = data.value?.result
@@ -391,7 +408,13 @@ watch(isMapOverlayOpen, (isOpen) => {
   document.body.style.overflow = isOpen ? 'hidden' : ''
 })
 
+onMounted(() => {
+  updateMapZoom()
+  window.addEventListener('resize', updateMapZoom)
+})
+
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', updateMapZoom)
   if (typeof document === 'undefined') return
   document.body.style.overflow = ''
 })
