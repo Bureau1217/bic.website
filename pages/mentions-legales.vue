@@ -1,5 +1,6 @@
 <template>
   <main class="v-legal">
+    <Menu />
 
     <template v-if="data?.status === 'ok' && data.result">
       <ListeMentions 
