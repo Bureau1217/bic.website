@@ -1,12 +1,12 @@
 <template>
   <div class="map-view">
-    <div ref="mapContainer" class="map-view__container" :class="{ 'is-ready': isMapReady }"></div>
-    <Transition name="map-reveal-fade">
-      <div v-if="!isMapReady" class="map-view__reveal"></div>
+    <div ref="mapContainer" class="map-view__container" :class="{ 'is-visible': isMapVisible }"></div>
+    <Transition name="map-white-fade">
+      <div v-if="!isMapVisible" class="map-view__reveal"></div>
     </Transition>
 
     <button
-      v-if="specialHiddenMarker"
+      v-if="isMapVisible && specialHiddenMarker"
       class="map-view__special-dot"
       type="button"
       aria-label="Afficher le lieu 12"
@@ -21,7 +21,7 @@
     </button>
     
     <!-- Conteneur des markers HTML -->
-    <div ref="markersContainer" class="map-view__markers"></div>
+    <div ref="markersContainer" class="map-view__markers" :class="{ 'is-ready': isMapVisible }"></div>
     
     <!-- Message d'erreur si le style ne charge pas -->
     <div v-if="mapError" class="map-view__error">
@@ -67,7 +67,7 @@
     </div>
     
     <!-- Attribution SITG -->
-    <div class="map-view__attribution">
+    <div v-if="isMapVisible" class="map-view__attribution">
       Source : ICDG / SITG (État de Genève)
     </div>
   </div>
@@ -173,6 +173,7 @@ const mapContainer = ref<HTMLDivElement | null>(null)
 const markersContainer = ref<HTMLDivElement | null>(null)
 const mapError = ref<string | null>(null)
 const isMapReady = ref(false)
+const isMapVisible = ref(false)
 
 // Popup state
 const activePopup = ref<MapMarker | null>(null)
@@ -249,6 +250,7 @@ let continuousUpdateRAF: number | null = null
 let isContinuousUpdateRunning = false
 let mapInitTimeoutId: number | null = null
 let mapInitIdleId: number | null = null
+let mapRevealTimeoutId: number | null = null
 let hasMapInitStarted = false
 
 type ArcGISModules = Awaited<ReturnType<typeof loadArcGISModules>>
@@ -494,6 +496,7 @@ async function initMap() {
   
   try {
     isMapReady.value = false
+    isMapVisible.value = false
     const arcgis = await loadArcGISModules()
     arcgisModules = arcgis
     mapError.value = null
@@ -591,6 +594,14 @@ async function initMap() {
     emit('mapLoad', view)
     requestAnimationFrame(() => {
       isMapReady.value = true
+      if (mapRevealTimeoutId) {
+        window.clearTimeout(mapRevealTimeoutId)
+      }
+      // Petit délai pour laisser les dernières couches se stabiliser avant le fondu.
+      mapRevealTimeoutId = window.setTimeout(() => {
+        isMapVisible.value = true
+        mapRevealTimeoutId = null
+      }, 320)
     })
     
     console.log('[MapView] ArcGIS map initialized with SITG style "Tons sombres" and HTML markers')
@@ -598,6 +609,7 @@ async function initMap() {
   } catch (error: unknown) {
     hasMapInitStarted = false
     isMapReady.value = true
+    isMapVisible.value = true
     const errorMessage = error instanceof Error ? error.message : String(error)
     console.error('[MapView] Failed to initialize map:', errorMessage)
     
@@ -677,6 +689,10 @@ onBeforeUnmount(() => {
     const browserWindow = window as Window & { cancelIdleCallback?: (handle: number) => void }
     browserWindow.cancelIdleCallback?.(mapInitIdleId)
     mapInitIdleId = null
+  }
+  if (mapRevealTimeoutId) {
+    window.clearTimeout(mapRevealTimeoutId)
+    mapRevealTimeoutId = null
   }
 
   clearMarkers()
@@ -796,11 +812,10 @@ defineExpose({
 .map-view__container {
   width: 100%;
   height: 100%;
-  opacity: 0;
-  transition: opacity 0.45s ease;
+  opacity: 1;
 }
 
-.map-view__container.is-ready {
+.map-view__container.is-visible {
   opacity: 1;
 }
 
@@ -834,11 +849,11 @@ defineExpose({
   object-fit: cover;
 }
 
-.map-reveal-fade-leave-active {
-  transition: opacity 0.45s ease;
+.map-white-fade-leave-active {
+  transition: opacity 0.75s ease;
 }
 
-.map-reveal-fade-leave-to {
+.map-white-fade-leave-to {
   opacity: 0;
 }
 
@@ -874,6 +889,12 @@ defineExpose({
   pointer-events: none;
   z-index: 50;
   overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.map-view__markers.is-ready {
+  opacity: 1;
 }
 
 .map-view__marker {
