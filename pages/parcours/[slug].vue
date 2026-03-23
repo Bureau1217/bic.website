@@ -122,10 +122,12 @@
 
     <Teleport to="body">
       <div
-        v-if="isMapOverlayOpen"
+        v-show="hasOpenedMapOverlay"
         class="lieu-map-overlay"
+        :class="{ 'is-open': isMapOverlayOpen }"
         role="dialog"
-        aria-modal="true"
+        :aria-modal="isMapOverlayOpen ? 'true' : 'false'"
+        :aria-hidden="isMapOverlayOpen ? 'false' : 'true'"
         aria-label="Carte des lieux"
       >
         <button
@@ -430,6 +432,11 @@ onBeforeUnmount(() => {
   height: 100vh;
   background: var(--white);
   z-index: 10000;
+  display: none;
+}
+
+.lieu-map-overlay.is-open {
+  display: block;
 }
 
 .lieu-map-overlay_map {
