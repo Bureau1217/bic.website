@@ -23,21 +23,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create .env file
+      - name: Create .env file for build
         run: |
           echo "API_AUTH_EMAIL=${{ secrets.API_AUTH_EMAIL }}" >> .env
           echo "API_AUTH_PASSWORD=${{ secrets.API_AUTH_PASSWORD }}" >> .env
           echo "API_URL=${{ secrets.API_URL }}" >> .env
 
-      - name: Build
-        run: npm run generate
+      - name: Build (SSR mode)
+        run: npm run build
 
-      - name: Prepare deployment folder
+      - name: Prepare deployment
         run: |
           mkdir -p deploy
-          cp server-static/package.json deploy/
-          cp server-static/server.js deploy/
-          cp -r .output/public deploy/public
+          cp -r .output deploy/.output
+          cp package.json deploy/
+          cp package-lock.json deploy/ || true
+          echo "API_AUTH_EMAIL=${{ secrets.API_AUTH_EMAIL }}" >> deploy/.env
+          echo "API_AUTH_PASSWORD=${{ secrets.API_AUTH_PASSWORD }}" >> deploy/.env
+          echo "API_URL=${{ secrets.API_URL }}" >> deploy/.env
 
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
