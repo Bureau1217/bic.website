@@ -403,10 +403,11 @@ function updateMarkersPosition() {
         markerIcon.classList.toggle('map-view__marker-icon--scaled', shouldScaleIcon)
       }
       // Sur mobile, des coordonnées fractionnaires peuvent rendre les icônes floues/pixellisées.
-      // On aligne la position sur des pixels entiers et on passe en translate3d.
+      // On aligne la position sur des pixels entiers, mais on reste en transform 2D:
+      // sur iOS, translate3d + will-change peut rasteriser les images en basse résolution.
       const pixelAlignedX = Math.round(screenPoint.x)
       const pixelAlignedY = Math.round(screenPoint.y)
-      el.style.transform = `translate3d(${pixelAlignedX}px, ${pixelAlignedY}px, 0)`
+      el.style.transform = `translate(${pixelAlignedX}px, ${pixelAlignedY}px)`
       el.style.display = 'flex'
     } else {
       // Point hors de l'écran
@@ -920,7 +921,7 @@ defineExpose({
   pointer-events: auto;
   /* Pas de transition sur transform: évite l'effet de "retard" pendant les déplacements */
   transition: filter 0.2s ease-in-out;
-  will-change: transform;
+  will-change: auto;
 }
 
 .map-view__marker-number {
@@ -935,9 +936,11 @@ defineExpose({
   height: 100%;
   object-fit: contain;
   padding: 4px;
-  image-rendering: -webkit-optimize-contrast;
+  image-rendering: auto;
   image-rendering: auto;
   transition: transform 0.2s ease;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .map-view__marker-icon:hover {
