@@ -24,6 +24,8 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Côté serveur seulement (pas exposé au client)
     apiUrl: process.env.API_URL || 'http://localhost:8000',
+    apiAuthEmail: process.env.API_AUTH_EMAIL || '',
+    apiAuthPassword: process.env.API_AUTH_PASSWORD || '',
     // Côté client (public)
     public: {
       // URL de base du CMS, utilisée pour normaliser les URLs des médias

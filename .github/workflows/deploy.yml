@@ -38,9 +38,10 @@ jobs:
           cp -r .output deploy/.output
           cp package.json deploy/
           cp package-lock.json deploy/ || true
-          echo "API_AUTH_EMAIL=${{ secrets.API_AUTH_EMAIL }}" >> deploy/.env
-          echo "API_AUTH_PASSWORD=${{ secrets.API_AUTH_PASSWORD }}" >> deploy/.env
-          echo "API_URL=${{ secrets.API_URL }}" >> deploy/.env
+          echo "NUXT_API_URL=${{ secrets.API_URL }}" >> deploy/.env
+          echo "NUXT_API_AUTH_EMAIL=${{ secrets.API_AUTH_EMAIL }}" >> deploy/.env
+          echo "NUXT_API_AUTH_PASSWORD=${{ secrets.API_AUTH_PASSWORD }}" >> deploy/.env
+          echo "NUXT_PUBLIC_CMS_BASE_URL=${{ secrets.API_URL }}" >> deploy/.env
 
       - name: Install sshpass
         run: sudo apt-get install -y sshpass

@@ -1,6 +1,9 @@
 export default defineEventHandler(async (event) => {
-    const email = process.env.API_AUTH_EMAIL
-    const password = process.env.API_AUTH_PASSWORD
+    const config = useRuntimeConfig()
+
+    const email = config.apiAuthEmail
+    const password = config.apiAuthPassword
+    const apiUrl = config.apiUrl
 
     const authHeader = Buffer.from(`${email}:${password}`).toString('base64')
 
@@ -17,7 +20,7 @@ export default defineEventHandler(async (event) => {
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
-            const dataApi = await $fetch(`${process.env.API_URL}/api/query`, {
+            const dataApi = await $fetch(`${apiUrl}/api/query`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Basic ${authHeader}`,
