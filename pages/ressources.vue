@@ -60,6 +60,12 @@
       :button2-url="data?.result?.ressources?.affiches_bouton2_url || ''"
     />
 
+    <Journal
+      :title="data?.result?.ressources?.azulejos_titre || 'Atelier Azulejos'"
+      :text="data?.result?.ressources?.azulejos_texte || ''"
+      :video-url="data?.result?.ressources?.azulejos_video?.url || ''"
+    />
+
     <ListeRessource 
       v-if="data?.result?.ressources?.ressources" 
       title="Références" 
@@ -162,6 +168,9 @@ type FetchData = CMS_API_Response & {
       affiches_bouton_fichier: CMS_API_File | null
       affiches_bouton2_texte: string | null
       affiches_bouton2_url: string | null
+      azulejos_titre: string | null
+      azulejos_texte: string | null
+      azulejos_video: CMS_API_File | null
       remerciement_title: string | null
       remerciement_text: string | null
     }
@@ -243,6 +252,12 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           },
           affiches_bouton2_texte: 'page.affiches_bouton2_texte.value',
           affiches_bouton2_url: 'page.affiches_bouton2_url.value',
+          azulejos_titre: 'page.azulejos_titre.value',
+          azulejos_texte: 'page.azulejos_texte.value',
+          azulejos_video: {
+            query: 'page.azulejos_video.toFile',
+            select: { url: true },
+          },
           remerciement_title: 'page.remerciement_title.value',
           remerciement_text: 'page.remerciement_text.value',
         },

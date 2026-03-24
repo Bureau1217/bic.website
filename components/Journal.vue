@@ -5,7 +5,14 @@
         <div class="journal_content">
             <div class="journal_content_wrapper">
                 <p class="journal_text">{{ text }}</p>
-                <div class="journal_buttons">
+                <div v-if="videoUrl" class="journal_video">
+                    <video
+                        :src="videoUrl"
+                        controls
+                        playsinline
+                    ></video>
+                </div>
+                <div v-else class="journal_buttons">
                     <a v-if="buttonText && buttonUrl" :href="buttonUrl" target="_blank" rel="noopener noreferrer" class="journal_button" download>{{ buttonText }}</a>
                     <NuxtLink target="_blank" v-if="button2Text && button2Url" :to="button2Url" class="journal_button">{{ button2Text }}</NuxtLink>
                 </div>
@@ -39,6 +46,10 @@ defineProps({
         default: '',
     },
     button2Url: {
+        type: String,
+        default: '',
+    },
+    videoUrl: {
         type: String,
         default: '',
     },
@@ -77,6 +88,17 @@ defineProps({
     display: flex;
     flex-wrap: wrap;
     gap: var(--10);
+}
+
+.journal_video {
+    width: 100%;
+}
+
+.journal_video video {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
 }
 
 .journal_button {
