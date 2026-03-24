@@ -192,16 +192,16 @@ const updateMapZoom = () => {
   if (typeof window === 'undefined') return
 
   if (window.matchMedia('(max-width: 767px)').matches) {
-    mapZoom.value = 4.3
+    mapZoom.value = 2
     return
   }
 
   if (window.matchMedia('(max-width: 991px)').matches) {
-    mapZoom.value = 4.5
+    mapZoom.value = 2
     return
   }
 
-  mapZoom.value = 4.7
+  mapZoom.value = 4.5
 }
 
 const onPlayAudio = () => {
