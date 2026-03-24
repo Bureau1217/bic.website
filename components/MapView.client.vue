@@ -257,7 +257,6 @@ let hasMapInitStarted = false
 
 type ArcGISModules = Awaited<ReturnType<typeof loadArcGISModules>>
 let arcgisModules: ArcGISModules | null = null
-let useTopLeftMarkerPositioning = false
 
 // ============================================================================
 // POPUP MANAGEMENT
@@ -403,21 +402,11 @@ function updateMarkersPosition() {
       if (markerIcon) {
         markerIcon.classList.toggle('map-view__marker-icon--scaled', shouldScaleIcon)
       }
-      // Coordonnées alignées sur pixels entiers pour limiter le flou subpixel.
+      // Sur mobile, des coordonnées fractionnaires peuvent rendre les icônes floues/pixellisées.
+      // On aligne la position sur des pixels entiers et on passe en translate3d.
       const pixelAlignedX = Math.round(screenPoint.x)
       const pixelAlignedY = Math.round(screenPoint.y)
-      if (useTopLeftMarkerPositioning) {
-        // Sur mobile réel (notamment iOS), le positionnement via transform peut
-        // rasteriser les icônes dans un calque GPU et créer un effet pixellisé.
-        // left/top évite ce pipeline de compositing.
-        el.style.transform = 'none'
-        el.style.left = `${pixelAlignedX}px`
-        el.style.top = `${pixelAlignedY}px`
-      } else {
-        el.style.left = '0px'
-        el.style.top = '0px'
-        el.style.transform = `translate(${pixelAlignedX}px, ${pixelAlignedY}px)`
-      }
+      el.style.transform = `translate3d(${pixelAlignedX}px, ${pixelAlignedY}px, 0)`
       el.style.display = 'flex'
     } else {
       // Point hors de l'écran
@@ -683,7 +672,6 @@ function scheduleMapInit() {
 onMounted(async () => {
   await nextTick()
   console.log('[MapView] Container:', mapContainer.value)
-  useTopLeftMarkerPositioning = window.matchMedia('(pointer: coarse)').matches
   window.addEventListener('resize', handleWindowResize)
   mapContainer.value?.addEventListener('touchmove', handleTouchMoveOnMap, { passive: true })
   scheduleMapInit()
@@ -932,7 +920,7 @@ defineExpose({
   pointer-events: auto;
   /* Pas de transition sur transform: évite l'effet de "retard" pendant les déplacements */
   transition: filter 0.2s ease-in-out;
-  will-change: auto;
+  will-change: transform;
 }
 
 .map-view__marker-number {
@@ -948,10 +936,7 @@ defineExpose({
   object-fit: contain;
   padding: 4px;
   image-rendering: auto;
-  image-rendering: auto;
   transition: transform 0.2s ease;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
 }
 
 .map-view__marker-icon:hover {
