@@ -835,8 +835,8 @@ defineExpose({
 
 .map-view__special-dot {
   position: absolute;
-  top: 16px;
-  left: 16px;
+  bottom: 42px;
+  right: 16px;
   width: 100px;
   height: 100px;
   border-radius: 50%;

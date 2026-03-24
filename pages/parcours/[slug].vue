@@ -453,7 +453,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100svh;
   background: var(--white);
   z-index: 10000;
   display: none;
