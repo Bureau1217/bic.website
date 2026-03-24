@@ -32,6 +32,13 @@ jobs:
       - name: Build
         run: npm run generate
 
+      - name: Prepare deployment folder
+        run: |
+          mkdir -p deploy
+          cp server-static/package.json deploy/
+          cp server-static/server.js deploy/
+          cp -r .output/public deploy/public
+
       - name: Install sshpass
         run: sudo apt-get install -y sshpass
 
@@ -39,5 +46,11 @@ jobs:
         run: |
           sshpass -p "${{ secrets.SSH_PASSWORD }}" rsync -avz --delete \
             -e "ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" \
-            .output/public/ \
+            deploy/ \
             ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_TARGET_DIR }}
+
+      - name: Install dependencies on server
+        run: |
+          sshpass -p "${{ secrets.SSH_PASSWORD }}" ssh -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no \
+            ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} \
+            "cd ${{ secrets.SSH_TARGET_DIR }} && npm install --production"
