@@ -32,12 +32,13 @@ jobs:
       - name: Build
         run: npm run generate
 
-      - name: Deploy via SFTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy via SSH
+        uses: easingthemes/ssh-deploy@main
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: .output/public/
-          server-dir: ./
-          protocol: ftps
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.SSH_HOST }}
+          REMOTE_USER: ${{ secrets.SSH_USERNAME }}
+          REMOTE_PORT: ${{ secrets.SSH_PORT }}
+          SOURCE: ".output/public/"
+          TARGET: ${{ secrets.SSH_TARGET_DIR }}
+          ARGS: "-avz --delete"
