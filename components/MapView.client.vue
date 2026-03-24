@@ -6,18 +6,29 @@
     </Transition>
 
     <button
+      ref="specialDotButton"
       v-if="isMapVisible && specialHiddenMarker"
       class="map-view__special-dot"
       type="button"
       aria-label="Afficher le lieu 12"
-      @click.stop="openSpecialHiddenMarker"
+      @mouseenter="hoverSpecialHiddenMarker"
+      @mouseleave="closePopupOnHoverOut"
+      @click.stop="clickSpecialHiddenMarker"
     >
       <img
-        src="/images/lisbon_001.png"
+        src="/images/Map_notrehistoira_lisbon_2-01.png"
         alt=""
         class="map-view__special-dot-image"
         aria-hidden="true"
       />
+      <img
+        v-if="specialHiddenMarker.icon"
+        :src="specialHiddenMarker.icon"
+        :alt="specialHiddenMarker.title || ''"
+        class="map-view__special-dot-icon"
+        aria-hidden="true"
+      />
+      <span v-else class="map-view__special-dot-number">12</span>
     </button>
     
     <!-- Conteneur des markers HTML -->
@@ -29,9 +40,10 @@
     </div>
     
     <!-- Popup personnalisée -->
-    <div 
-      v-if="activePopup" 
+    <div
+      v-if="activePopup"
       class="map-view__popup"
+      :class="{ 'map-view__popup--below': popupBelow }"
       :style="{ left: popupPosition.x + 'px', top: popupPosition.y + 'px' }"
     >
       <!--<button class="map-view__popup-close" @click="closePopup">&times;</button>-->
@@ -172,6 +184,7 @@ const SITG_PORTAL_ITEM_ID = '753d065ee1ba4d29be9a6de655abd94f'
 
 const mapContainer = ref<HTMLDivElement | null>(null)
 const markersContainer = ref<HTMLDivElement | null>(null)
+const specialDotButton = ref<HTMLButtonElement | null>(null)
 const mapError = ref<string | null>(null)
 const isMapReady = ref(false)
 const isMapVisible = ref(false)
@@ -179,7 +192,9 @@ const isMapVisible = ref(false)
 // Popup state
 const activePopup = ref<MapMarker | null>(null)
 const popupPosition = ref({ x: 0, y: 0 })
+const popupBelow = ref(false) // true si le popup doit s'afficher en dessous
 const selectedMarkerId = ref<string | number | null>(null)
+const isPopupLocked = ref(false) // true si le popup a été ouvert par un clic (reste ouvert)
 
 // --- Durées audio ---
 const audioDurations = ref<Record<string, string>>({})
@@ -262,47 +277,108 @@ let arcgisModules: ArcGISModules | null = null
 // POPUP MANAGEMENT
 // ============================================================================
 
-function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }) {
+// Dimensions approximatives du popup (AudioCard map-popup)
+const POPUP_WIDTH = 280
+const POPUP_HEIGHT = 120
+
+function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }, locked = false) {
   ensureAudioDurationForMarker(marker)
 
-  // Positionner la popup au-dessus du marker
-  popupPosition.value = {
-    x: screenPoint.x,
-    y: screenPoint.y - 10 // Décalage vers le haut
+  const mapRect = mapContainer.value?.getBoundingClientRect()
+  if (!mapRect) {
+    popupPosition.value = { x: screenPoint.x, y: screenPoint.y - 10 }
+    popupBelow.value = false
+    activePopup.value = marker
+    selectedMarkerId.value = marker.id
+    isPopupLocked.value = locked
+    updateSelectedMarkerStyles()
+    return
   }
+
+  // Calculer la position avec le transform CSS (-50%, -125%)
+  let x = screenPoint.x
+  let y = screenPoint.y - 10
+  let showBelow = false
+
+  // Vérifier les limites horizontales
+  const halfPopupWidth = POPUP_WIDTH / 2
+  const minX = halfPopupWidth + 10 // marge de 10px
+  const maxX = mapRect.width - halfPopupWidth - 10
+
+  if (x < minX) {
+    x = minX
+  } else if (x > maxX) {
+    x = maxX
+  }
+
+  // Vérifier les limites verticales (le popup apparaît au-dessus avec -125%)
+  const popupTopPosition = y - POPUP_HEIGHT * 1.25
+  const minY = 10 // marge de 10px en haut
+
+  if (popupTopPosition < minY) {
+    // Si le popup sortirait en haut, le placer en dessous du marker
+    y = screenPoint.y + 50 // décalage en dessous
+    showBelow = true
+  }
+
+  popupPosition.value = { x, y }
+  popupBelow.value = showBelow
   activePopup.value = marker
   selectedMarkerId.value = marker.id
+  isPopupLocked.value = locked
   updateSelectedMarkerStyles()
 }
 
-function closePopup() {
+function closePopup(force = false) {
+  // Ne pas fermer si le popup est verrouillé (sauf si force=true)
+  if (isPopupLocked.value && !force) return
+
   activePopup.value = null
+  popupBelow.value = false
   selectedMarkerId.value = null
+  isPopupLocked.value = false
   updateSelectedMarkerStyles()
 }
 
-function openSpecialHiddenMarker() {
-  if (!view || !arcgisModules?.Point || !specialHiddenMarker.value) return
+function closePopupOnHoverOut() {
+  // Fermer seulement si pas verrouillé
+  if (!isPopupLocked.value) {
+    closePopup(true)
+  }
+}
 
-  const marker = specialHiddenMarker.value
-  const point = new arcgisModules.Point({
-    longitude: marker.coordinates[0],
-    latitude: marker.coordinates[1]
-  })
+function getSpecialMarkerScreenPoint() {
+  if (!specialHiddenMarker.value || !specialDotButton.value) return null
 
-  startContinuousMarkersUpdate()
-  view.goTo({ target: point }, { duration: 500 }).then(() => {
-    const screenPoint = view!.toScreen(point)
-    if (screenPoint && markersContainer.value) {
-      openPopup(marker, {
-        x: screenPoint.x,
-        y: screenPoint.y
-      })
-    }
-    emit('markerClick', marker)
-  }).finally(() => {
-    scheduleMarkersUpdate()
-  })
+  const buttonRect = specialDotButton.value.getBoundingClientRect()
+  const mapRect = mapContainer.value?.getBoundingClientRect()
+
+  if (!mapRect) return null
+
+  return {
+    x: buttonRect.left - mapRect.left + buttonRect.width / 2 - 80, // Décalé vers la gauche
+    y: buttonRect.top - mapRect.top + 80 // Rapprocher du SVG central
+  }
+}
+
+function hoverSpecialHiddenMarker() {
+  if (!specialHiddenMarker.value) return
+
+  const screenPoint = getSpecialMarkerScreenPoint()
+  if (screenPoint) {
+    openPopup(specialHiddenMarker.value, screenPoint, false)
+  }
+}
+
+function clickSpecialHiddenMarker() {
+  if (!specialHiddenMarker.value) return
+
+  const screenPoint = getSpecialMarkerScreenPoint()
+  if (screenPoint) {
+    openPopup(specialHiddenMarker.value, screenPoint, true) // locked = true
+  }
+
+  emit('markerClick', specialHiddenMarker.value)
 }
 
 // ============================================================================
@@ -316,7 +392,7 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
   const el = document.createElement('div')
   el.className = 'map-view__marker'
   el.dataset.markerId = String(marker.id)
-  
+
   // Contenu du marker : picto (icon) si disponible, sinon numéro
   if (marker.icon) {
     // Utiliser l'image picto du CMS
@@ -326,11 +402,34 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
     const number = marker.number || ''
     el.innerHTML = `<span class="map-view__marker-number">${number}</span>`
   }
-  
-  // Gestionnaire de clic
+
+  // Helper pour obtenir la position écran du marker
+  const getMarkerScreenPoint = () => {
+    if (!view || !arcgisModules?.Point) return null
+    const point = new arcgisModules.Point({
+      longitude: marker.coordinates[0],
+      latitude: marker.coordinates[1]
+    })
+    return view.toScreen(point)
+  }
+
+  // Gestionnaire de hover (mouseenter)
+  el.addEventListener('mouseenter', () => {
+    const screenPoint = getMarkerScreenPoint()
+    if (screenPoint && markersContainer.value) {
+      openPopup(marker, { x: screenPoint.x, y: screenPoint.y }, false)
+    }
+  })
+
+  // Gestionnaire de hover out (mouseleave)
+  el.addEventListener('mouseleave', () => {
+    closePopupOnHoverOut()
+  })
+
+  // Gestionnaire de clic - verrouille le popup
   el.addEventListener('click', (e) => {
     e.stopPropagation()
-    
+
     // Recentrer la carte sur le marker
     if (view) {
       if (!arcgisModules?.Point) return
@@ -342,22 +441,22 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
       // pour éviter un décalage au début de l'animation goTo.
       startContinuousMarkersUpdate()
       view.goTo({ target: point }, { duration: 500 }).then(() => {
-        // Ouvrir la popup une fois le recentrage terminé
+        // Ouvrir la popup une fois le recentrage terminé (verrouillée)
         const screenPoint = view!.toScreen(point)
         if (screenPoint && markersContainer.value) {
           openPopup(marker, {
             x: screenPoint.x,
             y: screenPoint.y
-          })
+          }, true) // locked = true
         }
       }).finally(() => {
         scheduleMarkersUpdate()
       })
     }
-    
+
     emit('markerClick', marker)
   })
-  
+
   return el
 }
 
@@ -588,12 +687,12 @@ async function initMap() {
     
     // Fermer la popup quand on clique sur la carte (pas sur un marker)
     view.on('click', () => {
-      closePopup()
+      closePopup(true) // force close
     })
-    
+
     // Fermer la popup quand on drag la carte
     view.on('drag', () => {
-      closePopup()
+      closePopup(true) // force close
     })
     
     // Émettre l'événement de chargement
@@ -837,8 +936,8 @@ defineExpose({
   position: absolute;
   bottom: 42px;
   right: 16px;
-  width: 100px;
-  height: 100px;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   border: 1px solid var(--red);
   background: transparent;
@@ -846,13 +945,39 @@ defineExpose({
   z-index: 300;
   cursor: pointer;
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .map-view__special-dot-image {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: cover;
+}
+
+.map-view__special-dot-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.map-view__special-dot-number {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--black);
+  pointer-events: none;
 }
 
 .map-white-fade-leave-active {
@@ -962,7 +1087,7 @@ defineExpose({
 .map-view__popup {
   position: absolute;
   transform: translate(-50%, -125%);
-  z-index: 200;
+  z-index: 400;
   pointer-events: auto;
   animation: popup-fade-in 0.2s ease-out;
 }
@@ -975,6 +1100,22 @@ defineExpose({
   to {
     opacity: 1;
     transform: translate(-50%, -125%);
+  }
+}
+
+.map-view__popup--below {
+  transform: translate(-50%, 0);
+  animation: popup-fade-in-below 0.2s ease-out;
+}
+
+@keyframes popup-fade-in-below {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
   }
 }
 

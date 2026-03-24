@@ -25,8 +25,8 @@
           :key="index" 
           class="portrait_slide"
         >
-          <NuxtLink 
-            :to="portrait.link?.slug ? `/parcours/${portrait.link.slug}` : '#'"
+          <NuxtLink
+            :to="portrait.link?.slug ? `/parcours/${portrait.link.slug}#portrait` : '#'"
             class="portrait_card_link"
           >
             <!-- Image portrait responsive (AVIF + WebP + fallback) -->

@@ -34,20 +34,22 @@
       <div v-else class="map-placeholder" aria-hidden="true"></div>
     </div>
 
-    <div ref="portraitSectionRef" class="portrait-wrapper">
-      <PortraitSlider v-if="shouldMountPortraitSlider" />
-      <div v-else class="portrait-placeholder" aria-hidden="true"></div>
-    </div>
-
-    <ListeAgenda 
+     <ListeAgenda 
       v-if="data?.result?.ressources?.evenements" 
       title="Agenda" 
       :events="formattedEvents" 
     />
 
+    <div ref="portraitSectionRef" class="portrait-wrapper">
+      <PortraitSlider v-if="shouldMountPortraitSlider" />
+      <div v-else class="portrait-placeholder" aria-hidden="true"></div>
+    </div>
+
+   
+
     <ListEdito
       v-if="formattedEdito.length"
-      title="Édito"
+      title="Éditos"
       :items="formattedEdito"
     />
 
@@ -108,23 +110,23 @@ const mapSectionRef = ref<HTMLElement | null>(null)
 const portraitSectionRef = ref<HTMLElement | null>(null)
 const shouldMountMap = ref(false)
 const shouldMountPortraitSlider = ref(false)
-const mapZoom = ref(4.7)
+const mapZoom = ref(3.9)
 let sectionsObserver: IntersectionObserver | null = null
 
 const updateMapZoom = () => {
   if (typeof window === 'undefined') return
 
   if (window.matchMedia('(max-width: 767px)').matches) {
-    mapZoom.value = 2
+    mapZoom.value = 1.2
     return
   }
 
   if (window.matchMedia('(max-width: 991px)').matches) {
-    mapZoom.value = 2
+    mapZoom.value = 1.2
     return
   }
 
-  mapZoom.value = 4.5
+  mapZoom.value = 3.9
 }
 
 // Lecteur audio global

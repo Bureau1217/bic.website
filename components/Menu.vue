@@ -45,6 +45,14 @@
             </div>
           </div>
           <NuxtLink
+            to="/"
+            :prefetch="false"
+            :class="['menu_link', { 'is-active': isActiveStaticPage('/') }]"
+            @click="closeMenu"
+          >
+            <div>Accueil</div>
+          </NuxtLink>
+          <NuxtLink
             to="/parcours"
             :prefetch="false"
             :class="['menu_link', { 'is-active': isActiveStaticPage('/parcours') }]"

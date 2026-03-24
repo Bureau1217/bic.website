@@ -2,22 +2,23 @@
   <div class="list" id="ressources">
     <h2 class="list_title">{{ title }}</h2>
     <div class="list_wrapper">
-      <div 
-        v-for="(category, categoryIndex) in categories" 
-        :key="categoryIndex" 
+      <div
+        v-for="(category, categoryIndex) in categories"
+        :key="categoryIndex"
         class="list_line"
-        @click="toggleCategory(categoryIndex)"
       >
-        <div class="list_plus">
-          <div class="list_plus_line"></div>
-          <div class="list_plus_line is-vertical" v-show="!openCategories[categoryIndex]"></div>
-        </div>
-        <div class="list_line_wrapper">
-          <div class="list_case">
-            <p class="list_label"><strong>{{ category.name }}</strong></p>
+        <div class="list_line_header" @click="toggleCategory(categoryIndex)">
+          <div class="list_plus">
+            <div class="list_plus_line"></div>
+            <div class="list_plus_line is-vertical" v-show="!openCategories[categoryIndex]"></div>
           </div>
-          <div class="list_case is-telecharger">
-            <p class="list_label"><strong>Télécharger</strong></p>
+          <div class="list_line_wrapper">
+            <div class="list_case">
+              <p class="list_label"><strong>{{ category.name }}</strong></p>
+            </div>
+            <div class="list_case is-telecharger">
+              <p class="list_label"><strong>Télécharger</strong></p>
+            </div>
           </div>
         </div>
         <Transition
@@ -38,7 +39,7 @@
                 <p class="list_label">{{ item.label }}</p>
               </div>
               <div class="list_case">
-                <a :href="item.link" class="list_label">{{ item.downloadText || 'Article pdf' }}</a>
+                <a v-if="item.downloadText" :href="item.link" target="_blank" rel="noopener noreferrer" class="list_label">{{ item.downloadText }}</a>
               </div>
             </div>
           </div>
@@ -147,4 +148,10 @@ const afterLeave = (el) => {
 </script>
 
 <style lang="scss">
+.list_line_header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  cursor: pointer;
+}
 </style>

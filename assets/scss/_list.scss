@@ -30,6 +30,18 @@
   padding-left: var(--40);
 }
 
+h3.list_title {
+  font-family: Gt Sectra, Arial, sans-serif;
+  font-size: 40px;
+  color: var(--red);
+}
+
+@media screen and (max-width: 479px) {
+  h3.list_title {
+    font-size: 28px;
+  }
+}
+
 .list_title.is-edito {
   padding-top: var(--40);
 }

@@ -1,6 +1,6 @@
 <template>
 
-    <div class="journal">
+    <div class="journal" :id="anchorId || undefined">
         <h2 class="list_title">{{ title }}</h2>
         <div class="journal_content">
             <div class="journal_content_wrapper">
@@ -23,6 +23,10 @@
 
 <script setup>
 defineProps({
+    anchorId: {
+        type: String,
+        default: '',
+    },
     title: {
         type: String,
         required: true,

@@ -1,6 +1,6 @@
 <template>
   <div class="list is-last" id="remerciements">
-    <h2 class="list_title">{{ title }}</h2>
+    <h3 class="list_title">{{ title }}</h3>
     <div class="list_wrapper">
       <div
         v-for="(item, index) in items"

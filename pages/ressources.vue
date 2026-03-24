@@ -34,6 +34,7 @@
     />
 
     <Journal
+      anchor-id="journal"
       :title="data?.result?.ressources?.journal_titre || 'Notre journal'"
       :text="data?.result?.ressources?.journal_texte || ''"
       :button-text="data?.result?.ressources?.journal_bouton_texte || ''"

@@ -166,12 +166,10 @@ const aproposSections = computed(() => {
 .apropos_section_content {
   width: 100%;
   padding: var(--40) var(--40) 0;
-  border-top: 1px solid var(--red);
 }
 
 .apropos_section_text {
-  width: 60%;
-  margin-left: auto;
+  width: 40%;
 }
 
 @media screen and (max-width: 991px) {

@@ -36,6 +36,7 @@
     </div>
 
     <Journal
+      anchor-id="journal"
       :title="data?.result?.references?.journal_titre || 'Notre journal'"
       :text="data?.result?.references?.journal_texte || ''"
       :button-text="data?.result?.references?.journal_bouton_texte || ''"
@@ -44,23 +45,6 @@
       :button2-url="data?.result?.references?.journal_bouton2_url || ''"
     />
 
-    <Journal
-      :title="data?.result?.references?.cartepostale_titre || 'Carte postale'"
-      :text="data?.result?.references?.cartepostale_texte || ''"
-      :button-text="data?.result?.references?.cartepostale_bouton_texte || ''"
-      :button-url="data?.result?.references?.cartepostale_bouton_fichier?.url || ''"
-      :button2-text="data?.result?.references?.cartepostale_bouton2_texte || ''"
-      :button2-url="data?.result?.references?.cartepostale_bouton2_url || ''"
-    />
-
-    <Journal
-      :title="data?.result?.references?.affiches_titre || 'Affiches'"
-      :text="data?.result?.references?.affiches_texte || ''"
-      :button-text="data?.result?.references?.affiches_bouton_texte || ''"
-      :button-url="data?.result?.references?.affiches_bouton_fichier?.url || ''"
-      :button2-text="data?.result?.references?.affiches_bouton2_texte || ''"
-      :button2-url="data?.result?.references?.affiches_bouton2_url || ''"
-    />
 
   </main>
 </template>
@@ -75,22 +59,22 @@ await fetchPodcastData()
 
 // Lecteur audio global
 const { playTrack } = useAudioPlayer()
-const mapZoom = ref(4.7)
+const mapZoom = ref(3.9)
 
 const updateMapZoom = () => {
   if (typeof window === 'undefined') return
 
   if (window.matchMedia('(max-width: 767px)').matches) {
-    mapZoom.value = 2
+    mapZoom.value = 1.2
     return
   }
 
   if (window.matchMedia('(max-width: 991px)').matches) {
-    mapZoom.value = 2
+    mapZoom.value = 1.2
     return
   }
 
-  mapZoom.value = 4.5
+  mapZoom.value = 3.9
 }
 
 // Durée audio du premier épisode

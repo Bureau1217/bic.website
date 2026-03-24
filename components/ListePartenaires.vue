@@ -1,6 +1,6 @@
 <template>
   <div class="list" id="partenaires">
-    <h2 class="list_title">{{ title }}</h2>
+    <h3 class="list_title">{{ title }}</h3>
     <div class="list_wrapper">
       <div
         v-for="(partner, index) in partners"

@@ -5,12 +5,14 @@
       <component
         v-if="block.type === 'heading'"
         :is="getHeadingTag(block)"
+        :id="getBlockAnchor(block)"
         v-html="block.content?.text"
       />
-      
+
       <!-- Text (paragraphe) -->
       <div
         v-else-if="block.type === 'text'"
+        :id="getBlockAnchor(block)"
         class="block_p"
         v-html="block.content?.text"
       />
@@ -78,6 +80,14 @@ function getHeadingTag(block: ResolvedBlock): string {
     return level
   }
   return 'h2'
+}
+
+// Extrait l'ancre du bloc (sans le #)
+function getBlockAnchor(block: ResolvedBlock): string | undefined {
+  const anchor = block.content?.anchor as string | undefined
+  if (!anchor) return undefined
+  // Enlever le # si présent
+  return anchor.startsWith('#') ? anchor.slice(1) : anchor
 }
 
 /**

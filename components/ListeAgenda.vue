@@ -15,10 +15,11 @@
       </div>
     </div>
     <div class="list_wrapper">
-      <div 
-        v-for="(event, index) in events" 
-        :key="index" 
+      <div
+        v-for="(event, index) in events"
+        :key="index"
         class="list_line"
+        :class="{ 'is-past': isEventPast(event.date) }"
         @click="toggleEvent(index)"
       >
         <div class="list_plus" >
@@ -222,7 +223,40 @@ const formatEventDate = (value = '') => {
 
   return formattedDate
 }
+
+// Vérifie si un événement est passé
+const isEventPast = (dateValue = '') => {
+  const trimmedValue = dateValue.trim()
+  if (!trimmedValue) return false
+
+  // Extraire la date (avant le " - ")
+  const dateWithTimeMatch = trimmedValue.match(/^(.*?)(?:\s+-\s+|$)/)
+  const rawDate = dateWithTimeMatch ? dateWithTimeMatch[1].trim() : trimmedValue
+
+  // Parser la date ISO (YYYY-MM-DD)
+  const isoDateMatch = rawDate.match(/^(\d{4})-(\d{2})-(\d{2})$/)
+  if (!isoDateMatch) return false
+
+  const [, year, month, day] = isoDateMatch
+  const eventDate = new Date(`${year}-${month}-${day}T23:59:59`)
+  const today = new Date()
+
+  return eventDate < today
+}
 </script>
 
 <style lang="scss">
+.list_line.is-past {
+  opacity: 0.5;
+
+  .list_label,
+  .list_plus_line {
+    color: var(--red);
+    background-color: var(--red);
+  }
+
+  .list_label {
+    background-color: transparent;
+  }
+}
 </style>

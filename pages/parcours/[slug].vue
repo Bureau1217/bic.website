@@ -157,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineAsyncComponent } from 'vue'
+import { defineAsyncComponent, nextTick } from 'vue'
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
 const { lieux, parseGpsCoordinates, fetchPodcastData } = usePodcastData()
@@ -413,6 +413,32 @@ onMounted(() => {
   updateMapZoom()
   window.addEventListener('resize', updateMapZoom)
 })
+
+// Scroll vers l'ancre après le chargement des données
+const scrollToAnchor = () => {
+  if (!route.hash) return
+
+  let attempts = 0
+  const maxAttempts = 20
+
+  const tryScroll = () => {
+    const element = document.querySelector(route.hash)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    } else if (attempts < maxAttempts) {
+      attempts++
+      setTimeout(tryScroll, 100)
+    }
+  }
+
+  tryScroll()
+}
+
+watch(layoutRows, (rows) => {
+  if (rows?.length && route.hash) {
+    scrollToAnchor()
+  }
+}, { immediate: true })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', updateMapZoom)
