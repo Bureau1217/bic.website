@@ -257,6 +257,7 @@ let hasMapInitStarted = false
 
 type ArcGISModules = Awaited<ReturnType<typeof loadArcGISModules>>
 let arcgisModules: ArcGISModules | null = null
+let useTopLeftMarkerPositioning = false
 
 // ============================================================================
 // POPUP MANAGEMENT
@@ -402,12 +403,21 @@ function updateMarkersPosition() {
       if (markerIcon) {
         markerIcon.classList.toggle('map-view__marker-icon--scaled', shouldScaleIcon)
       }
-      // Sur mobile, des coordonnées fractionnaires peuvent rendre les icônes floues/pixellisées.
-      // On aligne la position sur des pixels entiers, mais on reste en transform 2D:
-      // sur iOS, translate3d + will-change peut rasteriser les images en basse résolution.
+      // Coordonnées alignées sur pixels entiers pour limiter le flou subpixel.
       const pixelAlignedX = Math.round(screenPoint.x)
       const pixelAlignedY = Math.round(screenPoint.y)
-      el.style.transform = `translate(${pixelAlignedX}px, ${pixelAlignedY}px)`
+      if (useTopLeftMarkerPositioning) {
+        // Sur mobile réel (notamment iOS), le positionnement via transform peut
+        // rasteriser les icônes dans un calque GPU et créer un effet pixellisé.
+        // left/top évite ce pipeline de compositing.
+        el.style.transform = 'none'
+        el.style.left = `${pixelAlignedX}px`
+        el.style.top = `${pixelAlignedY}px`
+      } else {
+        el.style.left = '0px'
+        el.style.top = '0px'
+        el.style.transform = `translate(${pixelAlignedX}px, ${pixelAlignedY}px)`
+      }
       el.style.display = 'flex'
     } else {
       // Point hors de l'écran
@@ -673,6 +683,7 @@ function scheduleMapInit() {
 onMounted(async () => {
   await nextTick()
   console.log('[MapView] Container:', mapContainer.value)
+  useTopLeftMarkerPositioning = window.matchMedia('(pointer: coarse)').matches
   window.addEventListener('resize', handleWindowResize)
   mapContainer.value?.addEventListener('touchmove', handleTouchMoveOnMap, { passive: true })
   scheduleMapInit()
