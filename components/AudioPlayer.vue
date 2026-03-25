@@ -16,8 +16,12 @@
         <button
           type="button"
           class="audioplayer_track-button"
-          aria-label="Piste précédente"
-          @click="playPrevious"
+          aria-label="Piste précédente / Retour rapide"
+          @mousedown="onPrevMouseDown"
+          @mouseup="onPrevMouseUp"
+          @mouseleave="onPrevMouseUp"
+          @touchstart.prevent="onPrevMouseDown"
+          @touchend="onPrevMouseUp"
         >
           <img
             src="/images/prev.svg"
@@ -32,8 +36,12 @@
         <button
           type="button"
           class="audioplayer_track-button"
-          aria-label="Piste suivante"
-          @click="playNext"
+          aria-label="Piste suivante / Avance rapide"
+          @mousedown="onNextMouseDown"
+          @mouseup="onNextMouseUp"
+          @mouseleave="onNextMouseUp"
+          @touchstart.prevent="onNextMouseDown"
+          @touchend="onNextMouseUp"
         >
           <img
             src="/images/next.svg"
@@ -104,6 +112,7 @@ const {
   toggleMute,
   close,
   seekTo,
+  seekBySeconds,
 } = useAudioPlayer()
 
 const onProgressClick = (event) => {
@@ -111,6 +120,69 @@ const onProgressClick = (event) => {
   const percent = ((event.clientX - rect.left) / rect.width) * 100
   seekTo(percent)
 }
+
+// Long press pour avance/retour rapide
+const LONG_PRESS_DELAY = 300 // ms avant de considérer comme long press
+const SEEK_INTERVAL = 100 // ms entre chaque seek
+const SEEK_AMOUNT = 2 // secondes par intervalle
+
+let longPressTimer = null
+let seekInterval = null
+let isLongPress = false
+let isPressing = false // Track si un press est en cours
+
+const startLongPress = (direction) => {
+  isPressing = true
+  isLongPress = false
+
+  longPressTimer = setTimeout(() => {
+    isLongPress = true
+    const seekAmount = direction === 'forward' ? SEEK_AMOUNT : -SEEK_AMOUNT
+
+    // Premier seek immédiat
+    seekBySeconds(seekAmount)
+
+    // Puis répéter
+    seekInterval = setInterval(() => {
+      seekBySeconds(seekAmount)
+    }, SEEK_INTERVAL)
+  }, LONG_PRESS_DELAY)
+}
+
+const endLongPress = (action) => {
+  // Ne rien faire si aucun press n'était en cours
+  if (!isPressing) return
+
+  isPressing = false
+
+  // Annuler le timer si pas encore déclenché
+  if (longPressTimer) {
+    clearTimeout(longPressTimer)
+    longPressTimer = null
+  }
+
+  // Arrêter le seek répété
+  if (seekInterval) {
+    clearInterval(seekInterval)
+    seekInterval = null
+  }
+
+  // Si c'était un clic court, faire l'action normale
+  if (!isLongPress) {
+    if (action === 'next') {
+      playNext()
+    } else {
+      playPrevious()
+    }
+  }
+
+  isLongPress = false
+}
+
+const onPrevMouseDown = () => startLongPress('backward')
+const onPrevMouseUp = () => endLongPress('previous')
+const onNextMouseDown = () => startLongPress('forward')
+const onNextMouseUp = () => endLongPress('next')
 
 const TABLET_MEDIA_QUERY = '(max-width: 991px)'
 
@@ -249,21 +321,21 @@ watch(getCurrentTrackLabel, () => {
 
 .audioplayer-wrapper {
   width: var(--100);
-  padding: 5px var(--10);
-  grid-column-gap: var(--10);
-  grid-row-gap: var(--10);
+  padding: 10px var(--15);
+  grid-column-gap: var(--15);
+  grid-row-gap: var(--15);
   background-color: #00000080;
   border-radius: 100px;
   justify-content: space-between;
   align-items: center;
   max-width: 900px;
-  height: 50px;
+  height: 70px;
   display: flex;
 }
 
 .audioplayer_icon {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
 }
 
@@ -274,8 +346,8 @@ watch(getCurrentTrackLabel, () => {
 }
 
 .audioplayer_track-button {
-  width: 28px;
-  height: 28px;
+  width: 38px;
+  height: 38px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -287,8 +359,8 @@ watch(getCurrentTrackLabel, () => {
 }
 
 .audioplayer_track-icon {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
   display: block;
   opacity: 1;
   transition: opacity 0.25s ease;
@@ -322,8 +394,8 @@ watch(getCurrentTrackLabel, () => {
 }
 
 .audioplayer_icon.is-sound {
-  width: 30px;
-  height: 30px;
+  width: 40px;
+  height: 40px;
 }
 
 .audioplayer_time {
@@ -332,27 +404,41 @@ watch(getCurrentTrackLabel, () => {
   justify-content: flex-start;
   align-items: center;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 10px;
+  font-size: 14px;
   display: flex;
 }
 
 .audioplayer_line {
   width: var(--100);
-  height: 1px;
+  height: 30px;
   flex-flow: column;
   justify-content: center;
   align-items: flex-start;
   display: flex;
   position: relative;
   cursor: pointer;
-  background-color: var(--yellow);
+  background-color: transparent;
+
+  // Ligne visible au centre de la zone cliquable
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 2px;
+    background-color: var(--yellow);
+    opacity: 0.4;
+  }
 }
 
 .audioplayer_progression {
-  width: var(--100);
   background-color: var(--yellow);
   height: 4px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .audioplayer_name {
@@ -361,7 +447,7 @@ watch(getCurrentTrackLabel, () => {
   justify-content: flex-start;
   align-items: center;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 14px;
+  font-size: 16px;
   display: flex;
   position: static;
   line-height: 1.2;
@@ -370,7 +456,9 @@ watch(getCurrentTrackLabel, () => {
 
 .audioplayer_name-marquee {
   position: absolute;
-  inset: -21px auto auto 0%;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: -4px;
   max-width: 100%;
   pointer-events: none;
 }
@@ -405,13 +493,64 @@ watch(getCurrentTrackLabel, () => {
 @media screen and (max-width: 479px) {
 
   .audioplayer-wrapper {
-    grid-column-gap: var(--10);
-    grid-row-gap: var(--10);
+    flex-wrap: wrap;
+    height: auto;
+    padding: 10px var(--10);
+    gap: 4px 8px;
+    border-radius: 16px;
   }
 
   .audioplayer {
     padding-right: var(--10);
     padding-left: var(--10);
+  }
+
+  // Timeline à droite du bouton mute, avec texte au-dessus et temps en-dessous
+  .audioplayer_line {
+    order: 0;
+    flex: 1;
+    min-width: 0;
+    height: 18px;
+  }
+
+  .audioplayer_time {
+    order: 1;
+    font-size: 10px;
+  }
+
+  .audioplayer_name-marquee {
+    margin-bottom: -4px;
+  }
+
+  .audioplayer_name {
+    font-size: 12px;
+  }
+
+  // Boutons plus petits sur mobile
+  .audioplayer_icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .audioplayer_icon.is-sound {
+    width: 28px;
+    height: 28px;
+  }
+
+  .audioplayer_track-button {
+    width: 26px;
+    height: 26px;
+  }
+
+  .audioplayer_track-icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .audioplayer_icon--close {
+    width: 24px;
+    height: 24px;
+    order: 2;
   }
 }
 

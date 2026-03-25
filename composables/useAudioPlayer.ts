@@ -258,6 +258,19 @@ export function useAudioPlayer() {
     }
   }
 
+  /**
+   * Avancer ou reculer de X secondes dans la piste
+   */
+  const seekBySeconds = (seconds: number) => {
+    if (import.meta.server) return
+
+    const audio = getAudioElement()
+    if (audio.duration) {
+      const newTime = Math.max(0, Math.min(audio.duration, audio.currentTime + seconds))
+      audio.currentTime = newTime
+    }
+  }
+
   return {
     // État
     isPlaying,
@@ -279,5 +292,6 @@ export function useAudioPlayer() {
     toggleMute,
     close,
     seekTo,
+    seekBySeconds,
   }
 }
