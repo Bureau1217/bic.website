@@ -107,14 +107,16 @@
       <div class="menu_catalogue" :class="{ 'is-open': catalogueOpen }">
         <div class="menu_close" @click="closeCatalogue"></div>
         <div class="menu_catalogue_wrapper">
+          <div class="menu_cross_wrapper">
+            <div class="menu_cross" @click="closeCatalogue">
+              <div class="list_plus_line is-white"></div>
+              <div class="list_plus_line is-vertical is-white"></div>
+            </div>
+          </div>
           <div class="menu_catalogue_header">
             <div class="menu_catalogue_title_wrapper">
               <p class="menu_catalogue_title is-yellow">podcast notre historia</p>
               <p class="menu_catalogue_title">reportage 1 à 6</p>
-            </div>
-            <div class="menu_cross" @click="closeCatalogue">
-              <div class="list_plus_line is-white"></div>
-              <div class="list_plus_line is-vertical is-white"></div>
             </div>
           </div>
           <div class="menu_catalogue_list">
@@ -754,6 +756,7 @@ const playLieu = (lieu: any) => {
 .menu_catalogue_wrapper {
   height: var(--100);
   padding: var(--10);
+  padding-top: 0;
   background-color: var(--black);
   flex: none;
   overflow: auto;
@@ -774,6 +777,10 @@ const playLieu = (lieu: any) => {
   &::-webkit-scrollbar-thumb {
     background-color: var(--yellow);
     border-radius: 4px;
+  }
+
+  .menu_cross_wrapper {
+    padding-right: var(--10);
   }
 }
 

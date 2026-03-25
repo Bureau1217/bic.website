@@ -625,6 +625,17 @@ onBeforeUnmount(() => {
 
 @media screen and (max-width: 479px) {
 
+  .lieu-map-fab {
+    width: 60px;
+    height: 60px;
+    bottom: 100px;
+  }
+
+  .lieu-map-fab_icon {
+    width: 26px;
+    height: 26px;
+  }
+
   .lieu-pagination_link {
     width: 100%;
     align-items: flex-start;

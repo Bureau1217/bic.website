@@ -356,7 +356,7 @@ function getSpecialMarkerScreenPoint() {
   if (!mapRect) return null
 
   return {
-    x: buttonRect.left - mapRect.left + buttonRect.width / 2 - 80, // Décalé vers la gauche
+    x: buttonRect.left - mapRect.left + buttonRect.width / 2 + 80, // Décalé vers la droite
     y: buttonRect.top - mapRect.top + 80 // Rapprocher du SVG central
   }
 }
@@ -648,8 +648,13 @@ async function initMap() {
       }
     })
     
-    // Positionner le zoom en haut à droite
-    view.ui.move('zoom', 'bottom-left')
+    // Positionner le zoom en bas à droite
+    view.ui.move('zoom', 'bottom-right')
+
+    // Sur mobile, coller les boutons zoom contre le bord droit
+    if (window.matchMedia('(max-width: 479px)').matches) {
+      view.ui.padding = { top: 0, right: 0, bottom: 0, left: 0 }
+    }
     
     // Attendre que la vue soit prête
     await view.when()
@@ -707,6 +712,45 @@ async function initMap() {
         isMapVisible.value = true
         mapRevealTimeoutId = null
       }, 320)
+
+      // Agrandir les icônes + et - dans les boutons zoom
+      setTimeout(() => {
+        const zoomButtons = mapContainer.value?.querySelectorAll('.esri-zoom calcite-button')
+        zoomButtons?.forEach((btn: Element) => {
+          const shadowRoot = (btn as HTMLElement).shadowRoot
+          if (shadowRoot) {
+            // Injecter un style dans le shadow DOM du bouton
+            const style = document.createElement('style')
+            style.textContent = `
+              calcite-icon {
+                width: 32px !important;
+                height: 32px !important;
+                min-width: 32px !important;
+                min-height: 32px !important;
+              }
+            `
+            shadowRoot.appendChild(style)
+
+            const icon = shadowRoot.querySelector('calcite-icon')
+            if (icon) {
+              (icon as HTMLElement).style.width = '32px';
+              (icon as HTMLElement).style.height = '32px';
+              const iconShadow = (icon as HTMLElement).shadowRoot
+              if (iconShadow) {
+                // Injecter un style dans le shadow DOM de l'icône
+                const iconStyle = document.createElement('style')
+                iconStyle.textContent = `
+                  svg {
+                    width: 32px !important;
+                    height: 32px !important;
+                  }
+                `
+                iconShadow.appendChild(iconStyle)
+              }
+            }
+          }
+        })
+      }, 800)
     })
     
     console.log('[MapView] ArcGIS map initialized with SITG style "Tons sombres" and HTML markers')
@@ -934,8 +978,8 @@ defineExpose({
 
 .map-view__special-dot {
   position: absolute;
-  bottom: 42px;
-  right: 16px;
+  bottom: 30px;
+  left: 16px;
   width: 150px;
   height: 150px;
   border-radius: 50%;
@@ -1191,11 +1235,51 @@ defineExpose({
   --calcite-color-foreground-1: var(--red) !important;
   --calcite-color-foreground-2: var(--red) !important;
   --calcite-color-foreground-3: var(--red) !important;
-  width: 36px;
-  height: 36px;
+  width: 60px;
+  height: 60px;
   color: white !important;
   background: var(--red) !important;
   border: none !important;
+}
+
+/* Agrandir les icônes + et - sans changer la taille du bloc */
+.map-view .esri-zoom calcite-icon {
+  transform: scale(1.8);
+}
+
+/* Bouton interne doit faire 60px aussi */
+.map-view .esri-widget--button calcite-button,
+.map-view .esri-widget--button button {
+  width: 60px !important;
+  height: 60px !important;
+  padding: 0 !important;
+}
+
+@media screen and (max-width: 479px) {
+  .map-view .esri-widget--button,
+  .map-view .esri-widget--button:is(calcite-button) {
+    width: 60px;
+    height: 60px;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .map-view .esri-ui-corner.esri-ui-bottom-right {
+    right: 0 !important;
+    bottom: 42px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .map-view .esri-ui-bottom-right .esri-component,
+  .map-view .esri-ui-bottom-right .esri-zoom {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .map-view .esri-zoom {
+    border-radius: 0 !important;
+  }
 }
 
 /* Enlever l'effet hover sur les boutons zoom */
