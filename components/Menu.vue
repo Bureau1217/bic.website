@@ -757,6 +757,24 @@ const playLieu = (lieu: any) => {
   background-color: var(--black);
   flex: none;
   overflow: auto;
+
+  // Scrollbar jaune pour le panneau audio
+  scrollbar-width: thin;
+  scrollbar-color: var(--yellow) var(--black);
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: var(--black);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--yellow);
+    border-radius: 4px;
+  }
 }
 
 .global {

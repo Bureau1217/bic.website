@@ -12,7 +12,7 @@
   align-items: center;
   display: flex;
   background-color: var(--green);
-  
+
 }
 
 // ============================================================================
@@ -212,13 +212,13 @@
 
 .audio-card--map-popup .audio-card_title {
   margin: 0;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
 }
 
 .audio-card--map-popup .audio-card_info_text {
   margin: 8px 0 0 0;
-  font-size: 12px;
+  font-size: 20px;
   opacity: 0.9;
   line-height: 1.4;
   color: var(--white);
@@ -289,7 +289,7 @@
 .audio-card_title {
   margin-bottom: 0;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   line-height: 1;
   font-weight: bold;
 }
@@ -321,7 +321,7 @@
 .audio-card_info_text {
   color: var(--black);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 600;
 }
 
@@ -350,6 +350,7 @@
   .audio-card {
     position: relative;
   }
+
   // Default variant : passe en static, layout row
   .audio-card--default {
     flex-flow: row;
@@ -370,6 +371,7 @@
     width: 30vw;
     position: static;
   }
+
   .audio-card--default .audio-card_button {
     inset: auto auto 20px calc(30vw + 20px);
   }
@@ -480,11 +482,7 @@
 
 }
 
-@media screen and (max-width: 767px) {
-
-
-
-}
+@media screen and (max-width: 767px) {}
 
 @media screen and (max-width: 479px) {
 
@@ -538,7 +536,7 @@
   .audio-card--default .audio-card_info {
     padding: var(--10);
   }
-  
+
   // Menu variant : passe en row layout
   .audio-card--menu-episode {
     width: 100%;

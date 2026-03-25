@@ -8,6 +8,7 @@ export default defineNuxtConfig({
       title: 'Notre Historia',
       titleTemplate: '%s - Notre Historia',
       link: [
+        { rel: 'icon', type: 'image/jpeg', href: '/images/favicon-notrehistoria.jpg' },
         { rel: 'preload', href: '/fonts/GT-Sectra-Medium.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
         { rel: 'preload', href: '/fonts/Solfa.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
       ],

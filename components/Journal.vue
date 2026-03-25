@@ -70,13 +70,11 @@ defineProps({
 .journal_content {
     width: 100%;
     padding: var(--40) var(--40);
-    border-top: 1px solid var(--red);
     border-bottom: 1px solid var(--red);
 }
 
 .journal_content_wrapper {
     width: 60%;
-    margin-left: auto;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;

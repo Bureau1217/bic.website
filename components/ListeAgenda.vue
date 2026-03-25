@@ -20,31 +20,32 @@
         :key="index"
         class="list_line"
         :class="{ 'is-past': isEventPast(event.date) }"
-        @click="toggleEvent(index)"
       >
-        <div class="list_plus" >
-          <div class="list_plus_line"></div>
-          <div class="list_plus_line is-vertical" v-show="!openEvents[index]"></div>
-        </div>
-        <div class="list_line_wrapper">
-          <div class="list_case">
-            <p class="list_label">{{ formatEventDate(event.date) }}</p>
+        <div class="list_line_header" @click="toggleEvent(index)">
+          <div class="list_plus" >
+            <div class="list_plus_line"></div>
+            <div class="list_plus_line is-vertical" v-show="!openEvents[index]"></div>
           </div>
-          <div class="list_case">
-            <p class="list_label is-bold">{{ event.title }}</p>
-          </div>
-          <div class="list_case">
-            <a
-              v-if="event.link"
-              class="list_label"
-              :href="event.link"
-              target="_blank"
-              rel="noopener noreferrer"
-              @click.stop
-            >
-              {{ event.venue }}
-            </a>
-            <p v-else class="list_label">{{ event.venue }}</p>
+          <div class="list_line_wrapper">
+            <div class="list_case">
+              <p class="list_label">{{ formatEventDate(event.date) }}</p>
+            </div>
+            <div class="list_case">
+              <p class="list_label is-bold">{{ event.title }}</p>
+            </div>
+            <div class="list_case">
+              <a
+                v-if="event.link"
+                class="list_label"
+                :href="event.link"
+                target="_blank"
+                rel="noopener noreferrer"
+                @click.stop
+              >
+                {{ event.venue }}
+              </a>
+              <p v-else class="list_label">{{ event.venue }}</p>
+            </div>
           </div>
         </div>
         <Transition
@@ -246,6 +247,13 @@ const isEventPast = (dateValue = '') => {
 </script>
 
 <style lang="scss">
+.list_line_header {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  cursor: pointer;
+}
+
 .list_line.is-past {
   opacity: 0.5;
 

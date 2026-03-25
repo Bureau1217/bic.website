@@ -6,15 +6,16 @@
         v-for="(item, index) in items"
         :key="index"
         class="list_line"
-        @click="toggleItem(index)"
       >
-        <div class="list_plus" >
-          <div class="list_plus_line"></div>
-          <div class="list_plus_line is-vertical" v-show="!openItems[index]"></div>
-        </div>
-        <div class="list_line_wrapper">
-          <div class="list_case">
-            <p class="list_label"><strong>{{ item.nom }}</strong></p>
+        <div class="list_line_header" @click="toggleItem(index)">
+          <div class="list_plus" >
+            <div class="list_plus_line"></div>
+            <div class="list_plus_line is-vertical" v-show="!openItems[index]"></div>
+          </div>
+          <div class="list_line_wrapper">
+            <div class="list_case">
+              <p class="list_label"><strong>{{ item.nom }}</strong></p>
+            </div>
           </div>
         </div>
         <Transition
@@ -130,6 +131,13 @@ const afterLeave = (el) => {
 </script>
 
 <style lang="scss">
+.list_line_header {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  cursor: pointer;
+}
+
 .list_description {
   white-space: pre-line;
 }
