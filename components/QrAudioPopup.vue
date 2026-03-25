@@ -13,7 +13,7 @@
           </div>    
           <div class="qr-popup_content">
             <p class="qr-popup_text">
-              Voulez-vous lancer l'audio de <strong>{{ title }}</strong>&nbsp;?
+              Voulez-vous lancer l’extrait audio <strong>{{ title }}</strong>&nbsp;?
             </p>
             <div class="qr-popup_actions">
               <button class="qr-popup_btn is-yes" :class="popupTypeClass" @click="accept">
