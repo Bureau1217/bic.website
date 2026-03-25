@@ -6,18 +6,19 @@
         v-for="(item, index) in items"
         :key="index"
         class="list_line list_line--edito"
-        @click="toggleItem(index)"
       >
-        <div class="list_plus">
-          <div class="list_plus_line"></div>
-          <div class="list_plus_line is-vertical" v-show="!openItems[index]"></div>
-        </div>
-        <div class="list_line_wrapper">
-          <div class="list_case list_case--half">
-            <p v-if="item.name" class="list_label is-bold">{{ item.name }}</p>
+        <div class="list_line_header" @click="toggleItem(index)">
+          <div class="list_plus">
+            <div class="list_plus_line"></div>
+            <div class="list_plus_line is-vertical" v-show="!openItems[index]"></div>
           </div>
-          <div class="list_case list_case--half">
-            <p class="list_label is-bold">{{ item.title }}</p>
+          <div class="list_line_wrapper">
+            <div class="list_case list_case--half">
+              <p v-if="item.name" class="list_label is-bold">{{ item.name }}</p>
+            </div>
+            <div class="list_case list_case--half">
+              <p class="list_label is-bold">{{ item.title }}</p>
+            </div>
           </div>
         </div>
         <Transition
@@ -156,6 +157,13 @@ const afterLeave = (el: Element) => {
 
 <style lang="scss">
 .list_line--edito {
+  flex-wrap: wrap;
+}
+
+.list_line--edito .list_line_header {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
   cursor: pointer;
 }
 
