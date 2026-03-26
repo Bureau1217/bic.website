@@ -35,7 +35,10 @@
         />
       </template>
       <template #info>
-        <p class="audio-card_title"><span class="audio-card_number">{{ data?.result?.num ?? null }}.  </span> {{ data?.result?.title ?? '' }}</p>
+        <p class="audio-card_title audio-card_title--split">
+          <span class="audio-card_number">{{ data?.result?.num ?? null }}.</span>
+          <span class="audio-card_title_text">{{ data?.result?.title ?? '' }}</span>
+        </p>
       </template>
     </AudioCard>
 

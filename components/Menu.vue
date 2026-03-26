@@ -116,7 +116,7 @@
           <div class="menu_catalogue_header">
             <div class="menu_catalogue_title_wrapper">
               <p class="menu_catalogue_title is-yellow">podcast notre historia</p>
-              <p class="menu_catalogue_title">reportage 1 à 6</p>
+              <p class="menu_catalogue_title">reportages 1 à 6</p>
             </div>
           </div>
           <div class="menu_catalogue_list">
@@ -153,7 +153,10 @@
                 <ResponsivePicture v-if="lieu.imagepodcast" class="audio-card_image" :image="lieu.imagepodcast" sizes="200px" :alt="lieu.title" picture-class="audio-card_image_rp" />
               </template>
               <template #info>
-                <p class="audio-card_title"><span class="audio-card_number">{{ lieuIndex + 1 }}.  </span> {{ lieu.title }}</p>
+                <p class="audio-card_title audio-card_title--split">
+                  <span class="audio-card_number">{{ lieuIndex + 1 }}.</span>
+                  <span class="audio-card_title_text">{{ lieu.title }}</span>
+                </p>
               </template>
             </AudioCard>
           </div>

@@ -36,8 +36,10 @@
     </div>
     <div class="audio-card_info" >
       <slot name="info">
-        <div v-if="number" class="audio-card_number">{{ number }}.</div>
-        <p class="audio-card_title">{{ title }}</p>
+        <p class="audio-card_title" :class="{ 'audio-card_title--split': hasNumber }">
+          <span v-if="hasNumber" class="audio-card_number">{{ number }}.</span>
+          <span class="audio-card_title_text">{{ title }}</span>
+        </p>
         <p v-if="description" class="audio-card_info_text">
           {{ description }}
         </p>
@@ -112,6 +114,7 @@ const isVisible = ref(true)
 const showDismissButton = computed(() => props.variant === 'home' || props.variant === 'default' || props.variant === 'parcours-home')
 const cardRef = ref<HTMLElement | null>(null)
 const isCurrentTrack = computed(() => !!props.trackAudioUrl && currentTrack.value?.audioUrl === props.trackAudioUrl)
+const hasNumber = computed(() => props.number !== null && props.number !== undefined && props.number !== '')
 const playButtonIcon = computed(() => {
   if (isCurrentTrack.value && isPlaying.value) return '/images/son-pause.svg'
   return '/images/son-play.svg'

@@ -48,6 +48,11 @@
   box-shadow: 0 10px 30px rgba(0, 0, 0, 1);
 }
 
+// Texte calé en bas du bloc
+.audio-card--home .audio-card_info {
+  justify-content: flex-end;
+}
+
 // ============================================================================
 // AUDIO CARD — Variant: parcours-home (parcours index, fixed top-right)
 // ============================================================================
@@ -74,6 +79,11 @@
   width: 240px;
   height: 240px;
   background-color: var(--red);
+}
+
+// Texte calé en bas du bloc
+.audio-card--menu-episode .audio-card_info {
+  justify-content: flex-end;
 }
 
 // Durée : jaune dans le menu
@@ -113,6 +123,10 @@
 
 .audio-card--menu-catalogue .audio-card_number {
   color: var(--yellow);
+}
+
+.audio-card--menu-catalogue .audio-card_title {
+  font-weight: normal;
 }
 
 
@@ -220,7 +234,7 @@
   margin: 8px 0 0 0;
   font-size: 12px;
   opacity: 0.9;
-  line-height: 1.4;
+  line-height: 1.2;
   color: var(--white);
 }
 
@@ -290,16 +304,29 @@
   margin-bottom: 0;
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 20px;
-  line-height: 1;
+  line-height: 1.2;
   font-weight: bold;
 }
+
+.audio-card_title.audio-card_title--split {
+  font-weight: 400;
+}
+
+.audio-card_title.audio-card_title--split .audio-card_number {
+  margin-right: 0.15em;
+}
+
+.audio-card_title_text {
+  font-weight: inherit;
+}
+
 
 // Numéro
 .audio-card_number {
   color: var(--yellow);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-  font-size: 16px;
-  line-height: 1;
+  font-size: 20px;
+  line-height: 1.2;
   font-weight: bold;
 }
 
@@ -307,9 +334,9 @@
 .audio-card_info {
   width: var(--100);
   height: var(--100);
-  padding: var(--10);
+  padding: 10px;
   grid-column-gap: 5px;
-  grid-row-gap: 5px;
+  grid-row-gap: 0px;
   flex-flow: column;
   display: flex;
 }
@@ -322,7 +349,8 @@
   color: var(--black);
   font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
   font-size: 20px;
-  font-weight: 600;
+  font-weight:400;
+  line-height: 1.2;
 }
 
 // ============================================================================
@@ -455,8 +483,19 @@
     height: 50vw;
   }
 
+  .audio-card--menu-episode .audio-card_info {
+    justify-content: flex-start;
+    align-items: flex-start;
+    row-gap: 0;
+  }
+
   .audio-card--menu-episode .audio-card_title {
     color: var(--yellow);
+  }
+
+  .audio-card--menu-episode .audio-card_title,
+  .audio-card--menu-episode .audio-card_info_text {
+    line-height: 1.2;
   }
 
   .audio-card--menu-catalogue {
@@ -497,6 +536,8 @@
 
   .audio-card--home .audio-card_info {
     padding: var(--10);
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .audio-card--home .audio-card_button {

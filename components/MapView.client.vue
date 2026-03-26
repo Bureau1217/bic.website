@@ -5,31 +5,33 @@
       <div v-if="!isMapVisible" class="map-view__reveal"></div>
     </Transition>
 
-    <button
-      ref="specialDotButton"
-      v-if="isMapVisible && specialHiddenMarker"
-      class="map-view__special-dot"
-      type="button"
-      aria-label="Afficher le lieu 12"
-      @mouseenter="hoverSpecialHiddenMarker"
-      @mouseleave="closePopupOnHoverOut"
-      @click.stop="clickSpecialHiddenMarker"
-    >
-      <img
-        src="/images/Map_notrehistoira_lisbon_2-01.png"
-        alt=""
-        class="map-view__special-dot-image"
-        aria-hidden="true"
-      />
-      <img
-        v-if="specialHiddenMarker.icon"
-        :src="specialHiddenMarker.icon"
-        :alt="specialHiddenMarker.title || ''"
-        class="map-view__special-dot-icon"
-        aria-hidden="true"
-      />
-      <span v-else class="map-view__special-dot-number">12</span>
-    </button>
+    <div v-if="isMapVisible && specialHiddenMarker" class="map-view__special-dot-wrapper">
+      <span class="map-view__special-dot-label">Portugal</span>
+      <button
+        ref="specialDotButton"
+        class="map-view__special-dot"
+        type="button"
+        aria-label="Afficher le lieu 12"
+        @mouseenter="hoverSpecialHiddenMarker"
+        @mouseleave="closePopupOnHoverOut"
+        @click.stop="clickSpecialHiddenMarker"
+      >
+        <img
+          src="/images/Map_notrehistoira_lisbon_2-01.png"
+          alt=""
+          class="map-view__special-dot-image"
+          aria-hidden="true"
+        />
+        <img
+          v-if="specialHiddenMarker.icon"
+          :src="specialHiddenMarker.icon"
+          :alt="specialHiddenMarker.title || ''"
+          class="map-view__special-dot-icon"
+          aria-hidden="true"
+        />
+        <span v-else class="map-view__special-dot-number">12</span>
+      </button>
+    </div>
     
     <!-- Conteneur des markers HTML -->
     <div ref="markersContainer" class="map-view__markers" :class="{ 'is-ready': isMapVisible }"></div>
@@ -69,8 +71,10 @@
           </template>
           <template #info>
             <div class="audio-card_info_wrapper">
-              <div v-if="activePopup.number" class="audio-card_number">{{ activePopup.number }}.</div>
-              <p class="audio-card_title">{{ activePopup.title }}</p>
+              <p class="audio-card_title" :class="{ 'audio-card_title--split': !!activePopup.number }">
+                <span v-if="activePopup.number" class="audio-card_number">{{ activePopup.number }}.</span>
+                <span class="audio-card_title_text">{{ activePopup.title }}</span>
+              </p>
             </div>
             <p v-if="activePopup.adresse" class="audio-card_info_text">{{ activePopup.adresse }}</p>
           </template>
@@ -195,6 +199,9 @@ const popupPosition = ref({ x: 0, y: 0 })
 const popupBelow = ref(false) // true si le popup doit s'afficher en dessous
 const selectedMarkerId = ref<string | number | null>(null)
 const isPopupLocked = ref(false) // true si le popup a été ouvert par un clic (reste ouvert)
+
+// Marker sur lequel on garde le centrage pendant le zoom
+const zoomFocusMarker = ref<MapMarker | null>(null)
 
 // --- Durées audio ---
 const audioDurations = ref<Record<string, string>>({})
@@ -430,6 +437,9 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
   el.addEventListener('click', (e) => {
     e.stopPropagation()
 
+    // Mémoriser ce marker pour garder le centrage pendant le zoom
+    zoomFocusMarker.value = marker
+
     // Recentrer la carte sur le marker
     if (view) {
       if (!arcgisModules?.Point) return
@@ -638,11 +648,11 @@ async function initMap() {
         minZoom: 4,
         maxZoom: 10,
         geometry: new arcgis.Extent({
-          // Limites de navigation "ville centre" de Genève (WGS84)
-          xmin: 6.11,  // ouest
-          ymin: 46.18, // sud
-          xmax: 6.18,  // est
-          ymax: 46.23, // nord
+          // Limites de navigation élargies pour inclure tous les lieux (WGS84)
+          xmin: 6.05,  // ouest
+          ymin: 46.15, // sud
+          xmax: 6.25,  // est
+          ymax: 46.28, // nord
           spatialReference: { wkid: 4326 }
         })
       }
@@ -698,8 +708,21 @@ async function initMap() {
     // Fermer la popup quand on drag la carte
     view.on('drag', () => {
       closePopup(true) // force close
+      // Annuler le focus de zoom quand l'utilisateur déplace manuellement la carte
+      zoomFocusMarker.value = null
     })
-    
+
+    // Recentrer sur le marker sélectionné quand on zoom
+    view.watch('zoom', () => {
+      if (zoomFocusMarker.value && arcgisModules?.Point) {
+        const point = new arcgisModules.Point({
+          longitude: zoomFocusMarker.value.coordinates[0],
+          latitude: zoomFocusMarker.value.coordinates[1]
+        })
+        view!.center = point
+      }
+    })
+
     // Émettre l'événement de chargement
     emit('mapLoad', view)
     requestAnimationFrame(() => {
@@ -727,6 +750,21 @@ async function initMap() {
                 height: 32px !important;
                 min-width: 32px !important;
                 min-height: 32px !important;
+              }
+              /* Enlever le hover gris */
+              :host(:hover),
+              :host(:focus),
+              :host(:active),
+              button:hover,
+              button:focus,
+              button:active,
+              .button:hover,
+              .button:focus,
+              .button:active {
+                background: var(--red, #e63946) !important;
+                background-color: var(--red, #e63946) !important;
+                outline: none !important;
+                box-shadow: none !important;
               }
             `
             shadowRoot.appendChild(style)
@@ -976,17 +1014,33 @@ defineExpose({
   pointer-events: none;
 }
 
-.map-view__special-dot {
+.map-view__special-dot-wrapper {
   position: absolute;
   bottom: 30px;
   left: 16px;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.map-view__special-dot-label {
+  color: var(--red);
+  font-size: 14px;
+  font-weight: bold;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.map-view__special-dot {
+  position: relative;
   width: 150px;
   height: 150px;
   border-radius: 50%;
   border: 1px solid var(--red);
   background: transparent;
   overflow: hidden;
-  z-index: 300;
   cursor: pointer;
   padding: 0;
   display: flex;
@@ -1062,7 +1116,7 @@ defineExpose({
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 50;
+  z-index: 10;
   overflow: hidden;
   opacity: 0;
   transition: opacity 0.3s ease;
@@ -1221,10 +1275,28 @@ defineExpose({
 
 
 
-/* Conteneur des boutons zoom */
+/* Conteneur des boutons zoom - au-dessus des markers */
 .map-view .esri-zoom {
   background: transparent !important;
   box-shadow: none !important;
+  position: relative !important;
+  z-index: 100 !important;
+}
+
+.map-view .esri-ui {
+  z-index: 100 !important;
+}
+
+.map-view .esri-ui-corner {
+  z-index: 100 !important;
+}
+
+.map-view .esri-ui-bottom-right {
+  z-index: 100 !important;
+}
+
+.map-view .esri-component {
+  z-index: 100 !important;
 }
 
 /* Override des variables Calcite pour les boutons */
