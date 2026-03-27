@@ -138,7 +138,7 @@ type FetchData = CMS_API_Response & {
       metaDescription: string | null
       ogTitle: string | null
       ogDescription: string | null
-      ogImage: string | null
+      ogImage: { url: string } | null
     }
     references: {
       journal_titre: string | null
@@ -193,9 +193,12 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           },
           // SEO fields
           metaDescription: 'page.metaDescription.value',
-          ogTitle: 'page.ogTitle.value',
+          ogTitle: 'page.metaTitle.value',
           ogDescription: 'page.ogDescription.value',
-          ogImage: 'page.ogImage.value',
+          ogImage: {
+            query: 'page.ogImage.toFile',
+            select: { url: true },
+          },
         },
       },
       references: {
@@ -251,7 +254,7 @@ useHead(() => ({
     },
     {
       property: 'og:image',
-      content: data.value?.result?.parcours?.ogImage || '',
+      content: data.value?.result?.parcours?.ogImage?.url || '',
     },
     {
       property: 'og:type',

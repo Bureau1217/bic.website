@@ -293,7 +293,7 @@ type HomePageData = CMS_API_Response & {
       metaDescription: string | null
       ogTitle: string | null
       ogDescription: string | null
-      ogImage: string | null
+      ogImage: { url: string } | null
     }
     ressources: {
       evenements: ReferenceEvent[]
@@ -331,9 +331,12 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           image2: 'page.responsiveImage("image2", "cover")',
           // SEO fields
           metaDescription: 'page.metaDescription.value',
-          ogTitle: 'page.ogTitle.value',
+          ogTitle: 'page.metaTitle.value',
           ogDescription: 'page.ogDescription.value',
-          ogImage: 'page.ogImage.value',
+          ogImage: {
+            query: 'page.ogImage.toFile',
+            select: { url: true },
+          },
         },
       },
       ressources: {
@@ -374,7 +377,7 @@ useHead(() => ({
     },
     {
       property: 'og:image',
-      content: data.value?.result?.home?.ogImage || '',
+      content: data.value?.result?.home?.ogImage?.url || '',
     },
     {
       property: 'og:type',
