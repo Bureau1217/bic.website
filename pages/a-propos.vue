@@ -127,8 +127,8 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
   },
 })
 
-// Normaliser les URLs d'images du CMS (WhatsApp exige des URLs absolues)
-const { normalizeUrl } = useImageUrl()
+// Image OG statique (dans /public/images/) - URL absolue requise pour WhatsApp
+const OG_IMAGE_URL = 'https://notrehistoria.ch/images/og-notrehistoria.jpg'
 
 useHead(() => ({
   title: data.value?.result?.apropos?.title || 'A propos',
@@ -147,7 +147,7 @@ useHead(() => ({
     },
     {
       property: 'og:image',
-      content: normalizeUrl(data.value?.result?.apropos?.ogImage?.url),
+      content: OG_IMAGE_URL,
     },
     {
       property: 'og:image:width',
@@ -156,6 +156,10 @@ useHead(() => ({
     {
       property: 'og:image:height',
       content: '630',
+    },
+    {
+      property: 'og:image:type',
+      content: 'image/jpeg',
     },
     {
       property: 'og:type',
