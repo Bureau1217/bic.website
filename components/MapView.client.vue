@@ -741,9 +741,15 @@ async function initMap() {
       }, 320)
 
       // Agrandir les icônes + et - dans les boutons zoom
+      // et empêcher le double-clic de zoomer la page
       setTimeout(() => {
         const zoomButtons = mapContainer.value?.querySelectorAll('.esri-zoom calcite-button')
         zoomButtons?.forEach((btn: Element) => {
+          // Empêcher le double-clic de zoomer la page
+          btn.addEventListener('dblclick', (e) => {
+            e.preventDefault()
+            e.stopPropagation()
+          })
           const shadowRoot = (btn as HTMLElement).shadowRoot
           if (shadowRoot) {
             // Injecter un style dans le shadow DOM du bouton

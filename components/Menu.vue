@@ -760,6 +760,8 @@ const playLieu = (lieu: any) => {
   height: var(--100);
   padding: var(--10);
   padding-top: 0;
+  // Padding bottom pour éviter que la dernière carte soit cachée par la barre de navigation mobile
+  padding-bottom: calc(var(--10) + env(safe-area-inset-bottom, 20px));
   background-color: var(--black);
   flex: none;
   overflow: auto;
