@@ -383,6 +383,7 @@ useHead(() => ({
       name: 'description',
       content: data.value?.result?.home?.metaDescription || '',
     },
+    // Open Graph
     {
       property: 'og:title',
       content: data.value?.result?.home?.ogTitle || 'Notre Historia',
@@ -393,6 +394,10 @@ useHead(() => ({
     },
     {
       property: 'og:image',
+      content: OG_IMAGE_URL,
+    },
+    {
+      property: 'og:image:secure_url',
       content: OG_IMAGE_URL,
     },
     {
@@ -408,12 +413,37 @@ useHead(() => ({
       content: 'image/jpeg',
     },
     {
+      property: 'og:image:alt',
+      content: 'Notre Historia',
+    },
+    {
       property: 'og:type',
       content: 'website',
     },
     {
       property: 'og:url',
       content: 'https://notre-historia.ch/',
+    },
+    {
+      property: 'og:site_name',
+      content: 'Notre Historia',
+    },
+    // Twitter Card (fallback pour certaines apps)
+    {
+      name: 'twitter:card',
+      content: 'summary_large_image',
+    },
+    {
+      name: 'twitter:title',
+      content: data.value?.result?.home?.ogTitle || 'Notre Historia',
+    },
+    {
+      name: 'twitter:description',
+      content: data.value?.result?.home?.ogDescription || data.value?.result?.home?.metaDescription || '',
+    },
+    {
+      name: 'twitter:image',
+      content: OG_IMAGE_URL,
     },
   ],
 }))
