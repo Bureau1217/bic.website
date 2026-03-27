@@ -518,6 +518,7 @@ const playLieu = (lieu: any) => {
   flex-flow: row;
   width: 100%;
   height: 100vh;
+  height: 100dvh; // Dynamic viewport height - s'adapte à la hauteur réelle sur mobile
   display: flex;
   position: fixed;
   inset: 0% 0% auto auto;
@@ -757,11 +758,12 @@ const playLieu = (lieu: any) => {
 }
 
 .menu_catalogue_wrapper {
-  height: var(--100);
+  height: 100vh;
+  height: 100dvh; // Dynamic viewport height pour mobile
   padding: var(--10);
   padding-top: 0;
   // Padding bottom pour éviter que la dernière carte soit cachée par la barre de navigation mobile
-  padding-bottom: calc(var(--10) + env(safe-area-inset-bottom, 20px));
+  padding-bottom: calc(var(--20) + env(safe-area-inset-bottom, 60px));
   background-color: var(--black);
   flex: none;
   overflow: auto;

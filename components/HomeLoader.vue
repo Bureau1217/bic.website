@@ -42,7 +42,7 @@ const props = withDefaults(defineProps<{
   visible: boolean
   message?: string
 }>(), {
-  message: "Chargement de l'expérience immersive...",
+  message: '',
 })
 
 const showMessage = ref(false)
@@ -52,7 +52,7 @@ watch(() => props.visible, (isVisible) => {
     showMessage.value = false
     setTimeout(() => {
       showMessage.value = true
-    }, 1500)
+    }, 600)
   }
 }, { immediate: true })
 </script>

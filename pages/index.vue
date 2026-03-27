@@ -71,10 +71,11 @@ import { computed, defineAsyncComponent, onBeforeUnmount, onMounted } from 'vue'
 import type { ResponsiveImage } from '~/types/image'
 import { getImageSrc } from '~/types/image'
 
-const isLoading = ref(false)
+// Le loader est visible par défaut (SSR) pour éviter le flash de contenu
+const isLoading = ref(true)
 const nuxtApp = useNuxtApp()
 const isInitialHydration = nuxtApp.isHydrating
-let loaderTimer: ReturnType<typeof setTimeout> | null = null
+let loaderTimer: number | null = null
 let previousBodyOverflow: string | null = null
 
 const lockBodyScroll = () => {
@@ -165,14 +166,18 @@ onMounted(() => {
     void prewarmMapAssets()
   })
 
+  // Le loader est visible par défaut (SSR). Côté client, on vérifie si on doit le garder.
   if (shouldShowHomeLoader()) {
-    isLoading.value = true
+    // Garder le loader visible pendant 3 secondes
     lockBodyScroll()
     loaderTimer = window.setTimeout(() => {
       isLoading.value = false
       unlockBodyScroll()
       loaderTimer = null
     }, 3000)
+  } else {
+    // Navigation interne : cacher le loader immédiatement
+    isLoading.value = false
   }
 
   sectionsObserver = new IntersectionObserver(
@@ -180,13 +185,13 @@ onMounted(() => {
       for (const entry of entries) {
         if (!entry.isIntersecting) continue
 
-        if (entry.target === mapSectionRef.value) {
+        if (mapSectionRef.value && entry.target === (mapSectionRef.value as unknown as Element)) {
           shouldMountMap.value = true
           sectionsObserver?.unobserve(entry.target)
           continue
         }
 
-        if (entry.target === portraitSectionRef.value) {
+        if (portraitSectionRef.value && entry.target === (portraitSectionRef.value as unknown as Element)) {
           shouldMountPortraitSlider.value = true
           sectionsObserver?.unobserve(entry.target)
         }
@@ -200,11 +205,11 @@ onMounted(() => {
   )
 
   if (mapSectionRef.value) {
-    sectionsObserver.observe(mapSectionRef.value)
+    sectionsObserver.observe(mapSectionRef.value as unknown as Element)
   }
 
   if (portraitSectionRef.value) {
-    sectionsObserver.observe(portraitSectionRef.value)
+    sectionsObserver.observe(portraitSectionRef.value as unknown as Element)
   }
 })
 
@@ -395,8 +400,7 @@ useHead(() => ({
 }))
 
 const homeLoaderMessage = computed(() => {
-  const message = data.value?.result?.home?.loader_message?.trim()
-  return message || "Chargement de l'experience immersive..."
+  return data.value?.result?.home?.loader_message?.trim() || ''
 })
 
 // Transformer les événements du CMS pour le composant ListeAgenda
