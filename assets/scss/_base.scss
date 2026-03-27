@@ -32,6 +32,12 @@
   background-color: var(--red);
 }
 
+// Sélection de texte en vert
+::selection {
+  background-color: var(--green);
+  color: var(--white);
+}
+
 html {
   height: 100%;
 }

@@ -437,6 +437,8 @@
   .audio-card--home .audio-card_info {
     width: 70%;
     padding: var(--20);
+    justify-content: flex-start;
+    align-items: flex-start;
   }
 
   .audio-card--home .audio-card_title {

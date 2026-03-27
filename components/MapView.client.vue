@@ -369,6 +369,8 @@ function getSpecialMarkerScreenPoint() {
 }
 
 function hoverSpecialHiddenMarker() {
+  // Désactiver le hover sur mobile
+  if (isMobilePhoneViewport()) return
   if (!specialHiddenMarker.value) return
 
   const screenPoint = getSpecialMarkerScreenPoint()
@@ -420,8 +422,9 @@ function createMarkerElement(marker: MapMarker): HTMLElement {
     return view.toScreen(point)
   }
 
-  // Gestionnaire de hover (mouseenter)
+  // Gestionnaire de hover (mouseenter) - désactivé sur mobile
   el.addEventListener('mouseenter', () => {
+    if (isMobilePhoneViewport()) return
     const screenPoint = getMarkerScreenPoint()
     if (screenPoint && markersContainer.value) {
       openPopup(marker, { x: screenPoint.x, y: screenPoint.y }, false)
