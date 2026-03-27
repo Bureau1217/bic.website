@@ -1,11 +1,14 @@
 <template>
   <div v-if="blocks?.length" class="v-blocks">
-    <component
-      v-for="block in blocks"
-      :is="resolveTag(block)"
-      :key="block.id"
-      v-html="block.content?.text ?? ''"
-    />
+    <template v-for="block in blocks" :key="block.id">
+      <h1 v-if="block.type === 'heading' && block.content?.level === 'h1'" v-html="block.content?.text ?? ''" />
+      <h2 v-else-if="block.type === 'heading' && block.content?.level === 'h2'" v-html="block.content?.text ?? ''" />
+      <h3 v-else-if="block.type === 'heading' && block.content?.level === 'h3'" v-html="block.content?.text ?? ''" />
+      <h4 v-else-if="block.type === 'heading' && block.content?.level === 'h4'" v-html="block.content?.text ?? ''" />
+      <h5 v-else-if="block.type === 'heading' && block.content?.level === 'h5'" v-html="block.content?.text ?? ''" />
+      <h6 v-else-if="block.type === 'heading' && block.content?.level === 'h6'" v-html="block.content?.text ?? ''" />
+      <div v-else v-html="block.content?.text ?? ''" />
+    </template>
   </div>
 </template>
 
@@ -13,16 +16,5 @@
 defineProps<{
   blocks?: CMS_API_Block[]
 }>()
-
-const resolveTag = (block: CMS_API_Block) => {
-  if (block.type === 'heading') {
-    const level = block.content?.level
-    if (typeof level === 'string' && /^h[1-6]$/.test(level)) {
-      return level
-    }
-    return 'h2'
-  }
-  return 'div'
-}
 </script>
 

@@ -18,7 +18,7 @@ export default defineNuxtConfig({
     port: 3002,
     https: false,
   },
-  ssr: false,
+  ssr: true,
   css: [
     '~/assets/scss/main.scss'
   ],

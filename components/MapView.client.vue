@@ -325,7 +325,7 @@ function openPopup(marker: MapMarker, screenPoint: { x: number; y: number }, loc
 
   if (popupTopPosition < minY) {
     // Si le popup sortirait en haut, le placer en dessous du marker
-    y = screenPoint.y + 50 // décalage en dessous
+    y = screenPoint.y + 10 // décalage en dessous (proche du marker)
     showBelow = true
   }
 

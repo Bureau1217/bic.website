@@ -142,6 +142,8 @@ const formatDuration = (seconds: number): string => {
 }
 
 watch(firstEpisode, (ep) => {
+  // Audio API n'existe que côté client
+  if (!import.meta.client) return
   if (ep?.audio?.url && !firstEpisodeDuration.value) {
     const audio = new Audio()
     audio.preload = 'metadata'
@@ -157,6 +159,11 @@ watch(firstEpisode, (ep) => {
 onMounted(() => {
   updateMapZoom()
   window.addEventListener('resize', updateMapZoom)
+
+  // Précharger les modules ArcGIS pour accélérer le chargement de la carte
+  import('~/composables/useArcgisModules.client').then(({ prewarmMapAssets }) => {
+    void prewarmMapAssets()
+  })
 
   if (shouldShowHomeLoader()) {
     isLoading.value = true
@@ -187,7 +194,7 @@ onMounted(() => {
     },
     {
       root: null,
-      rootMargin: '300px 0px',
+      rootMargin: '800px 0px', // Augmenté pour précharger plus tôt
       threshold: 0.01,
     },
   )
@@ -302,8 +309,8 @@ type HomePageData = CMS_API_Response & {
 }
 
 // Fetch des données de la page home + événements de la page ressources
+// Note: pas de lazy pour que les données SEO soient disponibles côté serveur (SSR)
 const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
-  lazy: true,
   method: 'POST',
   body: {
     query: 'site',

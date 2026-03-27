@@ -123,15 +123,8 @@ export function usePodcastData() {
                   select: {
                     nom: 'structureItem.nom.value',
                     description: 'structureItem.description.value',
-                    // Éviter les erreurs KQL quand le champ image est vide:
-                    // on récupère le fichier brut puis on normalise côté front.
-                    image: {
-                      query: 'structureItem.image.toFile',
-                      select: {
-                        url: true,
-                        alt: true,
-                      },
-                    },
+                    // Image optimisée avec srcset WebP + fallback JPEG
+                    image: 'structureItem.safeImage("image", "column")',
                     link: {
                       query: 'structureItem.link.toPages.first',
                       select: {
