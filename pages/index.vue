@@ -289,6 +289,11 @@ type HomePageData = CMS_API_Response & {
       /** Images secondaires du hero */
       image1: ResponsiveImage | null
       image2: ResponsiveImage | null
+      /** SEO fields */
+      metaDescription: string | null
+      ogTitle: string | null
+      ogDescription: string | null
+      ogImage: string | null
     }
     ressources: {
       evenements: ReferenceEvent[]
@@ -324,6 +329,11 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           cover: 'page.responsiveImage("cover", "cover")',
           image1: 'page.responsiveImage("image1", "cover")',
           image2: 'page.responsiveImage("image2", "cover")',
+          // SEO fields
+          metaDescription: 'page.metaDescription.value',
+          ogTitle: 'page.metadata.ogTitle.value',
+          ogDescription: 'page.metadata.ogDescription.value',
+          ogImage: 'page.metadata.ogImage',
         },
       },
       ressources: {
@@ -347,9 +357,31 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
   },
 })
 
-useHead({
+useHead(() => ({
   title: 'Accueil',
-})
+  meta: [
+    {
+      name: 'description',
+      content: data.value?.result?.home?.metaDescription || '',
+    },
+    {
+      property: 'og:title',
+      content: data.value?.result?.home?.ogTitle || 'Notre Historia',
+    },
+    {
+      property: 'og:description',
+      content: data.value?.result?.home?.ogDescription || data.value?.result?.home?.metaDescription || '',
+    },
+    {
+      property: 'og:image',
+      content: data.value?.result?.home?.ogImage || '',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+  ],
+}))
 
 const homeLoaderMessage = computed(() => {
   const message = data.value?.result?.home?.loader_message?.trim()

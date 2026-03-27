@@ -134,6 +134,11 @@ type FetchData = CMS_API_Response & {
       soustitre: CMS_API_Block[]
       cover: CMS_API_File | null
       children: ParcoursChild[]
+      /** SEO fields */
+      metaDescription: string | null
+      ogTitle: string | null
+      ogDescription: string | null
+      ogImage: string | null
     }
     references: {
       journal_titre: string | null
@@ -186,6 +191,11 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               template: true,
             },
           },
+          // SEO fields
+          metaDescription: 'page.metaDescription.value',
+          ogTitle: 'page.metadata.ogTitle.value',
+          ogDescription: 'page.metadata.ogDescription.value',
+          ogImage: 'page.metadata.ogImage',
         },
       },
       references: {
@@ -226,6 +236,28 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
 
 useHead(() => ({
   title: data.value?.result?.parcours?.title || 'Parcours',
+  meta: [
+    {
+      name: 'description',
+      content: data.value?.result?.parcours?.metaDescription || '',
+    },
+    {
+      property: 'og:title',
+      content: data.value?.result?.parcours?.ogTitle || data.value?.result?.parcours?.title || 'Parcours',
+    },
+    {
+      property: 'og:description',
+      content: data.value?.result?.parcours?.ogDescription || data.value?.result?.parcours?.metaDescription || '',
+    },
+    {
+      property: 'og:image',
+      content: data.value?.result?.parcours?.ogImage || '',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+  ],
 }))
 
 // Transformer les lieux en markers pour MapView

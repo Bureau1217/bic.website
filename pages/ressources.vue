@@ -174,6 +174,11 @@ type FetchData = CMS_API_Response & {
       azulejos_video: CMS_API_File | null
       remerciement_title: string | null
       remerciement_text: string | null
+      /** SEO fields */
+      metaDescription: string | null
+      ogTitle: string | null
+      ogDescription: string | null
+      ogImage: string | null
     }
   }
 }
@@ -261,6 +266,11 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           },
           remerciement_title: 'page.remerciement_title.value',
           remerciement_text: 'page.remerciement_text.value',
+          // SEO fields
+          metaDescription: 'page.metaDescription.value',
+          ogTitle: 'page.metadata.ogTitle.value',
+          ogDescription: 'page.metadata.ogDescription.value',
+          ogImage: 'page.metadata.ogImage',
         },
       },
     },
@@ -269,6 +279,28 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
 
 useHead(() => ({
   title: data.value?.result?.ressources?.title || 'Ressources',
+  meta: [
+    {
+      name: 'description',
+      content: data.value?.result?.ressources?.metaDescription || '',
+    },
+    {
+      property: 'og:title',
+      content: data.value?.result?.ressources?.ogTitle || data.value?.result?.ressources?.title || 'Ressources',
+    },
+    {
+      property: 'og:description',
+      content: data.value?.result?.ressources?.ogDescription || data.value?.result?.ressources?.metaDescription || '',
+    },
+    {
+      property: 'og:image',
+      content: data.value?.result?.ressources?.ogImage || '',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+  ],
 }))
 
 // Transformer les ressources du CMS pour le composant ListeRessource (groupées par tag)

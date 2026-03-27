@@ -71,6 +71,11 @@ type FetchData = CMS_API_Response & {
       phone: string | null
       partenaires: Partenaire[]
       remerciements: Remerciement[]
+      /** SEO fields */
+      metaDescription: string | null
+      ogTitle: string | null
+      ogDescription: string | null
+      ogImage: string | null
     }
   }
 }
@@ -108,6 +113,11 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
               paragraphe: true,
             },
           },
+          // SEO fields
+          metaDescription: 'page.metaDescription.value',
+          ogTitle: 'page.metadata.ogTitle.value',
+          ogDescription: 'page.metadata.ogDescription.value',
+          ogImage: 'page.metadata.ogImage',
         },
       },
     },
@@ -116,6 +126,28 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
 
 useHead(() => ({
   title: data.value?.result?.apropos?.title || 'A propos',
+  meta: [
+    {
+      name: 'description',
+      content: data.value?.result?.apropos?.metaDescription || '',
+    },
+    {
+      property: 'og:title',
+      content: data.value?.result?.apropos?.ogTitle || data.value?.result?.apropos?.title || 'A propos',
+    },
+    {
+      property: 'og:description',
+      content: data.value?.result?.apropos?.ogDescription || data.value?.result?.apropos?.metaDescription || '',
+    },
+    {
+      property: 'og:image',
+      content: data.value?.result?.apropos?.ogImage || '',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+  ],
 }))
 
 // Formater les partenaires pour le composant ListePartenaires

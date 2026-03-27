@@ -16,6 +16,11 @@ type FetchData = CMS_API_Response & {
     title: string
     slug: string
     items: Array<{ nom: string; description: string }> | null
+    /** SEO fields */
+    metaDescription: string | null
+    ogTitle: string | null
+    ogDescription: string | null
+    ogImage: string | null
   } | null
 }
 
@@ -34,11 +39,38 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           description: true,
         },
       },
+      // SEO fields
+      metaDescription: 'page.metaDescription.value',
+      ogTitle: 'page.metadata.ogTitle.value',
+      ogDescription: 'page.metadata.ogDescription.value',
+      ogImage: 'page.metadata.ogImage',
     },
   },
 })
 
 useHead(() => ({
   title: data.value?.result?.title || 'Mentions legales',
+  meta: [
+    {
+      name: 'description',
+      content: data.value?.result?.metaDescription || '',
+    },
+    {
+      property: 'og:title',
+      content: data.value?.result?.ogTitle || data.value?.result?.title || 'Mentions legales',
+    },
+    {
+      property: 'og:description',
+      content: data.value?.result?.ogDescription || data.value?.result?.metaDescription || '',
+    },
+    {
+      property: 'og:image',
+      content: data.value?.result?.ogImage || '',
+    },
+    {
+      property: 'og:type',
+      content: 'website',
+    },
+  ],
 }))
 </script>
