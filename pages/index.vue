@@ -373,7 +373,7 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
 })
 
 // Image OG statique (dans /public/images/) - URL absolue requise pour WhatsApp
-const OG_IMAGE_URL = 'https://notrehistoria.ch/images/og-notrehistoria.jpg'
+const OG_IMAGE_URL = 'https://notre-historia.ch/images/og-notrehistoria.jpg'
 
 useHead(() => ({
   title: 'Notre Historia',
@@ -413,7 +413,7 @@ useHead(() => ({
     },
     {
       property: 'og:url',
-      content: 'https://notrehistoria.ch/',
+      content: 'https://notre-historia.ch/',
     },
   ],
 }))
