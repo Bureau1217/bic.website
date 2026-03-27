@@ -331,9 +331,9 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
           image2: 'page.responsiveImage("image2", "cover")',
           // SEO fields
           metaDescription: 'page.metaDescription.value',
-          ogTitle: 'page.metadata.ogTitle.value',
-          ogDescription: 'page.metadata.ogDescription.value',
-          ogImage: 'page.metadata.ogImage',
+          ogTitle: 'page.ogTitle.value',
+          ogDescription: 'page.ogDescription.value',
+          ogImage: 'page.ogImage.value',
         },
       },
       ressources: {

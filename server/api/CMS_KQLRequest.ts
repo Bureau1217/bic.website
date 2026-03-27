@@ -5,6 +5,14 @@ export default defineEventHandler(async (event) => {
     const password = config.apiAuthPassword
     const apiUrl = config.apiUrl
 
+    if (!apiUrl || !email || !password) {
+        throw createError({
+            statusCode: 500,
+            statusMessage: 'CMS API configuration is incomplete',
+            message: 'Missing API_URL, API_AUTH_EMAIL, or API_AUTH_PASSWORD',
+        })
+    }
+
     const authHeader = Buffer.from(`${email}:${password}`).toString('base64')
 
     const body = await readBody(event)
@@ -40,6 +48,17 @@ export default defineEventHandler(async (event) => {
                 data: error.data,
                 response: error.response?._data
             })
+
+            if (error.statusCode === 401 || error.statusCode === 403) {
+                throw createError({
+                    statusCode: 502,
+                    statusMessage: 'CMS authentication failed',
+                    message: 'The CMS rejected the configured API credentials',
+                    data: {
+                        upstreamStatusCode: error.statusCode,
+                    },
+                })
+            }
 
             // Only retry on 400 errors (PHP server overload)
             if (error.statusCode !== 400 || attempt === maxRetries) {

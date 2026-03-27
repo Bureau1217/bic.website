@@ -39,9 +39,9 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
       },
       // SEO fields
       metaDescription: 'page.metaDescription.value',
-      ogTitle: 'page.metadata.ogTitle.value',
-      ogDescription: 'page.metadata.ogDescription.value',
-      ogImage: 'page.metadata.ogImage',
+      ogTitle: 'page.ogTitle.value',
+      ogDescription: 'page.ogDescription.value',
+      ogImage: 'page.ogImage.value',
     },
   },
 })

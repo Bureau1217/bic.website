@@ -276,6 +276,7 @@ let mapInitTimeoutId: number | null = null
 let mapInitIdleId: number | null = null
 let mapRevealTimeoutId: number | null = null
 let hasMapInitStarted = false
+let arcgisWatchHandles: Array<{ remove: () => void }> = []
 
 type ArcGISModules = Awaited<ReturnType<typeof loadArcGISModules>>
 let arcgisModules: ArcGISModules | null = null
@@ -689,19 +690,19 @@ async function initMap() {
     addMarkers()
     
     // Mettre à jour les positions des markers quand la carte bouge
-    view.watch('extent', () => {
+    arcgisWatchHandles.push(arcgis.reactiveUtils.watch(() => view?.extent, () => {
       scheduleMarkersUpdate()
-    })
+    }))
     
     // Pendant les animations/interactions, forcer une synchro frame par frame
-    view.watch('stationary', (isStationary: boolean) => {
+    arcgisWatchHandles.push(arcgis.reactiveUtils.watch(() => view?.stationary, (isStationary: boolean) => {
       if (isStationary) {
         stopContinuousMarkersUpdate()
         scheduleMarkersUpdate()
       } else {
         startContinuousMarkersUpdate()
       }
-    })
+    }))
     
     // Fermer la popup quand on clique sur la carte (pas sur un marker)
     view.on('click', () => {
@@ -716,7 +717,7 @@ async function initMap() {
     })
 
     // Recentrer sur le marker sélectionné quand on zoom
-    view.watch('zoom', () => {
+    arcgisWatchHandles.push(arcgis.reactiveUtils.watch(() => view?.zoom, () => {
       if (zoomFocusMarker.value && arcgisModules?.Point) {
         const point = new arcgisModules.Point({
           longitude: zoomFocusMarker.value.coordinates[0],
@@ -724,7 +725,7 @@ async function initMap() {
         })
         view!.center = point
       }
-    })
+    }))
 
     // Émettre l'événement de chargement
     emit('mapLoad', view)
@@ -884,6 +885,8 @@ onBeforeUnmount(() => {
     window.clearTimeout(mapRevealTimeoutId)
     mapRevealTimeoutId = null
   }
+  arcgisWatchHandles.forEach((handle) => handle.remove())
+  arcgisWatchHandles = []
 
   clearMarkers()
   

@@ -5,6 +5,7 @@ type ArcGISModules = {
   VectorTileLayer: any
   Point: any
   Extent: any
+  reactiveUtils: any
 }
 
 let arcgisModules: ArcGISModules | null = null
@@ -25,6 +26,7 @@ export async function loadArcGISModules(): Promise<ArcGISModules> {
       { default: VectorTileLayer },
       { default: Point },
       { default: Extent },
+      reactiveUtils,
     ] = await Promise.all([
       import('@arcgis/core/config'),
       import('@arcgis/core/Map'),
@@ -32,6 +34,7 @@ export async function loadArcGISModules(): Promise<ArcGISModules> {
       import('@arcgis/core/layers/VectorTileLayer'),
       import('@arcgis/core/geometry/Point'),
       import('@arcgis/core/geometry/Extent'),
+      import('@arcgis/core/core/reactiveUtils'),
     ])
 
     esriConfig.portalUrl = 'https://app2.ge.ch/tergeoportal'
@@ -43,6 +46,7 @@ export async function loadArcGISModules(): Promise<ArcGISModules> {
       VectorTileLayer,
       Point,
       Extent,
+      reactiveUtils,
     }
 
     return arcgisModules
