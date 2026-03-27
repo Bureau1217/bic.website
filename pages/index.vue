@@ -361,7 +361,8 @@ const { data } = await useFetch<HomePageData>('/api/CMS_KQLRequest', {
 })
 
 useHead(() => ({
-  title: 'Accueil',
+  title: 'Notre Historia',
+  titleTemplate: '',
   meta: [
     {
       name: 'description',
