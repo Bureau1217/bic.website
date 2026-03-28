@@ -2,12 +2,13 @@
   <div class="block-text" :class="{ 'is-auto': isAuto }">
     <template v-for="(block, index) in blocks" :key="block.id ?? index">
       <!-- Heading -->
-      <component
-        v-if="block.type === 'heading'"
-        :is="getHeadingTag(block)"
-        :id="getBlockAnchor(block)"
-        v-html="block.content?.text"
-      />
+      <h1 v-if="block.type === 'heading' && block.content?.level === 'h1'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
+      <h2 v-else-if="block.type === 'heading' && block.content?.level === 'h2'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
+      <h3 v-else-if="block.type === 'heading' && block.content?.level === 'h3'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
+      <h4 v-else-if="block.type === 'heading' && block.content?.level === 'h4'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
+      <h5 v-else-if="block.type === 'heading' && block.content?.level === 'h5'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
+      <h6 v-else-if="block.type === 'heading' && block.content?.level === 'h6'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
+      <h2 v-else-if="block.type === 'heading'" :id="getBlockAnchor(block)" v-html="block.content?.text" />
 
       <!-- Text (paragraphe) -->
       <div
@@ -72,15 +73,6 @@ const props = defineProps<{
   blocks?: ResolvedBlock[]
   isAuto?: boolean
 }>()
-
-// Détermine la balise h1-h6 selon le niveau
-function getHeadingTag(block: ResolvedBlock): string {
-  const level = block.content?.level
-  if (typeof level === 'string' && /^h[1-6]$/.test(level)) {
-    return level
-  }
-  return 'h2'
-}
 
 // Extrait l'ancre du bloc (sans le #)
 function getBlockAnchor(block: ResolvedBlock): string | undefined {

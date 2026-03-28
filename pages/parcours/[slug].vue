@@ -265,7 +265,6 @@ type FetchData = CMS_API_Response & {
 }
 
 const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
-  lazy: true,
   method: 'POST',
   body: {
     query: `site.find('parcours').childrenAndDrafts().published().find('${slug}')`,
