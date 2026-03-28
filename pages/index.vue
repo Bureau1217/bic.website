@@ -378,7 +378,14 @@ const OG_IMAGE_URL = 'https://notre-historia.ch/images/og-notrehistoria.jpg'
 useHead(() => ({
   title: 'Notre Historia',
   titleTemplate: '',
+  link: [
+    { rel: 'canonical', href: 'https://notre-historia.ch/' },
+  ],
   meta: [
+    {
+      name: 'robots',
+      content: 'index, follow',
+    },
     {
       name: 'description',
       content: data.value?.result?.home?.metaDescription || '',

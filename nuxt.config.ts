@@ -27,6 +27,56 @@ export default defineNuxtConfig({
         { rel: 'preload', href: '/fonts/GT-Sectra-Medium.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
         { rel: 'preload', href: '/fonts/Solfa.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
       ],
+      script: [
+        {
+          type: 'application/ld+json',
+          innerHTML: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@graph': [
+              {
+                '@type': 'WebSite',
+                '@id': 'https://notre-historia.ch/#website',
+                'url': 'https://notre-historia.ch/',
+                'name': 'Notre Historia',
+                'description': 'Découvrez Notre Historia - Un parcours à travers l\'histoire de la migration à Genève',
+                'inLanguage': 'fr-CH',
+              },
+              {
+                '@type': 'Organization',
+                '@id': 'https://notre-historia.ch/#organization',
+                'name': 'Notre Historia',
+                'url': 'https://notre-historia.ch/',
+                'logo': {
+                  '@type': 'ImageObject',
+                  'url': 'https://notre-historia.ch/images/Logo-Notre-Historia.svg',
+                },
+              },
+              {
+                '@type': 'SiteNavigationElement',
+                '@id': 'https://notre-historia.ch/#navigation',
+                'name': 'Navigation principale',
+                'hasPart': [
+                  {
+                    '@type': 'SiteNavigationElement',
+                    'name': 'Parcours',
+                    'url': 'https://notre-historia.ch/parcours',
+                  },
+                  {
+                    '@type': 'SiteNavigationElement',
+                    'name': 'Agenda et ressources',
+                    'url': 'https://notre-historia.ch/ressources',
+                  },
+                  {
+                    '@type': 'SiteNavigationElement',
+                    'name': 'À propos',
+                    'url': 'https://notre-historia.ch/a-propos',
+                  },
+                ],
+              },
+            ],
+          }),
+        },
+      ],
     },
   },
   devServer: {

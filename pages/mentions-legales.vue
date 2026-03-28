@@ -55,15 +55,19 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
 const OG_IMAGE_URL = 'https://notre-historia.ch/images/og-notrehistoria.jpg'
 
 useHead(() => ({
-  title: data.value?.result?.title || 'Mentions legales',
+  title: data.value?.result?.title || 'Mentions légales',
   meta: [
+    {
+      name: 'robots',
+      content: 'noindex, follow',
+    },
     {
       name: 'description',
       content: data.value?.result?.metaDescription || '',
     },
     {
       property: 'og:title',
-      content: data.value?.result?.ogTitle || data.value?.result?.title || 'Mentions legales',
+      content: data.value?.result?.ogTitle || data.value?.result?.title || 'Mentions légales',
     },
     {
       property: 'og:description',

@@ -87,6 +87,8 @@ const formatDuration = (seconds: number): string => {
 }
 
 watch(firstEpisode, (ep) => {
+  // Audio API n'existe que côté client
+  if (typeof Audio === 'undefined') return
   if (ep?.audio?.url && !firstEpisodeDuration.value) {
     const audio = new Audio()
     audio.preload = 'metadata'
@@ -242,7 +244,14 @@ const OG_IMAGE_URL = 'https://notre-historia.ch/images/og-notrehistoria.jpg'
 
 useHead(() => ({
   title: data.value?.result?.parcours?.title || 'Parcours',
+  link: [
+    { rel: 'canonical', href: 'https://notre-historia.ch/parcours' },
+  ],
   meta: [
+    {
+      name: 'robots',
+      content: 'index, follow',
+    },
     {
       name: 'description',
       content: data.value?.result?.parcours?.metaDescription || '',

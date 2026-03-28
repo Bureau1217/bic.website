@@ -66,7 +66,7 @@
             :class="['menu_link', { 'is-active': isActiveStaticPage('/ressources') }]"
             @click="closeMenu"
           >
-            <div>Ressources</div>
+            <div>Agenda et ressources</div>
           </NuxtLink>
           <div class="menu_parcours">
             <div class="menu_parcours_link is-triger" @click="toggleLieux">

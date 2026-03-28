@@ -131,15 +131,22 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
 const OG_IMAGE_URL = 'https://notre-historia.ch/images/og-notrehistoria.jpg'
 
 useHead(() => ({
-  title: data.value?.result?.apropos?.title || 'A propos',
+  title: data.value?.result?.apropos?.title || 'À propos',
+  link: [
+    { rel: 'canonical', href: 'https://notre-historia.ch/a-propos' },
+  ],
   meta: [
+    {
+      name: 'robots',
+      content: 'index, follow',
+    },
     {
       name: 'description',
       content: data.value?.result?.apropos?.metaDescription || '',
     },
     {
       property: 'og:title',
-      content: data.value?.result?.apropos?.ogTitle || data.value?.result?.apropos?.title || 'A propos',
+      content: data.value?.result?.apropos?.ogTitle || data.value?.result?.apropos?.title || 'À propos',
     },
     {
       property: 'og:description',

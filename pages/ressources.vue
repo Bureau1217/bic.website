@@ -97,6 +97,8 @@ const formatDuration = (seconds: number): string => {
 }
 
 watch(firstEpisode, (ep) => {
+  // Audio API n'existe que côté client
+  if (typeof Audio === 'undefined') return
   if (ep?.audio?.url && !firstEpisodeDuration.value) {
     const audio = new Audio()
     audio.preload = 'metadata'
@@ -284,15 +286,22 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
 const OG_IMAGE_URL = 'https://notre-historia.ch/images/og-notrehistoria.jpg'
 
 useHead(() => ({
-  title: data.value?.result?.ressources?.title || 'Ressources',
+  title: data.value?.result?.ressources?.title || 'Agenda et ressources',
+  link: [
+    { rel: 'canonical', href: 'https://notre-historia.ch/ressources' },
+  ],
   meta: [
+    {
+      name: 'robots',
+      content: 'index, follow',
+    },
     {
       name: 'description',
       content: data.value?.result?.ressources?.metaDescription || '',
     },
     {
       property: 'og:title',
-      content: data.value?.result?.ressources?.ogTitle || data.value?.result?.ressources?.title || 'Ressources',
+      content: data.value?.result?.ressources?.ogTitle || data.value?.result?.ressources?.title || 'Agenda et ressources',
     },
     {
       property: 'og:description',
