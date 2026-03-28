@@ -7,6 +7,21 @@ export default defineNuxtConfig({
     head: {
       title: 'Notre Historia',
       titleTemplate: '%s - Notre Historia',
+      meta: [
+        { name: 'description', content: 'Découvrez Notre Historia - Un parcours à travers l\'histoire de la migration à Genève' },
+        { property: 'og:site_name', content: 'Notre Historia' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:title', content: 'Notre Historia' },
+        { property: 'og:description', content: 'Découvrez Notre Historia - Un parcours à travers l\'histoire de la migration à Genève' },
+        { property: 'og:image', content: 'https://notre-historia.ch/images/og-notrehistoria.jpg' },
+        { property: 'og:image:secure_url', content: 'https://notre-historia.ch/images/og-notrehistoria.jpg' },
+        { property: 'og:image:type', content: 'image/jpeg' },
+        { property: 'og:image:width', content: '1200' },
+        { property: 'og:image:height', content: '630' },
+        { property: 'og:url', content: 'https://notre-historia.ch/' },
+        { name: 'twitter:card', content: 'summary_large_image' },
+        { name: 'twitter:image', content: 'https://notre-historia.ch/images/og-notrehistoria.jpg' },
+      ],
       link: [
         { rel: 'icon', type: 'image/jpeg', href: '/images/favicon-notrehistoria.jpg' },
         { rel: 'preload', href: '/fonts/GT-Sectra-Medium.woff2', as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },

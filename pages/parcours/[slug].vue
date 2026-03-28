@@ -298,20 +298,23 @@ useHead(() => ({
 }))
 
 // QR: ouvrir le popup dès que l'audio est disponible, puis nettoyer l'URL
-if (hasQrParam) {
-  const stopQrWatch = watch(() => data.value?.result?.audio?.url, (audioUrl) => {
-    if (audioUrl) {
+const qrPopupShown = ref(false)
+watch(
+  () => data.value?.result?.audio?.url,
+  (audioUrl) => {
+    if (hasQrParam && audioUrl && !qrPopupShown.value) {
+      qrPopupShown.value = true
       showQrPopup.value = true
       router.replace({ query: { ...route.query, qr: undefined } })
-      stopQrWatch()
     }
-  }, { immediate: true })
-}
+  },
+  { immediate: true }
+)
 
 
-// Charger la durée audio quand les données arrivent
+// Charger la durée audio quand les données arrivent (côté client uniquement)
 watch(() => data.value?.result?.audio?.url, (audioUrl) => {
-  if (audioUrl && !audioDuration.value) {
+  if (import.meta.client && audioUrl && !audioDuration.value) {
     const audio = new Audio()
     audio.preload = 'metadata'
     audio.addEventListener('loadedmetadata', () => {
