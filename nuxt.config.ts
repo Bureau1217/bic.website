@@ -8,6 +8,7 @@ export default defineNuxtConfig({
       title: 'Notre Historia',
       titleTemplate: '%s - Notre Historia',
       meta: [
+        { name: 'google-site-verification', content: 'tPe-I5TpH8FmsV5mpGCqRMCaS6d2zf4lNZZVu6HPuPw' },
         { name: 'description', content: 'Découvrez Notre Historia - Un parcours à travers l\'histoire de la migration à Genève' },
         { property: 'og:site_name', content: 'Notre Historia' },
         { property: 'og:type', content: 'website' },
