@@ -1,1 +1,4 @@
+User-agent: *
+Allow: /
 
+Sitemap: https://notre-historia.ch/sitemap.xml
