@@ -76,7 +76,7 @@
                 <span class="audio-card_title_text">{{ activePopup.title }}</span>
               </p>
             </div>
-            <p v-if="activePopup.adresse" class="audio-card_info_text">{{ activePopup.adresse }}</p>
+            <p v-if="activePopup.adresse" class="audio-card_info_text" v-html="activePopup.adresse"></p>
           </template>
         </AudioCard>
       </NuxtLink>
