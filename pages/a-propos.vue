@@ -63,6 +63,8 @@ type FetchData = CMS_API_Response & {
       slug: string
       titre: CMS_API_Block[]
       soustitre: CMS_API_Block[]
+      bloc0_titre: CMS_API_Block[]
+      bloc0_texte: CMS_API_Block[]
       bloc1_titre: CMS_API_Block[]
       bloc1_texte: CMS_API_Block[]
       layout: string | null
@@ -92,6 +94,8 @@ const { data } = await useFetch<FetchData>('/api/CMS_KQLRequest', {
           slug: true,
           titre: 'page.titre.toBlocks',
           soustitre: 'page.soustitre.toBlocks',
+          bloc0_titre: 'page.bloc0_titre.toBlocks',
+          bloc0_texte: 'page.bloc0_texte.toBlocks',
           bloc1_titre: 'page.bloc1_titre.toBlocks',
           bloc1_texte: 'page.bloc1_texte.toBlocks',
           layout: 'page.layout.toBlocks.toHtml',
@@ -195,6 +199,11 @@ const aproposSections = computed(() => {
   if (!apropos) return []
 
   return [
+    {
+      id: 'bloc0',
+      titre: apropos.bloc0_titre || [],
+      texte: apropos.bloc0_texte || [],
+    },
     {
       id: 'bloc1',
       titre: apropos.bloc1_titre || [],
